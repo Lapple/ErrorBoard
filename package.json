@@ -15,7 +15,7 @@
     }
   , "bin": {
       "errorboard": "bin/errorboard.js"
-    },
+    }
   , "version": "0.0.5"
   , "dependencies": {
       "express": "2.5.5"

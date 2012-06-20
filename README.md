@@ -4,11 +4,11 @@ Track and fix JavaScript errors fired by your vititor's browsers
 
 ## Installation
 
-    $ npm install errorboard.js -g
+	$ npm install errorboard.js -g
 
 ## Running
 
-		$ errorboard
+	$ errorboard
 
 ## TODO
 
