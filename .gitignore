@@ -1,0 +1,9 @@
+# Generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+# Ignore node modules
+node_modules/

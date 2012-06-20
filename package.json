@@ -1,0 +1,14 @@
+{
+    "name": "ErrorBoard.js"
+  , "description": ""
+  , "version": "0.0.2"
+  , "dependencies": {
+      "express": "2.5.5"
+    , "jade": ">= 0.0.1"
+    , "underscore": ">= 0.0.1"
+    , "mongodb": ">= 0.9.1"
+    , "ua-parser": ">= 0.0.1"
+    , "winston": ">= 0.6.1"
+    , "winston-mongodb": ">= 0.0.1"
+  }
+}

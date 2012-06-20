@@ -1,0 +1,17 @@
+table.table.table-condensed
+  thead
+    tr
+      if browsers[0]['message.message']
+        th= lang.error
+      th= lang.browser
+      th.cell-right= lang.timesReported
+  tbody
+    each browser in browsers
+      tr(class=browser.fixed ? 'fixed' : '')
+        if browser['message.message']
+          td
+            span.error= browser['message.message']
+        td
+          img(src='/img/browsers/#{ browser["message.agent.browser"].toLowerCase() }.png', class='browser_icon')
+          #{ browser["message.agent.browser"] } #{ browser["message.agent.version"] }
+        td(width='50').cell-right= browser.errSum

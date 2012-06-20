@@ -1,0 +1,177 @@
+.container {
+  margin-top: 25px;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+  overflow-y: scroll;
+}
+
+#showFixed {
+  display: inline;
+  float: right;
+  color: #999;
+  line-height: 36px;
+  margin-bottom: 0;
+}
+  #showFixed input {
+    position: relative;
+    top: -2px;
+    margin-right: 5px;
+  }
+
+.browser_icon {
+  position: relative;
+  top: -2px;
+  margin-right: 10px;
+}
+
+.browsers {
+  float: right;
+}
+.browsers .browser_icon {
+  margin-right: 3px;
+}
+
+.well {
+  padding: 8px 0;
+  border-radius: 0;
+}
+
+.error {
+  color: #722;
+}
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: #f0f0f0;
+  border-top: 1px solid #ddd;
+  font-size: 12px;
+  box-shadow: inset 0 1px 0 #fff;
+  height: 34px;
+  line-height: 34px;
+  overflow: hidden;
+}
+
+.generation-time {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  color: #aaa;
+}
+
+#languages {
+  position: absolute;
+  top: 0;
+  right: 10px;
+}
+
+#languages a {
+  margin-right: 5px;
+  color: #777;
+}
+  #languages a.active {
+    color: #ccc;
+    cursor: text;
+  }
+    #languages a.active:hover {
+      text-decoration: none;
+    }
+
+#data .badge {
+  position: relative;
+  top: -2px;
+  padding: 0 7px 1px;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.2);
+  font-size: 9px;
+}
+
+.fixed {
+  text-decoration: line-through;
+}
+#data .fixed td, .modal-body .fixed td, .fixed a, .fixed .error {
+  color: #999;
+  background: #eee;
+}
+.fixed .badge {
+  background-color: #ccc;
+}
+.fixed img {
+  opacity: 0.2;
+  -moz-opacity: 0.2;
+  filter:alpha(opacity=2);
+}
+
+#data th .badge {
+  background-color: #eee;
+}
+
+#data tr.noErrors td {
+  padding: 25px 8px;
+  text-align: center;
+  background: #fff;
+  color: #999;
+}
+
+.has-popup {
+  cursor: pointer;
+}
+
+#logo {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 18px;
+  line-height: 34px;
+  color: #bbb;
+  text-shadow: 0 1px 0 #f5f5f5;
+  cursor: default;
+  -webkit-transition: 0.3s;
+     -moz-transition: 0.3s;
+       -o-transition: 0.3s;
+          transition: 0.3s;
+}
+  #logo:hover {
+    color: #999;
+  }
+
+.modal-backdrop {
+  background: #000811;
+}
+
+table .cell-right {
+  text-align: right;
+}
+
+table .cell-center {
+  text-align: center;
+}
+
+#error-modal {
+  width: 960px;
+  margin-left: -480px;
+}
+
+#error-modal .modal-header {
+  background: #ddd;
+  border-bottom-color: #bbb;
+  border-radius: 6px 6px 0 0;
+}
+
+#error-modal h3 {
+  text-shadow: 0 1px 0 #eee;
+  font-weight: normal;
+}
+
+.fixed-checkbox {
+  position: relative;
+  top: -2px;
+}
+
+.secondary {
+  font-style: italic;
+}
