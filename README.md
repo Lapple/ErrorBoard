@@ -15,6 +15,7 @@ Track and fix JavaScript errors fired by your vititor's browsers
 * Command-line settings
 * More docs
 * Higher test coverage
+* Better error handling
 
 ## License
 
