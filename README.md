@@ -1,6 +1,6 @@
 # ErrorBoard.js
 
-Track and fix JavaScript errors fired by your visitor's browsers
+Track and fix JavaScript errors fired by your visitor's browsers.
 
 ## Installation
 
@@ -56,14 +56,14 @@ After you have everything installed and configured, run
 
 	$ errorboard
 
-from your terminal.
+from your terminal. The misconfiguration and error-handling mechanism is not yet implemented.
 
 ## TODO
 
-* Command-line settings
 * More docs
-* Higher test coverage
+* Add test coverage
 * Better error handling
+* Command-line settings
 
 ## License
 
