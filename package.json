@@ -1,6 +1,6 @@
 {
     "name": "errorboard.js"
-  , "description": "Track and fix JavaScript errors fired by your vititor's browsers"
+  , "description": "Track and fix JavaScript errors fired by your visitor's browsers"
   , "author": {
         "name": "Aziz Yuldoshev"
       , "email": "yuldoshev.aziz@gmail.com"
@@ -16,7 +16,7 @@
   , "bin": {
       "errorboard": "bin/errorboard.js"
     }
-  , "version": "0.0.7b"
+  , "version": "0.0.7c"
   , "dependencies": {
       "express": "2.5.5"
     , "jade": ">= 0.0.1"

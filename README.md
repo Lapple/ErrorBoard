@@ -1,6 +1,6 @@
 # ErrorBoard.js
 
-Track and fix JavaScript errors fired by your vititor's browsers
+Track and fix JavaScript errors fired by your visitor's browsers
 
 ## Installation
 
