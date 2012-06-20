@@ -1,8 +1,0 @@
-{
-  "transports": {
-    "mongodb": {
-      "db": "winston",
-      "keepAlive": 1000
-    }
-  }
-}
