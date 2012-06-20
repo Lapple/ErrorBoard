@@ -16,7 +16,7 @@
   , "bin": {
       "errorboard": "bin/errorboard.js"
     }
-  , "version": "0.0.5"
+  , "version": "0.0.6"
   , "dependencies": {
       "express": "2.5.5"
     , "jade": ">= 0.0.1"
