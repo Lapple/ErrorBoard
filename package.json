@@ -4,6 +4,7 @@
   , "main": "app.js"
   , "author": {
         "name": "Aziz Yuldoshev"
+      , "email": "yuldoshev.aziz@gmail.com"
     }
   , "keywords": [
       "error tracking",
