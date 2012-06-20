@@ -5,3 +5,5 @@
 *.swp
 *.out
 
+# Ignore specific folders
+node_modules/.bin/
