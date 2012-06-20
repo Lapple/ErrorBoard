@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var express = require('express')
+  , path    = require('path')
   , config  = require('./../config/main')
   , i18n    = require('./../config/i18n');
 
@@ -10,7 +11,7 @@ var app     = module.exports = express.createServer()
 // Configuration
 
 app.configure(function() {
-  app.set( 'views', __dirname + '../views' );
+  app.set( 'views', path.resolve(__dirname, '..', 'views') );
   app.set( 'view engine', 'jade' );
 
   // Configuration middleware
@@ -23,7 +24,7 @@ app.configure(function() {
 
   app.use( express.bodyParser() );
   app.use( app.router );
-  app.use( express.static(__dirname + '../public') );
+  app.use( express.static( path.resolve(__dirname, '..', 'views') ) );
 });
 
 app.configure( 'development', function () {
