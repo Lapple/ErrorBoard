@@ -1,5 +1,5 @@
 {
-    "name": "ErrorBoard.js"
+    "name": "errorboard.js"
   , "description": "Track and fix JavaScript errors fired by your vititor's browsers"
   , "main": "app.js"
   , "author": {
