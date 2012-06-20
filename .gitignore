@@ -5,5 +5,3 @@
 *.swp
 *.out
 
-# Ignore node modules
-node_modules/

@@ -1,10 +1,10 @@
 {
     "name": "errorboard.js"
   , "description": "Track and fix JavaScript errors fired by your vititor's browsers"
-  , "main": "app.js"
   , "author": {
         "name": "Aziz Yuldoshev"
       , "email": "yuldoshev.aziz@gmail.com"
+      , "url": "http://flatora.ru"
     }
   , "keywords": [
       "error tracking",
@@ -13,7 +13,10 @@
   , "engines": {
       "node": ">= 0.6.18"
     }
-  , "version": "0.0.3"
+  , "bin": {
+      "errorboard": "bin/errorboard.js"
+    },
+  , "version": "0.0.5"
   , "dependencies": {
       "express": "2.5.5"
     , "jade": ">= 0.0.1"

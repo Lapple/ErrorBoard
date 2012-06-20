@@ -1,13 +1,11 @@
-/**
- * Module dependencies.
- */
+#!/usr/bin/env node
 
 var express = require('express')
-  , config  = require('./config/main')
-  , i18n    = require('./config/i18n');
+  , config  = require('./../config/main')
+  , i18n    = require('./../config/i18n');
 
 var app     = module.exports = express.createServer()
-  , routes  = require('./routes');
+  , routes  = require('./../routes');
 
 // Configuration
 
