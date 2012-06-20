@@ -6,4 +6,4 @@
 *.out
 
 # Ignore specific folders
-node_modules/.bin
+node_modules/
