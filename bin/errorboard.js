@@ -24,7 +24,7 @@ app.configure(function() {
 
   app.use( express.bodyParser() );
   app.use( app.router );
-  app.use( express.static( path.resolve(__dirname, '..', 'views') ) );
+  app.use( express.static( path.resolve(__dirname, '..', 'public') ) );
 });
 
 app.configure( 'development', function () {
