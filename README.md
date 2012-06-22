@@ -58,7 +58,7 @@ After you have everything installed and configured, run
 
 from your terminal. The misconfiguration and error-handling mechanism is not yet implemented.
 
-Once the app has started successfully, navigate to the `http://app.host:app.port/stats/` (in the example config above that would be http://127.0.0.1:3000/stats) to get the error data.
+Once the app has started successfully, navigate to the `http://app.host:app.port/stats/` (in the example config above that would be http://127.0.0.1:3000/stats) to get the error data. Similar error messages are not grouped, however the one can navigate to *Scripts* tab to get the idea which file:line pairs produce most errors.
 
 ## TODO
 
