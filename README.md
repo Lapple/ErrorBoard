@@ -58,6 +58,8 @@ After you have everything installed and configured, run
 
 from your terminal. The misconfiguration and error-handling mechanism is not yet implemented.
 
+Once the app has started successfully, navigate to the `http://app.host:app.port/stats/` (in the example config above that would be http://127.0.0.1:3000/stats) to get the error data.
+
 ## TODO
 
 * More docs
