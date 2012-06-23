@@ -48,15 +48,15 @@ module.exports = {
 };
 ```
 
-You can also add custom languages — just edit `config/i18n.js`. English and Russian are already bundled.
+To add more languages — just edit `config/i18n.js`. English and Russian are already bundled.
 
 ## Running
 
-After you have everything installed and configured, run
+After you have everything installed and configured, run:
 
     $ node errorboard
 
-from your terminal. Please note that the misconfiguration and error-handling mechanism is not yet implemented.
+Please note that the misconfiguration and error-handling mechanism is not yet implemented.
 
 Once the app has started successfully, navigate to the `http://app.host:app.port/stats/` (in the example config above that would be http://127.0.0.1:3000/stats) to get the error data. Similar error messages are not grouped, however the one can navigate to *Scripts* tab to get the idea which file:line pairs produce most errors.
 
@@ -82,6 +82,14 @@ window.onerror = ( errorMsg, url, lineNumber ) ->
 ```
 
 Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is running (configured in `config/main.js`).
+
+## Screenshots
+
+![Errors page](http://i.imgur.com/gcrFR.png)
+![Scripts page](http://i.imgur.com/boQf4.png)
+![Browsers page](http://i.imgur.com/d9v5P.png)
+![Pages breakdown](http://i.imgur.com/H5p4S.png)
+![Console](http://i.imgur.com/Yev5s.png)
 
 ## TODO
 
