@@ -33,7 +33,7 @@ StatsProvider.prototype.getErrorInfo = function( query, all, callback ) {
   }
 
   this.collection.group(
-    keys,
+    keys
   , condition
   , { 'errSum': 0, 'latest': 0, 'fixed': true }
   , function ( obj, prev ) {

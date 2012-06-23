@@ -4,11 +4,11 @@ Track and fix JavaScript errors fired by your visitor's browsers.
 
 ## Installation
 
-	$ npm install errorboard.js -g
+  $ git clone git://github.com/Lapple/ErrorBoard.git
 
 ## Configuration
 
-Main configuration file is located in `path/to/module/config/main.js`. Here are the example contents:
+Main configuration file is located in `config/main.js`. Here are the example contents:
 
 ```js
 // Please make sure you don't remove
@@ -48,13 +48,13 @@ module.exports = {
 };
 ```
 
-You can also add custom languages — just edit `path/to/module/config/i18n.js`. English and Russian are already bundled.
+You can also add custom languages — just edit `config/i18n.js`. English and Russian are already bundled.
 
 ## Running
 
 After you have everything installed and configured, run
 
-	$ errorboard
+	$ node errorboard
 
 from your terminal. Please note that the misconfiguration and error-handling mechanism is not yet implemented.
 
