@@ -84,7 +84,7 @@ window.onerror = function( errorMsg, url, lineNumber ) {
 ```
 
 ```coffee
-# CoffeeScript
+# or CoffeeScript
 window.onerror = ( errorMsg, url, lineNumber ) ->
   e = encodeURIComponent
   ( new Image() ).src = "http://127.0.0.1:3000/pusherror/?message=#{ e errorMsg }&url=#{ e url }&line=#{ e lineNumber }"
@@ -102,9 +102,15 @@ Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is
 
 ![Pages breakdown](http://i.imgur.com/H5p4S.png)
 
+## Testing
+
+Started writing some basic tests:
+
+    $ make test
+
 ## TODO
 
-* Add test coverage
+* Improve test coverage
 * Better error handling
 * Command-line settings
 
