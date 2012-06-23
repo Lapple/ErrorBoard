@@ -5,7 +5,7 @@ Track and fix JavaScript errors fired by your visitor's browsers.
 ## Installation
 
 ```
-  $ git clone git://github.com/Lapple/ErrorBoard.git
+$ git clone git://github.com/Lapple/ErrorBoard.git
 ```
 
 ## Configuration
