@@ -2,9 +2,18 @@
 
 Track and fix JavaScript errors fired by your visitor's browsers.
 
-## Installation
+### Prerequisites
 
-    $ git clone git://github.com/Lapple/ErrorBoard.git
+* Node.js and NPM
+* MongoDB
+* A free port
+
+### Installation
+
+    $ mkdir ErrorBoard
+    $ git clone git://github.com/Lapple/ErrorBoard.git ErrorBoard
+    $ cd ErrorBoard
+    $ npm install -d
 
 ## Configuration
 
