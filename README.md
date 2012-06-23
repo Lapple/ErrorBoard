@@ -10,7 +10,7 @@ $ git clone git://github.com/Lapple/ErrorBoard.git
 
 ## Configuration
 
-Main configuration file is located in `config/main.js`. Here are the example contents:
+Main configuration file is `config/main.js`. Here are the example contents:
 
 ```js
 // Please make sure you don't remove
@@ -56,11 +56,34 @@ You can also add custom languages — just edit `config/i18n.js`. English and Ru
 
 After you have everything installed and configured, run
 
-	$ node errorboard
+  $ node errorboard
 
 from your terminal. Please note that the misconfiguration and error-handling mechanism is not yet implemented.
 
 Once the app has started successfully, navigate to the `http://app.host:app.port/stats/` (in the example config above that would be http://127.0.0.1:3000/stats) to get the error data. Similar error messages are not grouped, however the one can navigate to *Scripts* tab to get the idea which file:line pairs produce most errors.
+
+## Browser snippet
+
+The first time you ran http://127.0.0.1:3000/stats you probably won't see any errors since they were not being sent to the Errorboard. To start sending errors, make sure that the following JavaScript snippet is the first code, executed on your page:
+
+```js
+// JavaScript
+window.onerror = function( errorMsg, url, lineNumber ) {
+  var e = encodeURIComponent;
+  (new Image()).src = 'http://127.0.0.1:3000/pusherror/?message=' + e(errorMsg) +
+                                                      '&url='     + e(url) +
+                                                      '&line='    + e(lineNumber);
+};
+```
+
+```coffee
+# CoffeeScript
+window.onerror = ( errorMsg, url, lineNumber ) ->
+  e = encodeURIComponent
+  ( new Image() ).src = "http://127.0.0.1:3000/pusherror/?message=#{ e errorMsg }&url=#{ e url }&line=#{ e lineNumber }"
+```
+
+Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is running.
 
 ## TODO
 
