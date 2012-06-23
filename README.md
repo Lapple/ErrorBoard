@@ -97,7 +97,6 @@ Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is
 
 ## TODO
 
-* More docs
 * Add test coverage
 * Better error handling
 * Command-line settings
