@@ -86,9 +86,13 @@ Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is
 ## Screenshots
 
 ![Errors page](http://i.imgur.com/gcrFR.png)
+
 ![Scripts page](http://i.imgur.com/boQf4.png)
+
 ![Browsers page](http://i.imgur.com/d9v5P.png)
+
 ![Pages breakdown](http://i.imgur.com/H5p4S.png)
+
 ![Console](http://i.imgur.com/Yev5s.png)
 
 ## TODO
