@@ -1,30 +1,20 @@
-#!/usr/bin/env node
-
 var express = require('express')
-  , path    = require('path')
-  , config  = require('./../config/main')
-  , i18n    = require('./../config/i18n');
+  , config  = require('./config/main')
+  , i18n    = require('./config/i18n');
 
 var app     = module.exports = express.createServer()
-  , routes  = require('./../routes');
+  , routes  = require('./routes')
+  , middleware = {};
 
 // Configuration
 
 app.configure(function() {
-  app.set( 'views', path.resolve(__dirname, '..', 'views') );
+  app.set( 'views', __dirname + 'views' );
   app.set( 'view engine', 'jade' );
-
-  // Configuration middleware
-  app.use(function( req, res, next ) {
-    req.site    = config.observedSite.title;
-    req.siteUrl = config.observedSite.url;
-    req.i18n    = i18n;
-    next();
-  });
 
   app.use( express.bodyParser() );
   app.use( app.router );
-  app.use( express.static( path.resolve(__dirname, '..', 'public') ) );
+  app.use( express.static( __dirname + 'public' );
 });
 
 app.configure( 'development', function () {
@@ -35,10 +25,22 @@ app.configure( 'production', function() {
   app.use( express.errorHandler() );
 });
 
+// Route-specific middleware
+middleware.i18n = function( req, res, next ) {
+  req.i18n = i18n;
+  next();
+};
+
+middleware.configuration = function( req, res, next ) {
+  req.site    = config.observedSite.title;
+  req.siteUrl = config.observedSite.url;
+  next();
+};
+
 // Routes
 app.get( '/stats/fix',                 routes.fix );
-app.get( '/:lang?/stats/info/:all?',   routes.info );
-app.get( '/:lang?/stats/:type?/:all?', routes.stats );
+app.get( '/:lang?/stats/info/:all?',   [ middleware.i18n, middleware.configuration ], routes.info );
+app.get( '/:lang?/stats/:type?/:all?', [ middleware.i18n, middleware.configuration ], routes.stats );
 app.all( '/pusherror/*',               routes.pushError );
 app.get( '/',                          routes.index );
 
