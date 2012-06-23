@@ -93,8 +93,6 @@ Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is
 
 ![Pages breakdown](http://i.imgur.com/H5p4S.png)
 
-![Console](http://i.imgur.com/Yev5s.png)
-
 ## TODO
 
 * Add test coverage
