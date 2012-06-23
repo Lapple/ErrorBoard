@@ -4,9 +4,7 @@ Track and fix JavaScript errors fired by your visitor's browsers.
 
 ## Installation
 
-```
-$ git clone git://github.com/Lapple/ErrorBoard.git
-```
+    $ git clone git://github.com/Lapple/ErrorBoard.git
 
 ## Configuration
 
@@ -56,7 +54,7 @@ You can also add custom languages — just edit `config/i18n.js`. English and Ru
 
 After you have everything installed and configured, run
 
-  $ node errorboard
+    $ node errorboard
 
 from your terminal. Please note that the misconfiguration and error-handling mechanism is not yet implemented.
 
@@ -83,7 +81,7 @@ window.onerror = ( errorMsg, url, lineNumber ) ->
   ( new Image() ).src = "http://127.0.0.1:3000/pusherror/?message=#{ e errorMsg }&url=#{ e url }&line=#{ e lineNumber }"
 ```
 
-Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is running.
+Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is running (configured in `config/main.js`).
 
 ## TODO
 
