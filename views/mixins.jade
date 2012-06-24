@@ -1,0 +1,24 @@
+- moment.lang( lang.url );
+
+- var formatDate = function(date) {
+-   return moment( date ).fromNow();
+- };
+
+- var formatLifespan = function(ms) {
+-   return moment.humanizeDuration( ms )
+- }
+
+- var limitChars = function(string, length) {
+-   length = length || 60;
+-   if (string.length <= length) {
+-     return string;
+-   }
+-   return string.slice(0, length) + '…';
+- }
+
+- var getStatus = function(ms) {
+-   var status = 'success', days = moment( ms ).diff( Date.now(), 'days' );
+-   if (days <= 2) status = 'important';
+-   if (days > 2 && days <= 5) status = 'warning';
+-   return status;
+- }

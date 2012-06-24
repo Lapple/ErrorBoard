@@ -30,7 +30,7 @@ module.exports = {
   , host       : '127.0.0.1'
   , port       : 27017
 
-    // Optional options for insert command
+    // Options for insert command
     // http://mongodb.github.com/node-mongodb-native/api-generated/server.html#Server
   , serverOptions: {}
 

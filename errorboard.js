@@ -1,4 +1,5 @@
 var express = require('express')
+  , moment  = require('moment')
   , config  = require('./config/main')
   , i18n    = require('./config/i18n');
 
@@ -37,10 +38,17 @@ middleware.configuration = function( req, res, next ) {
   next();
 };
 
+middleware.moment = function( req, res, next ) {
+  req.moment = moment;
+  next();
+};
+
+middleware.common = [ middleware.i18n, middleware.configuration, middleware.moment ];
+
 // Routes
 app.get( '/stats/fix',                 routes.fix );
-app.get( '/:lang?/stats/info/:all?',   [ middleware.i18n, middleware.configuration ], routes.info );
-app.get( '/:lang?/stats/:type?/:all?', [ middleware.i18n, middleware.configuration ], routes.stats );
+app.get( '/:lang?/stats/info/:all?',   middleware.common, routes.info );
+app.get( '/:lang?/stats/:type?/:all?', middleware.common, routes.stats );
 app.all( '/pusherror/*',               routes.pushError );
 app.get( '/',                          routes.index );
 

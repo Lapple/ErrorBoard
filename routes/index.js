@@ -60,6 +60,7 @@ routes.stats = function( req, res ) {
         title : language.langName
       }
     });
+    data.moment      = req.moment;
 
     res.render( 'stats', data );
   });
@@ -79,6 +80,7 @@ routes.info = function( req, res ) {
 
   stats.getErrorInfo( req.query, req.params.all, function( data ) {
     data.layout = false;
+    data.moment = req.moment;
     data.lang   = req.i18n[ req.params.lang ];
     res.render( 'info', data );
   });

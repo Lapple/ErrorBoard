@@ -16,8 +16,9 @@
   , "version": "0.0.7c"
   , "dependencies": {
       "express": "2.5.5"
-    , "jade": ">= 0.0.1"
+    , "jade": "0.26.2"
     , "underscore": ">= 0.0.1"
+    , "moment": "1.6.2"
     , "mongodb": ">= 0.9.1"
     , "ua-parser": ">= 0.0.1"
     , "winston": ">= 0.6.1"

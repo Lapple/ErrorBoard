@@ -13,5 +13,5 @@ table.table.table-condensed
             span.error= browser['message.message']
         td
           img(src='/img/browsers/#{ browser["message.agent.browser"].toLowerCase() }.png', class='browser_icon')
-          #{ browser["message.agent.browser"] } #{ browser["message.agent.version"] }
+          | #{ browser["message.agent.browser"] } #{ browser["message.agent.version"] }
         td(width='50').cell-right= browser.errSum

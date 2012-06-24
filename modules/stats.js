@@ -7,7 +7,10 @@ StatsProvider = function() {
   this.collectionName = config.collection;
   this.db             = new mongodb.Db( this.dbName, new mongodb.Server( config.host, config.port, config.serverOptions ), config.collectionOptions )
     .open(function ( err, client ) {
-      if ( err ) throw err;
+      if ( err ) {
+        console.error( 'Error: %s\nExiting.', err.message );
+        process.exit();
+      }
       this.collection = new mongodb.Collection( client, this.collectionName );
     }.bind( this ));
 };
