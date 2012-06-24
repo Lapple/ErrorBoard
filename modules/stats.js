@@ -38,11 +38,21 @@ StatsProvider.prototype.getErrorInfo = function( query, all, callback ) {
   this.collection.group(
     keys
   , condition
-  , { 'errSum': 0, 'latest': 0, 'fixed': true }
+  , {
+      'errSum'   : 0
+    , 'latest'   : 0
+    , 'earliest' : Date.now()
+    , 'lifespan' : 0
+    , 'fixed'    : true
+    }
   , function ( obj, prev ) {
       prev.errSum++;
-      prev.latest = obj.timestamp > prev.latest ? obj.timestamp : prev.latest;
-      prev.fixed  = obj.message.fixed === false ? false : prev.fixed;
+      prev.earliest = obj.timestamp < prev.earliest ? obj.timestamp : prev.earliest;
+      prev.latest   = obj.timestamp > prev.latest ? obj.timestamp : prev.latest;
+      prev.fixed    = obj.message.fixed === false ? false : prev.fixed;
+    }
+  , function ( obj ) {
+      obj.lifespan = obj.latest - obj.earliest;
     }
   , true
   , function( err, docs ) {
@@ -89,7 +99,7 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
       'errSum'   : 0
     , 'latest'   : 0
     , 'hotness'  : 0
-    , 'lifespan' : 0
+    // , 'lifespan' : 0
     , 'fixed'    : true
     , 'earliest' : Date.now()
     , 'browsers' : {}
@@ -102,7 +112,7 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
       prev.browsers[obj.message.agent.browser] = true;
     }
   , function ( obj ) {
-      obj.lifespan = obj.latest - obj.earliest;
+    //  obj.lifespan = obj.latest - obj.earliest;
       obj.hotness  = Date.now() - obj.latest;
     }
   , true

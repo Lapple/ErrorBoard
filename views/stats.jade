@@ -12,7 +12,7 @@ table#data.table.table-striped
           th= lang.sourceFile
           th.cell-center= lang.timesReported
           th.cell-right= lang.latestReport
-          th.cell-right= lang.lifespan
+          // th.cell-right= lang.lifespan
       tbody
         each error in fields
           tr(class=error.fixed ? 'fixed' : 'has-popup'
@@ -35,7 +35,7 @@ table#data.table.table-striped
                 | #{ error['message.url'] } : #{ error['message.line'] }
             td.cell-center= error.errSum
             td.cell-right #{ formatDate(error.latest) }
-            td.cell-right #{ formatLifespan(error.lifespan) }
+            // td.cell-right #{ formatLifespan(error.lifespan) }
         unless fields.length
           tr.noErrors
             td(colspan='7')= lang.noErrors
@@ -49,7 +49,7 @@ table#data.table.table-striped
           th.cell-center= lang.timesReported
           th.cell-right= lang.latestReport
           th.cell-right= lang.earliestReport
-          th.cell-right= lang.lifespan
+          // th.cell-right= lang.lifespan
       tbody
         each file in fields
           tr(class=file.fixed ? 'fixed' : 'has-popup'
@@ -67,7 +67,7 @@ table#data.table.table-striped
             td.cell-center= file.errSum
             td.cell-right(width='160') #{ formatDate(file.latest) }
             td.cell-right(width='160') #{ formatDate(file.earliest) }
-            td.cell-right(width='100') #{ formatLifespan(file.lifespan) }
+            // td.cell-right(width='100') #{ formatLifespan(file.lifespan) }
         unless fields.length
           tr.noErrors
             td(colspan='6')= lang.noErrors

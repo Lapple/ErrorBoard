@@ -1,3 +1,5 @@
+include mixins
+
 table.table.table-condensed
   thead
     tr
@@ -5,6 +7,7 @@ table.table.table-condensed
         th= lang.error
       th= lang.browser
       th.cell-right= lang.timesReported
+      th.cell-right= lang.lifespan
   tbody
     each browser in browsers
       tr(class=browser.fixed ? 'fixed' : '')
@@ -15,3 +18,4 @@ table.table.table-condensed
           img(src='/img/browsers/#{ browser["message.agent.browser"].toLowerCase() }.png', class='browser_icon')
           | #{ browser["message.agent.browser"] } #{ browser["message.agent.version"] }
         td(width='50').cell-right= browser.errSum
+        td.cell-right #{ formatLifespan(browser.lifespan) }
