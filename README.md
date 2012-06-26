@@ -43,7 +43,7 @@ module.exports = {
 , app: {
     host: '127.0.0.1'
   , port: 3000
-    output: [
+  , output: [
       'console'  // Output to stdout
     , 'database' // Log to database
     ]
