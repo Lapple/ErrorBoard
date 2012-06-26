@@ -57,7 +57,7 @@ module.exports = {
 };
 ```
 
-To add more languages — just edit `config/i18n.js`. English and Russian are already bundled.
+Edit `config/i18n.js` to add more languages. English and Russian are already bundled.
 
 ## Running
 
@@ -71,15 +71,15 @@ Once the app has started successfully, navigate to the `http://app.host:app.port
 
 ## Browser snippet
 
-The first time you ran http://127.0.0.1:3000/stats you probably won't see any errors since they were not being sent to the Errorboard. To start sending errors, make sure that the following JavaScript snippet is the first code, executed on your page:
+The first time you ran http://127.0.0.1:3000/stats you probably won't see any errors since they were not being sent to the ErrorBoard. To start sending errors, make sure that the following JavaScript snippet is the first code, executed on your pages:
 
 ```js
 // JavaScript
 window.onerror = function( errorMsg, url, lineNumber ) {
   var e = encodeURIComponent;
-  (new Image()).src = 'http://127.0.0.1:3000/pusherror/?message=' + e(errorMsg) +
-                                                      '&url='     + e(url) +
-                                                      '&line='    + e(lineNumber);
+  ( new Image() ).src = 'http://127.0.0.1:3000/pusherror/?message=' + e( errorMsg ) +
+                                                        '&url='     + e( url ) +
+                                                        '&line='    + e( lineNumber );
 };
 ```
 
