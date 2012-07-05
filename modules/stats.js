@@ -1,21 +1,33 @@
-var mongodb = require('mongodb')
-  , config  = require('./../config/main').database
+var mongodb  = require('mongodb')
+  , config   = require('./../config/main')
+  , dbConfig = config.database
   , StatsProvider;
 
 StatsProvider = function() {
-  this.dbName         = config.name;
-  this.collectionName = config.collection;
-  this.db             = new mongodb.Db( this.dbName, new mongodb.Server( config.host, config.port, config.serverOptions ), config.collectionOptions )
-    .open(function ( err, client ) {
-      if ( err ) {
-        console.error( 'Error: %s\nExiting.', err.message );
-        process.exit();
-      }
-      this.collection = new mongodb.Collection( client, this.collectionName );
-    }.bind( this ));
+  this.enabled = config.app.output.indexOf( 'database' ) !== -1;
+
+  // `database` is included into the output options list
+  if ( this.enabled ) {
+    this.dbName         = dbConfig.name;
+    this.collectionName = dbConfig.collection;
+    this.db             = new mongodb.Db( this.dbName, new mongodb.Server( dbConfig.host, dbConfig.port, dbConfig.serverOptions ), dbConfig.collectionOptions )
+      .open(function ( err, client ) {
+        if ( err ) {
+          console.error( 'Error: %s\nExiting.', err.message );
+          process.exit();
+        }
+        this.collection = new mongodb.Collection( client, this.collectionName );
+      }.bind( this ));
+
+  // Database is not listed
+  } else {
+    console.log( 'Note: Errors are not being sent to the database' );
+  }
 };
 
 StatsProvider.prototype.getErrorInfo = function( query, all, callback ) {
+  if ( !this.enabled ) return;
+
   var condition = {
       'message.url'   :  query.file
     , 'message.line'  : +query.line
@@ -66,6 +78,14 @@ StatsProvider.prototype.getErrorInfo = function( query, all, callback ) {
 };
 
 StatsProvider.prototype.getErrors = function( type, all, callback ) {
+  if ( !this.enabled ) {
+    return callback({
+      databaseDisabled : true
+    , all              : !!all
+    , type             : type
+    });
+  }
+
   var settings  = {}
     , condition = {};
 
@@ -99,7 +119,6 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
       'errSum'   : 0
     , 'latest'   : 0
     , 'hotness'  : 0
-    // , 'lifespan' : 0
     , 'fixed'    : true
     , 'earliest' : Date.now()
     , 'browsers' : {}
@@ -118,7 +137,9 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
   , true
   , function( err, docs ) {
       if ( err ) throw err;
-      
+
+      console.log(docs);
+
       callback({
         title  : settings.title
       , type   : type
@@ -132,6 +153,8 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
 };
 
 StatsProvider.prototype.fixError = function( query ) {
+  if ( !this.enabled ) return;
+
   var condition = {
     'message.url'  :  query.file
   , 'message.line' : +query.line

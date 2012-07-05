@@ -1,5 +1,6 @@
-.container {
-  margin-top: 25px;
+.container-fluid {
+  max-width: 2000px;
+  margin: 25px auto 0;
 }
 
 body {
@@ -110,8 +111,9 @@ body {
   background-color: #eee;
 }
 
-#data tr.noErrors td {
+#data tr.noErrors td, #database-disabled {
   padding: 25px 8px;
+  font-size: 16px;
   text-align: center;
   background: #fff;
   color: #999;

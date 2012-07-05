@@ -1,121 +1,125 @@
 include mixins
 
-table#data.table.table-striped
-  case type
-    when 'errors'
-      thead
-        tr
-          th
-          th.cell-center(width='17')
-            span.badge
-          th= lang.errorMessage
-          th= lang.sourceFile
-          th.cell-center= lang.timesReported
-          th.cell-right= lang.latestReport
-          // th.cell-right= lang.lifespan
-      tbody
-        each error in fields
-          tr(class=error.fixed ? 'fixed' : 'has-popup'
-             title=error['message.message']
-             data-file=error['message.url']
-             data-line=error['message.line']
-             data-error=error['message.message']
-             data-href='/#{ lang.url }/stats/info' + (all ? '/all' : ''))
-            td(width=13)
-              input(type='checkbox', data-href='/stats/fix/', disabled=error.fixed, checked=error.fixed).fixed-checkbox
-            td.cell-center
-              span(class='badge badge-#{ getStatus(error.hotness) }')
-            td
-              span.error= limitChars( error['message.message'] )
-            td
-              span.browsers
-                each value, browser in error.browsers
-                  img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
-              a(href=error['message.url'], target='_blank')
-                | #{ error['message.url'] } : #{ error['message.line'] }
-            td.cell-center= error.errSum
-            td.cell-right #{ formatDate(error.latest) }
-            // td.cell-right #{ formatLifespan(error.lifespan) }
-        unless fields.length
-          tr.noErrors
-            td(colspan='7')= lang.noErrors
+- if ( typeof( databaseDisabled ) !== 'undefined' )
+  p#database-disabled= lang.databaseDisabled
 
-    when 'files'
-      thead
-        tr
-          th.cell-center(width='17')
-            span.badge
-          th= lang.fileLine
-          th.cell-center= lang.timesReported
-          th.cell-right= lang.latestReport
-          th.cell-right= lang.earliestReport
-          // th.cell-right= lang.lifespan
-      tbody
-        each file in fields
-          tr(class=file.fixed ? 'fixed' : 'has-popup'
-             data-file=file['message.url']
-             data-line=file['message.line']
-             data-href='/#{ lang.url }/stats/info' + (all ? '/all' : ''))
-            td.cell-center
-              span(class='badge badge-#{ getStatus(file.hotness) }')
-            td
-              span.browsers
-                each value, browser in file.browsers
-                  img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
-              a(href=file['message.url'], target='_blank')
-                | #{ file['message.url'] } : #{ file['message.line'] }
-            td.cell-center= file.errSum
-            td.cell-right(width='160') #{ formatDate(file.latest) }
-            td.cell-right(width='160') #{ formatDate(file.earliest) }
-            // td.cell-right(width='100') #{ formatLifespan(file.lifespan) }
-        unless fields.length
-          tr.noErrors
-            td(colspan='6')= lang.noErrors
-
-    when 'browsers'
-      thead
-        tr
-          th= lang.browser
-          th.cell-center= lang.timesReported
-          th.cell-right= lang.latestReport
-          th.cell-right= lang.earliestReport
-      tbody
-        each browser in fields
+else
+  table#data.table.table-striped
+    case type
+      when 'errors'
+        thead
           tr
-            td
-              img(src='/img/browsers/#{ browser["message.agent.browser"].toLowerCase() }.png', class='browser_icon') 
-              | #{ browser["message.agent.browser"] } #{ browser['message.agent.version'] }
-            td.cell-center= browser.errSum
-            td.cell-right(width='160') #{ formatDate(browser.latest) }
-            td.cell-right(width='160') #{ formatDate(browser.earliest) }
-        unless fields.length
-          tr.noErrors
-            td(colspan='4')= lang.noErrors
+            th
+            th.cell-center(width='17')
+              span.badge
+            th= lang.errorMessage
+            th= lang.sourceFile
+            th.cell-center= lang.timesReported
+            th.cell-right= lang.latestReport
+            // th.cell-right= lang.lifespan
+        tbody
+          each error in fields
+            tr(class=error.fixed ? 'fixed' : 'has-popup'
+               title=error['message.message']
+               data-file=error['message.url']
+               data-line=error['message.line']
+               data-error=error['message.message']
+               data-href='/#{ lang.url }/stats/info' + (all ? '/all' : ''))
+              td(width=13)
+                input(type='checkbox', data-href='/stats/fix/', disabled=error.fixed, checked=error.fixed).fixed-checkbox
+              td.cell-center
+                span(class='badge badge-#{ getStatus(error.hotness) }')
+              td
+                span.error= limitChars( error['message.message'] )
+              td
+                span.browsers
+                  each value, browser in error.browsers
+                    img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
+                a(href=error['message.url'], target='_blank')
+                  | #{ error['message.url'] } : #{ error['message.line'] }
+              td.cell-center= error.errSum
+              td.cell-right #{ formatDate(error.latest) }
+              // td.cell-right #{ formatLifespan(error.lifespan) }
+          unless fields.length
+            tr.noErrors
+              td(colspan='7')= lang.noErrors
 
-    when 'pages'
-      thead
-        tr
-          th= lang.errorPages
-          th.cell-center= lang.timesReported
-          th.cell-right= lang.latestReport
-          th.cell-right= lang.earliestReport
-      tbody
-        each page in fields
+      when 'files'
+        thead
           tr
-            td
-              span.browsers
-                each value, browser in page.browsers
-                  img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
-              a(href='#{ siteUrl }#{ page['message.page'] }', target='_blank')
-                /
-                if page['message.page'].length === 0
-                  span.secondary #{lang.homepage}
-                else
-                  | #{ page['message.page'] }
-            td.cell-center= page.errSum
-            td.cell-right(width='160') #{ formatDate(page.latest) }
-            td.cell-right(width='160') #{ formatDate(page.earliest) }
-        unless fields.length
-          tr.noErrors
-            td(colspan='4')= lang.noErrors
+            th.cell-center(width='17')
+              span.badge
+            th= lang.fileLine
+            th.cell-center= lang.timesReported
+            th.cell-right= lang.latestReport
+            th.cell-right= lang.earliestReport
+            // th.cell-right= lang.lifespan
+        tbody
+          each file in fields
+            tr(class=file.fixed ? 'fixed' : 'has-popup'
+               data-file=file['message.url']
+               data-line=file['message.line']
+               data-href='/#{ lang.url }/stats/info' + (all ? '/all' : ''))
+              td.cell-center
+                span(class='badge badge-#{ getStatus(file.hotness) }')
+              td
+                span.browsers
+                  each value, browser in file.browsers
+                    img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
+                a(href=file['message.url'], target='_blank')
+                  | #{ file['message.url'] } : #{ file['message.line'] }
+              td.cell-center= file.errSum
+              td.cell-right(width='160') #{ formatDate(file.latest) }
+              td.cell-right(width='160') #{ formatDate(file.earliest) }
+              // td.cell-right(width='100') #{ formatLifespan(file.lifespan) }
+          unless fields.length
+            tr.noErrors
+              td(colspan='6')= lang.noErrors
+
+      when 'browsers'
+        thead
+          tr
+            th= lang.browser
+            th.cell-center= lang.timesReported
+            th.cell-right= lang.latestReport
+            th.cell-right= lang.earliestReport
+        tbody
+          each browser in fields
+            tr
+              td
+                img(src='/img/browsers/#{ browser["message.agent.browser"].toLowerCase() }.png', class='browser_icon')
+                | #{ browser["message.agent.browser"] } #{ browser['message.agent.version'] }
+              td.cell-center= browser.errSum
+              td.cell-right(width='160') #{ formatDate(browser.latest) }
+              td.cell-right(width='160') #{ formatDate(browser.earliest) }
+          unless fields.length
+            tr.noErrors
+              td(colspan='4')= lang.noErrors
+
+      when 'pages'
+        thead
+          tr
+            th= lang.errorPages
+            th.cell-center= lang.timesReported
+            th.cell-right= lang.latestReport
+            th.cell-right= lang.earliestReport
+        tbody
+          each page in fields
+            tr
+              td
+                span.browsers
+                  each value, browser in page.browsers
+                    img(src='/img/browsers/#{ browser.toLowerCase() }.png', class='browser_icon compact')
+                a(href='#{ siteUrl }#{ page['message.page'] }', target='_blank')
+                  /
+                  if page['message.page'].length === 0
+                    span.secondary #{lang.homepage}
+                  else
+                    | #{ page['message.page'] }
+              td.cell-center= page.errSum
+              td.cell-right(width='160') #{ formatDate(page.latest) }
+              td.cell-right(width='160') #{ formatDate(page.earliest) }
+          unless fields.length
+            tr.noErrors
+              td(colspan='4')= lang.noErrors
 

@@ -22,6 +22,7 @@ module.exports = {
       }
     ]
   , browser: 'Browser'
+  , databaseDisabled: 'Database logging is disabled, unable to collect stats.'
   , earliestReport: 'Earliest report'
   , error: 'Error'
   , errorMessage: 'Message'
@@ -69,6 +70,7 @@ module.exports = {
       }
     ]
   , browser: 'Браузер'
+  , databaseDisabled: 'Запись в базу данных отключена, отображение ошибок невозможно.'
   , earliestReport: 'Первый отчет'
   , error: 'Ошибка'
   , errorMessage: 'Сообщение'
