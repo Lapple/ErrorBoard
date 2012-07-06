@@ -131,14 +131,11 @@ StatsProvider.prototype.getErrors = function( type, all, callback ) {
       prev.browsers[obj.message.agent.browser] = true;
     }
   , function ( obj ) {
-    //  obj.lifespan = obj.latest - obj.earliest;
       obj.hotness  = Date.now() - obj.latest;
     }
   , true
   , function( err, docs ) {
       if ( err ) throw err;
-
-      console.log(docs);
 
       callback({
         title  : settings.title
