@@ -22,3 +22,7 @@
 -   if (days > 2 && days <= 5) status = 'warning';
 -   return status;
 - }
+
+- var getErrorScriptLink = function( url, line ) {
+-	  return '/' + lang.url + '/script/' + encodeURIComponent( url ) + '/' + line + '#' + line;
+- }

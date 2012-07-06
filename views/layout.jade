@@ -2,39 +2,44 @@
 html(lang=lang.locale)
   head
     title #{ site } - Errorboard.js
-    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin,cyrillic')
-    link(rel='stylesheet', href='/css/bootstrap.min.css')
-    link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
-    link(rel='stylesheet', href='/css/style.css')
+    block stylesheets
+      link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin,cyrillic')
+      link(rel='stylesheet', href='/css/bootstrap.min.css')
+      link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
+      link(rel='stylesheet', href='/css/style.css')
   body
     .container-fluid
-      #header
-        label#showFixed
-          input(type='checkbox', checked=all)
-          span= lang.showFixed
-        ul.nav.nav-tabs
-          each page in lang.pages
-            li(class=page.type === type ? 'active' : '')
-              a(href='/#{ lang.url }/stats/#{ page.type }' + (all ? '/all' : ''))= page.title
+      block header
+        #header
+          label#showFixed
+            input(type='checkbox', checked=all)
+            span= lang.showFixed
+          ul.nav.nav-tabs
+            each page in lang.pages
+              li(class=page.type === type ? 'active' : '')
+                a(href='/#{ lang.url }/stats/#{ page.type }' + (all ? '/all' : ''))= page.title
 
-      != body
+      block content
 
-      #footer
-        div#languages
-          each language in langList
-            a(href='/#{ language.url }/stats/#{ type }' + (all ? '/all' : ''), class=language.url === lang.url ? 'active' : '')= language.title
+      block footer
+        #footer
+          div#languages
+            each language in langList
+              a(href='/#{ language.url }/stats/#{ type }' + (all ? '/all' : ''), class=language.url === lang.url ? 'active' : '')= language.title
 
-        span.generation-time #{ lang.generated } #{ timeElapsed }#{ lang.ms }
+          span.generation-time #{ lang.generated } #{ timeElapsed }#{ lang.ms }
 
-        h1#logo ErrorBoard.js
+          h1#logo ErrorBoard.js
 
-    #error-modal.modal.hide
-      .modal-header
-        button.close(type='button', data-dismiss='modal') ×
-        h3= lang.loading
-      .modal-body
-        p= lang.loadingFull
+    block modal
+      #error-modal.modal.hide
+        .modal-header
+          button.close(type='button', data-dismiss='modal') ×
+          h3= lang.loading
+        .modal-body
+          p= lang.loadingFull
 
-    script(src='/js/jquery.min.js')
-    script(src='/js/bootstrap-modal.js')
-    script(src='/js/main.js')
+    block scripts
+      script(src='/js/jquery.min.js')
+      script(src='/js/bootstrap-modal.js')
+      script(src='/js/main.js')
