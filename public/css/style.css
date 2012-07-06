@@ -177,3 +177,31 @@ table .cell-center {
 .secondary {
   font-style: italic;
 }
+
+pre {
+  width: 100%;
+  overflow: hidden;
+  font-size: 16px;
+  margin-bottom: 50px;
+}
+
+.error {
+  background: #f7d6d5;
+}
+  .error .script-line-number {
+    color: #722;
+  }
+
+.script-line-code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.script-line-number {
+  color: #aaa;
+  display: inline;
+  float: left;
+  text-align: right;
+  width: 2.5em;
+  margin-right: 1em;
+}

@@ -1,5 +1,6 @@
 var ErrorPusher   = require('./../modules/error_pusher'),
     StatsProvider = require('./../modules/stats'),
+    displayScript = require('./../modules/display_script'),
     config        = require('./../config/main');
 
 var _             = require('underscore'),
@@ -79,7 +80,6 @@ routes.info = function( req, res ) {
   }
 
   stats.getErrorInfo( req.query, req.params.all, function( data ) {
-    data.layout = false;
     data.moment = req.moment;
     data.lang   = req.i18n[ req.params.lang ];
     res.render( 'info', data );
@@ -95,6 +95,27 @@ routes.fix = function( req, res ) {
   }
 
   res.end();
+};
+
+/*
+ * Display the script and highlight
+ * the error line
+ */
+routes.script = function( req, res ) {
+  // Default language is English
+  if ( !req.params.lang ) {
+    req.params.lang = 'en';
+  }
+
+  displayScript({
+    url  :  req.params.url,
+    line : +req.params.line
+  }, function( data ) {
+    data.site     = req.site;
+    data.siteUrl  = req.siteUrl;
+    data.lang     = req.i18n[ req.params.lang ];
+    res.render( 'script', data );
+  })
 };
 
 module.exports = routes;

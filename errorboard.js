@@ -12,6 +12,7 @@ var app     = module.exports = express.createServer()
 app.configure(function() {
   app.set( 'views', __dirname + '/views' );
   app.set( 'view engine', 'jade' );
+  app.set( 'view options', { layout: false } );
 
   app.use( express.bodyParser() );
   app.use( app.router );
@@ -46,6 +47,7 @@ middleware.moment = function( req, res, next ) {
 middleware.common = [ middleware.i18n, middleware.configuration, middleware.moment ];
 
 // Routes
+app.get( '/:lang?/script/:url/:line',  middleware.common, routes.script );
 app.get( '/stats/fix',                 routes.fix );
 app.get( '/:lang?/stats/info/:all?',   middleware.common, routes.info );
 app.get( '/:lang?/stats/:type?/:all?', middleware.common, routes.stats );

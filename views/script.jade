@@ -1,0 +1,20 @@
+extends layout
+
+append stylesheets
+  link(rel='stylesheet', href='/css/solarized_light.css')
+
+block header
+  .page-header
+    h2= title
+
+block content
+  pre
+    each line, i in script
+      div(class='line#{ i + 1 == errorLine ? ' error' : '' }')
+        a(name=i + 1)
+        div.script-line-number= i + 1
+        div.script-line-code !{ line || '&nbsp;' }
+
+block footer
+  #footer
+    h1#logo ErrorBoard.js
