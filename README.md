@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Lapple/ErrorBoard.png)](http://travis-ci.org/Lapple/ErrorBoard)
 # ErrorBoard.js
 
 Track and fix JavaScript errors fired by your visitor's browsers.
