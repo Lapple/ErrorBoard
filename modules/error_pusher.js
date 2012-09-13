@@ -24,7 +24,8 @@ ErrorPusher = function( params ) {
   _.extend( this, params.query );
 
   this.time  = new Date();
-  this.page  = params.referer.replace(site, '');
+  this.page  = params.referer ? params.referer.replace(site, '')
+                              : '404';
   this.fixed = false;
 
   this.agent = {
