@@ -59,9 +59,7 @@ body {
 }
 
 .generation-time {
-  position: absolute;
-  top: 0;
-  left: 10px;
+  float: left;
   color: #aaa;
 }
 
@@ -124,6 +122,11 @@ body {
 }
 
 #logo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 400px;
+  margin-left: -200px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -132,10 +135,10 @@ body {
   color: #bbb;
   text-shadow: 0 1px 0 #f5f5f5;
   cursor: default;
-  -webkit-transition: 0.3s;
-     -moz-transition: 0.3s;
-       -o-transition: 0.3s;
-          transition: 0.3s;
+  -webkit-transition: color 0.3s;
+     -moz-transition: color 0.3s;
+       -o-transition: color 0.3s;
+          transition: color 0.3s;
 }
   #logo:hover {
     color: #999;
@@ -178,6 +181,30 @@ table .cell-center {
   font-style: italic;
 }
 
+#clear-all {
+  display: inline;
+  float: left;
+  margin: 4px 10px;
+  padding: 0 10px;
+  cursor: pointer;
+  height: 24px;
+  line-height: 20px;
+  border-radius: 3px;
+  border: none;
+  background: #ce6c6c;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #a55050, inset 0 2px 0 #cc9a9a;
+}
+
+#clear-all:hover {
+  background: #de7c7c;
+}
+
+#clear-all:active {
+  background: #b44e4e;
+  box-shadow: inset 0 0 4px rgba( 0, 0, 0, 0.5 );
+}
+
 pre {
   width: 100%;
   overflow: hidden;
@@ -185,12 +212,13 @@ pre {
   margin-bottom: 50px;
 }
 
-.error {
+.line .error {
   background: #f7d6d5;
 }
-  .error .script-line-number {
-    color: #722;
-  }
+
+.error .script-line-number {
+  color: #722;
+}
 
 .script-line-code {
   overflow: hidden;

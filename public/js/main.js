@@ -38,7 +38,7 @@
             line  : $el.data('line'),
             error : $el.data('error')
           };
-          
+
       $.get(href, data).done(function() {
         $self.prop('disabled', true);
       });
@@ -57,5 +57,13 @@
       this.disabled = true;
       window.location.href = href + (all ? '/all' : '');
     })
+    .on('click', '#clear-all', function() {
+      var $el  = $(this),
+          href = $el.data('href');
+
+      $.post(href, function() {
+        window.location.reload();
+      });
+    });
 
 }());

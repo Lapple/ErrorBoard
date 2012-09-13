@@ -47,12 +47,13 @@ middleware.moment = function( req, res, next ) {
 middleware.common = [ middleware.i18n, middleware.configuration, middleware.moment ];
 
 // Routes
-app.get( '/:lang?/script/:url/:line',  middleware.common, routes.script );
-app.get( '/stats/fix',                 routes.fix );
-app.get( '/:lang?/stats/info/:all?',   middleware.common, routes.info );
-app.get( '/:lang?/stats/:type?/:all?', middleware.common, routes.stats );
-app.all( '/pusherror/*',               routes.pushError );
-app.get( '/',                          routes.index );
+app.get(  '/:lang?/script/:url/:line',  middleware.common, routes.script );
+app.get(  '/stats/fix',                 routes.fix );
+app.post( '/stats/clearAll',            routes.clearAll );
+app.get(  '/:lang?/stats/info/:all?',   middleware.common, routes.info );
+app.get(  '/:lang?/stats/:type?/:all?', middleware.common, routes.stats );
+app.all(  '/pusherror/*',               routes.pushError );
+app.get(  '/',                          routes.index );
 
 app.listen( config.app.port, config.app.host );
 console.log( "Initialized on %s", (new Date()).toUTCString() );

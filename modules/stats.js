@@ -168,5 +168,9 @@ StatsProvider.prototype.fixError = function( query ) {
   );
 };
 
+StatsProvider.prototype.clearAll = function() {
+  this.collection.remove();
+};
+
 module.exports = StatsProvider;
 

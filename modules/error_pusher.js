@@ -16,16 +16,15 @@ util = {
 ErrorPusher = function( params ) {
   var ua = uaParser.parse( params.ua );
 
-  // Query prevalidation
-  if (params.query.url === 'undefined') {
-    params.query.url = 'Unable to determine'
-  }
-
   _.extend( this, params.query );
 
+  // Could not determine the url
+  if (this.url === 'undefined' || this.url === '') {
+    this.url = this.line = false;
+  }
+
   this.time  = new Date();
-  this.page  = params.referer ? params.referer.replace(site, '')
-                              : '404';
+  this.page  = params.referer && params.referer.replace(site, '');
   this.fixed = false;
 
   this.agent = {
@@ -35,29 +34,39 @@ ErrorPusher = function( params ) {
 };
 
 ErrorPusher.prototype.put = function() {
-  logger.log({
-    console : this.toString()
-  , file    : this.toJSON()
-  });
+  // Prevent referrerless calls from being put as errors
+  if ( this.page && this.url ) {
+    logger.log({
+      console : this.toString()
+    , file    : this.toJSON()
+    });
+  }
 };
 
 ErrorPusher.prototype.toJSON = function() {
-  return {
+  var error = {
     message :  this.message
-  , url     :  this.url
-  , line    : +this.line
   , time    : +this.time
   , agent   :  this.agent
   , page    :  this.page
   , fixed   :  this.fixed
+  };
+
+  if ( this.url ) {
+    _.extend( error, {
+      url  :  this.url
+    , line : +this.line
+    });
   }
+
+  return error;
 };
 
 ErrorPusher.prototype.toString = function() {
   return '[' + util.formatTime(this.time) + '] ' + this.agent.browser + ' v' + this.agent.version +
                                  '\n           ' + this.message +
                                  '\n     Page: ' + '/' + this.page +
-                                 '\n   Script: ' + this.url + ':' + this.line + '\n';
+                  ( this.url ? ( '\n   Script: ' + this.url + ':' + this.line ) : '' ) + '\n';
 };
 
 module.exports = ErrorPusher;

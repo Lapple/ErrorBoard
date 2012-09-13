@@ -27,7 +27,11 @@ html(lang=lang.locale)
             each language in langList
               a(href='/#{ language.url }/stats/#{ type }' + (all ? '/all' : ''), class=language.url === lang.url ? 'active' : '')= language.title
 
-          span.generation-time #{ lang.generated } #{ timeElapsed }#{ lang.ms }
+          button#clear-all(type="button", data-href="/stats/clearAll") #{ lang.clearAll }
+
+          span.generation-time
+            | #{ lang.generated }
+            | #{ timeElapsed }#{ lang.ms }
 
           h1#logo ErrorBoard.js
 

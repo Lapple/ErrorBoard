@@ -98,6 +98,14 @@ routes.fix = function( req, res ) {
 };
 
 /*
+ * Clear all errors.
+ */
+routes.clearAll = function( req, res ) {
+  stats.clearAll();
+  res.end();
+};
+
+/*
  * Display the script and highlight
  * the error line
  */
