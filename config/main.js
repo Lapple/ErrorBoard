@@ -14,7 +14,9 @@ module.exports = {
   , serverOptions: {}
     // Additional options for the collection
     // http://mongodb.github.com/node-mongodb-native/api-generated/db.html#Db
-  , collectionOptions: {}
+  , collectionOptions: {
+      w: 1
+    }
   }
 
   // App settings
