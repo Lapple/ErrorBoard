@@ -38,7 +38,7 @@ module.exports = {
     // Additional options for the collection
     // http://mongodb.github.com/node-mongodb-native/api-generated/db.html#Db
   , collectionOptions: {
-      w: 1
+      w: 0
     }
   }
 
