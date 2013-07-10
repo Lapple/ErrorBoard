@@ -20,7 +20,7 @@ ErrorPusher = function( params ) {
 
   // Could not determine the url
   if (this.url === 'undefined' || this.url === '') {
-    this.url = this.line = false;
+    this.url = this.line = 'Unable to determine';
   }
 
   this.time  = new Date();
