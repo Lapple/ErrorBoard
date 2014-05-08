@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node eb.js",
     "browserify": "node_modules/.bin/browserify client/app.js -o client/public/app.js",
+    "watchify": "node_modules/.bin/watchify client/app.js -o client/public/app.js -v",
     "nodemon": "node_modules/.bin/nodemon --ignore client/ eb.js"
   },
   "dependencies": {
@@ -17,22 +18,21 @@
     "nedb-logger": "^0.1.0",
     "express": "^4.1.1",
     "platform": "^1.0.0",
-    "moment": "^2.6.0"
+    "moment": "^2.6.0",
+    "envify": "^1.2.1",
+    "react": "^0.10.0",
+    "lodash": "^2.4.1"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",
     "browserify": "^3.46.0",
-    "browserify-shim": "^3.4.1"
-  },
-  "browser": {
-    "datavore": "./vendor/datavore/dv.js"
+    "browserify-shim": "^3.4.1",
+    "watchify": "^0.8.3",
+    "reactify": "^0.13.1"
   },
   "browserify": {
     "transform": [
-      "browserify-shim"
+      "reactify"
     ]
-  },
-  "browserify-shim": {
-    "datavore": "dv"
   }
 }
