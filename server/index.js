@@ -8,4 +8,6 @@ app.get('/error', require('./module-logger'));
 app.get('/find', require('./module-finder'));
 app.get('/', require('./module-serve-index'));
 
+app.get('/messages', require('./module-messages'));
+
 module.exports = app;
