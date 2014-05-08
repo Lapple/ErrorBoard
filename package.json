@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node eb.js",
+    "browserify": "node_modules/.bin/browserify client/app.js -o client/public/app.js",
     "nodemon": "node_modules/.bin/nodemon --ignore client/ eb.js"
   },
   "dependencies": {
@@ -19,6 +20,19 @@
     "moment": "^2.6.0"
   },
   "devDependencies": {
-    "nodemon": "^1.0.17"
+    "nodemon": "^1.0.17",
+    "browserify": "^3.46.0",
+    "browserify-shim": "^3.4.1"
+  },
+  "browser": {
+    "datavore": "./vendor/datavore/dv.js"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "datavore": "dv"
   }
 }
