@@ -4,14 +4,14 @@ var moment = require('moment');
 
 var config = require('../package.json').config;
 var db = require('./database');
+var ws = require('./websockets');
 var app = express();
 
 app.use(function(req, res) {
     var query = req.query;
-    var end = res.end.bind(res);
 
     if (!query.message || !query.url) {
-        return end(400);
+        return res.end(400);
     }
 
     var ua = platform.parse(req.headers['user-agent']);
@@ -19,7 +19,7 @@ app.use(function(req, res) {
     var timestamp = Date.now();
     var date = moment(timestamp).format('DD-MM-YYYY');
 
-    db.insert({
+    var doc = {
         ua: ua,
         referer: referer,
         timestamp: timestamp,
@@ -28,7 +28,19 @@ app.use(function(req, res) {
         message: query.message,
         url: query.url,
         line: query.line
-    }, end);
+    };
+
+    db.insert(doc, function(err) {
+        if (err) {
+            return res.end(500);
+        }
+
+        try {
+            ws.broadcast(JSON.stringify(doc));
+        } catch(e) {}
+
+        res.end();
+    });
 });
 
 module.exports = app;

@@ -7,4 +7,8 @@ var db = new NeDB({
     autoload: true
 });
 
+db.ensureIndex({
+    fieldName: 'timestamp'
+});
+
 module.exports = db;
