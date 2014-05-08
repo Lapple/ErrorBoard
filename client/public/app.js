@@ -37,7 +37,11 @@ $(function() {
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
         return React.DOM.div(null, 
-            this.props.message, " - ", this.props.count, " - ", this.props.browsers.join(', ')
+            React.DOM.b(null, this.props.message),
+            " "+' '+
+            "(",this.props.count,")"+' '+
+            " ",
+            this.props.browsers.join(', ')
         );
     }
 });

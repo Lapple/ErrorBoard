@@ -3,7 +3,11 @@ var React = require('react');
 module.exports = React.createClass({
     render: function() {
         return <div>
-            {this.props.message} - {this.props.count} - {this.props.browsers.join(', ')}
+            <b>{this.props.message}</b>
+            &nbsp;
+            ({this.props.count})
+            &nbsp;
+            {this.props.browsers.join(', ')}
         </div>;
     }
 });

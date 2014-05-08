@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "nedb": "^0.10.5",
-    "nedb-logger": "^0.1.0",
     "express": "^4.1.1",
     "platform": "^1.0.0",
     "moment": "^2.6.0",

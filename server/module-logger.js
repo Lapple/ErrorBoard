@@ -1,16 +1,10 @@
-var path = require('path');
-
 var express = require('express');
-var Logger = require('nedb-logger');
 var platform = require('platform');
 var moment = require('moment');
 
 var config = require('../package.json').config;
+var db = require('./database');
 var app = express();
-
-var logger = new Logger({
-    filename: path.join(process.cwd(), config.dbfile)
-});
 
 app.use(function(req, res) {
     var query = req.query;
@@ -25,7 +19,7 @@ app.use(function(req, res) {
     var timestamp = Date.now();
     var date = moment(timestamp).format('DD-MM-YYYY');
 
-    logger.insert({
+    db.insert({
         ua: ua,
         referer: referer,
         timestamp: timestamp,
