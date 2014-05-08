@@ -10,15 +10,21 @@ $(function() {
     var data = {};
     var ws = new SockJS('/ws');
 
-    ws.onmessage = function(e) {
-        aggregateMessages(data, JSON.parse(e.data));
+    var onDataChanged = function() {
         React.renderComponent(ErrorList({groups: data}), app);
+    };
+
+    ws.onmessage = function(e) {
+        data = aggregateMessages(data, JSON.parse(e.data));
+        onDataChanged();
     };
 
     $.getJSON('/messages').done(function(response) {
         data = response;
-        React.renderComponent(ErrorList({groups: data}), app);
+        onDataChanged();
     });
+
+    onDataChanged();
 });
 
 },{"../common/aggregator-messages":5,"./component-error-list.jsx":3,"react":142}],2:[function(require,module,exports){
@@ -52,7 +58,7 @@ module.exports = React.createClass({displayName: 'exports',
             });
         });
 
-        return React.DOM.div(null, errorItems);
+        return React.DOM.div(null, _.isEmpty(errorItems) ? 'Empty' : errorItems);
     }
 });
 

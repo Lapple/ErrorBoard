@@ -13,6 +13,6 @@ module.exports = React.createClass({
             });
         });
 
-        return <div>{errorItems}</div>;
+        return <div>{_.isEmpty(errorItems) ? 'Empty' : errorItems}</div>;
     }
 });
