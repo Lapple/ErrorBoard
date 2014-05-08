@@ -1,27 +1,40 @@
+var _ = require('lodash');
+var page = require('page');
 var React = require('react');
 
-var aggregateMessages = require('../common/aggregator-messages');
+var data = require('./data');
 var ErrorList = require('./component-error-list.jsx');
+var BrowserList = require('./component-browser-list.jsx');
 
-$(function() {
-    var app = document.getElementById('app');
-
-    var data = {};
-    var ws = new SockJS('/ws');
-
-    var onDataChanged = function() {
-        React.renderComponent(ErrorList({groups: data}), app);
+var extendCtx = function(params) {
+    return function(ctx, next) {
+        _.extend(ctx, params);
+        next();
     };
+};
 
-    ws.onmessage = function(e) {
-        data = aggregateMessages(data, JSON.parse(e.data));
-        onDataChanged();
+var load = function(ctx, next) {
+    data.fetch(ctx.type).done(next);
+};
+
+var render = function(selector, component) {
+    return function(ctx, next) {
+        React.renderComponent(
+            component({data: data.get(ctx.type)}),
+            document.querySelector(selector)
+        );
+        next();
     };
+};
 
-    $.getJSON('/messages').done(function(response) {
-        data = response;
-        onDataChanged();
-    });
+page('/',         extendCtx({type: 'messages'}), load, render('#app', ErrorList));
+page('/browsers', extendCtx({type: 'browsers'}), load, render('#app', BrowserList));
 
-    onDataChanged();
-});
+$(page.start);
+
+var ws = new SockJS('/ws');
+
+ws.onmessage = function(e) {
+    data.update(JSON.parse(e.data));
+    // React.renderComponent(ErrorList({data: data.get('messages')}), app);
+};

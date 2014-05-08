@@ -3,7 +3,7 @@ var NeDB = require('nedb');
 
 var config = require('../package.json').config;
 var db = new NeDB({
-    filename: path.join(process.cwd(), config.dbfile),
+    filename: path.join(__dirname, '..', config.dbfile),
     autoload: true
 });
 

@@ -4,7 +4,7 @@ var ErrorItem = require('./component-error-item.jsx');
 
 module.exports = React.createClass({
     render: function() {
-        var errorItems = _.map(this.props.groups, function(data, message) {
+        var items = _.map(this.props.data, function(data, message) {
             return ErrorItem({
                 key: message,
                 message: message,
@@ -13,6 +13,6 @@ module.exports = React.createClass({
             });
         });
 
-        return <div>{_.isEmpty(errorItems) ? 'Empty' : errorItems}</div>;
+        return <div>{_.isEmpty(items) ? 'Empty' : items}</div>;
     }
 });

@@ -21,19 +21,19 @@ module.exports = function(params) {
         params.groupBy = prop(params.groupBy);
     }
 
-    if (!_.isFunction(params.init)) {
-        params.init = value(params.init);
+    if (!_.isFunction(params.create)) {
+        params.create = value(params.create);
     }
 
-    return function(dataset, item) {
-        var groupName = params.groupBy(item);
-        var i = dataset[groupName];
+    return function(dataset, next) {
+        var groupName = params.groupBy(next);
+        var item = dataset[groupName];
 
-        if (!i) {
-            i = dataset[groupName] = params.init(item);
+        if (!item) {
+            item = dataset[groupName] = params.create(next);
         }
 
-        params.step(i, item);
+        params.each(item, next);
 
         return dataset;
     };
