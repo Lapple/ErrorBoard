@@ -17,6 +17,8 @@ var value = function(v) {
 };
 
 module.exports = function(params) {
+    var filter = params.filter || value(true);
+
     if (_.isString(params.groupBy)) {
         params.groupBy = prop(params.groupBy);
     }
@@ -26,14 +28,16 @@ module.exports = function(params) {
     }
 
     return function(dataset, next) {
-        var groupName = params.groupBy(next);
-        var item = dataset[groupName];
+        if (filter(next)) {
+            var groupName = params.groupBy(next);
+            var item = dataset[groupName];
 
-        if (!item) {
-            item = dataset[groupName] = params.create(next);
+            if (!item) {
+                item = dataset[groupName] = params.create(next);
+            }
+
+            params.each(item, next);
         }
-
-        params.each(item, next);
 
         return dataset;
     };

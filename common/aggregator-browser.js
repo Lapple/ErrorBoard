@@ -1,20 +1,20 @@
+var slug = require('speakingurl');
+
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
-var reduceBrowsers = require('./reduce-browsers');
 
-module.exports = function() {
+module.exports = function(params) {
     return aggregate({
-        groupBy: function(item) {
-            return item.url + ':' + (item.line || 0);
+        groupBy: 'message',
+        filter: function(item) {
+            return slug(item.ua.name) === params.id;
         },
         create: {
-            count: 0,
-            browsers: []
+            count: 0
         },
         each: function(obj, next) {
             obj.count += 1;
             reduceTimestamps(obj, next);
-            reduceBrowsers(obj, next);
         }
     });
 };

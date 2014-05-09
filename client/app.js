@@ -13,18 +13,20 @@ var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
-    Regions.update('#reports');
+    Regions.update(['#reports', '#details']);
 };
 
-var fetchReport = function(type) {
+var fetchReport = function(type, params) {
     return function(ctx, next) {
-        Reports.fetch(type).done(next);
+        var p = _.isFunction(params) ? params(ctx) : params;
+        Reports.fetch(type, p).always(next);
     };
 };
 
 var renderRegion = function(selector, Component, props) {
     return function(ctx, next) {
-        Regions.render(selector, Component, props);
+        var p = _.isFunction(props) ? props(ctx) : props;
+        Regions.render(selector, Component, p);
         next();
     };
 };
@@ -36,27 +38,36 @@ var redirectTo = function(url) {
 };
 
 page('/',
-    redirectTo('/messages')
+    redirectTo('/messages/')
 );
 
-page('/messages',
+page('/messages/',
     fetchReport('messages'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'messages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'messages', null))
 );
 
-page('/browsers',
+page('/browsers/*',
     fetchReport('browsers'),
-    renderRegion('#reports', ComponentBrowserList, _.partial(Reports.get, 'browsers'))
+    renderRegion('#reports', ComponentBrowserList, _.partial(Reports.get, 'browsers', null))
 );
 
-page('/scripts',
+page('/browsers/:id/',
+    fetchReport('browser', function(ctx) {
+        return {id: ctx.params.id};
+    }),
+    renderRegion('#details', ComponentReportList, function(ctx) {
+        return Reports.get('browser', {id: ctx.params.id});
+    })
+);
+
+page('/scripts/',
     fetchReport('scripts'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'scripts'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'scripts', null))
 );
 
-page('/pages',
+page('/pages/',
     fetchReport('pages'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'pages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'pages', null))
 );
 
 page('*',

@@ -20,7 +20,8 @@
     "moment": "^2.6.0",
     "envify": "^1.2.1",
     "lodash": "^2.4.1",
-    "sockjs": "^0.3.8"
+    "sockjs": "^0.3.8",
+    "speakingurl": "^0.9.1"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",

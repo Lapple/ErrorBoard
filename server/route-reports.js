@@ -12,7 +12,7 @@ module.exports = function(req, res) {
             if (err) {
                 res.json(400, { error: err });
             } else {
-                res.json(_.reduce(docs, aggregator, {}));
+                res.json(_.reduce(docs, aggregator(req.query), {}));
             }
         });
     } else {

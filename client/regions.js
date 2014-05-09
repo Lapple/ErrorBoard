@@ -7,7 +7,7 @@ module.exports = {
     render: function(selector, Component, props) {
         var render = _regions[selector] = _.partial(
             React.renderComponent,
-            Component(_.isFunction(props) ? props() : props),
+            Component(props),
             document.querySelector(selector)
         );
 
