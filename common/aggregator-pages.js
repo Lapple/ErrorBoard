@@ -3,7 +3,9 @@ var reduceTimestamps = require('./reduce-timestamps');
 var reduceBrowsers = require('./reduce-browsers');
 
 module.exports = aggregate({
-    groupBy: 'message',
+    groupBy: function(item) {
+        return item.referer || 'No referer';
+    },
     create: {
         count: 0,
         browsers: []
@@ -15,3 +17,4 @@ module.exports = aggregate({
         reduceBrowsers(obj, next);
     }
 });
+

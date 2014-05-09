@@ -5,6 +5,8 @@ module.exports = React.createClass({
         return <ul>
             <li>{ this.link('/', 'Messages') }</li>
             <li>{ this.link('/browsers', 'Browsers') }</li>
+            <li>{ this.link('/scripts', 'Scripts') }</li>
+            <li>{ this.link('/pages', 'Pages') }</li>
         </ul>;
     },
     link: function(pathname, title) {

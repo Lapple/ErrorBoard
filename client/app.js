@@ -39,6 +39,16 @@ page('/browsers',
     renderRegion('#reports', ComponentBrowserList, _.partial(Reports.get, 'browsers'))
 );
 
+page('/scripts',
+    fetchReport('scripts'),
+    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'scripts'))
+);
+
+page('/pages',
+    fetchReport('pages'),
+    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'pages'))
+);
+
 page('*',
     renderRegion('#nav', ComponentNav, function() {
         return { pathname: location.pathname };
