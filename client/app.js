@@ -15,13 +15,6 @@ ws.onmessage = function(e) {
     Regions.update(['#reports', '#details']);
 };
 
-var fetchReport = function(type, params) {
-    return function(ctx, next) {
-        var p = _.isFunction(params) ? params(ctx) : params;
-        Reports.fetch(type, p).always(next);
-    };
-};
-
 var renderRegion = function(selector, Component, props) {
     return function(ctx, next) {
         var p = _.isFunction(props) ? props(ctx) : props;
@@ -50,90 +43,37 @@ page('/', redirectTo('/messages/'));
 
 page('*', beforeRun);
 
-page('/messages/*',
-    fetchReport('messages'),
+page('/:type/*',
+    function(ctx, next) {
+        Reports.fetch(ctx.params.type).always(next);
+    },
     renderRegion('#reports', ComponentReportList, function(ctx) {
         return {
-            data: Reports.get('messages'),
-            type: 'messages'
+            data: Reports.get(ctx.params.type),
+            type: ctx.params.type
         };
     })
 );
 
-page('/browsers/*',
-    fetchReport('browsers'),
-    renderRegion('#reports', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('browsers'),
-            type: 'browsers'
-        };
-    })
-);
-
-page('/scripts/*',
-    fetchReport('scripts'),
-    renderRegion('#reports', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('scripts'),
-            type: 'scripts'
-        };
-    })
-);
-
-page('/pages/*',
-    fetchReport('pages'),
-    renderRegion('#reports', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('pages'),
-            type: 'pages'
-        };
-    })
-);
-
-page('/messages/:id/',
-    fetchReport('message', function(ctx) {
-        return {id: ctx.params.id};
-    }),
+page('/:type/:id/',
+    function(ctx, next) {
+        ctx.params.detailsType = ctx.params.type.slice(0, -1);
+        next();
+    },
+    function(ctx, next) {
+        Reports.fetch(ctx.params.detailsType, {id: ctx.params.id}).always(next);
+    },
     renderRegion('#details', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('message', {id: ctx.params.id}),
-            type: 'browser'
-        };
-    })
-);
+        var type = ctx.params.detailsType;
+        var displayType = 'messages';
 
-page('/browsers/:id/',
-    fetchReport('browser', function(ctx) {
-        return {id: ctx.params.id};
-    }),
-    renderRegion('#details', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('browser', {id: ctx.params.id}),
-            type: 'messages'
-        };
-    })
-);
+        if (type === 'message') {
+            displayType = 'browser';
+        }
 
-page('/scripts/:id/',
-    fetchReport('script', function(ctx) {
-        return {id: ctx.params.id};
-    }),
-    renderRegion('#details', ComponentReportList, function(ctx) {
         return {
-            data: Reports.get('script', {id: ctx.params.id}),
-            type: 'messages'
-        };
-    })
-);
-
-page('/pages/:id/',
-    fetchReport('page', function(ctx) {
-        return {id: ctx.params.id};
-    }),
-    renderRegion('#details', ComponentReportList, function(ctx) {
-        return {
-            data: Reports.get('page', {id: ctx.params.id}),
-            type: 'messages'
+            data: Reports.get(type, {id: ctx.params.id}),
+            type: displayType
         };
     })
 );
