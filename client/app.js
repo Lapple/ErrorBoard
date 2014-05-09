@@ -13,7 +13,7 @@ var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
-    Regions.update();
+    Regions.update('#reports');
 };
 
 var fetchReport = function(type) {

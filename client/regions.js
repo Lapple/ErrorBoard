@@ -3,10 +3,6 @@ var React = require('react');
 
 var _regions = {};
 
-var invoke = function(fn) {
-    return fn();
-};
-
 module.exports = {
     render: function(selector, Component, props) {
         var render = _regions[selector] = _.partial(
@@ -17,11 +13,15 @@ module.exports = {
 
         render();
     },
-    update: function(selector) {
-        if (selector && _regions[selector]) {
-            _regions[selector]();
-        } else {
-            _.each(_regions, invoke);
+    update: function(selectors) {
+        if (_.isString(selectors)) {
+            selectors = [selectors];
+        } else if (!selectors) {
+            selectors = _.keys(_regions);
         }
+
+        _.each(selectors, function(selector) {
+            _regions[selector]();
+        });
     }
 };
