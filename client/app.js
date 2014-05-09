@@ -5,6 +5,7 @@ var React = require('react');
 var Reports = require('./reports');
 var Regions = require('./regions');
 
+var ComponentNav = require('./component-nav.jsx');
 var ComponentErrorList = require('./component-error-list.jsx');
 var ComponentBrowserList = require('./component-browser-list.jsx');
 
@@ -30,12 +31,18 @@ var renderRegion = function(selector, Component, props) {
 
 page('/',
     fetchReport('messages'),
-    renderRegion('#app', ComponentErrorList, _.partial(Reports.get, 'messages'))
+    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'messages'))
 );
 
 page('/browsers',
     fetchReport('browsers'),
-    renderRegion('#app', ComponentBrowserList, _.partial(Reports.get, 'browsers'))
+    renderRegion('#reports', ComponentBrowserList, _.partial(Reports.get, 'browsers'))
+);
+
+page('*',
+    renderRegion('#nav', ComponentNav, function() {
+        return { pathname: location.pathname };
+    })
 );
 
 $(page.start);
