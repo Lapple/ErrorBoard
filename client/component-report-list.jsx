@@ -1,13 +1,13 @@
 var _ = require('lodash');
 var React = require('react');
-var ErrorItem = require('./component-error-item.jsx');
+var ReportItem = require('./component-report-item.jsx');
 
 module.exports = React.createClass({
     render: function() {
-        var items = _.map(this.props, function(data, message) {
-            return ErrorItem({
-                key: message,
-                message: message,
+        var items = _.map(this.props, function(data, title) {
+            return ReportItem({
+                key: title,
+                title: title,
                 data: data
             });
         });

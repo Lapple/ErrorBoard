@@ -7,7 +7,7 @@ var Reports = require('./reports');
 var Regions = require('./regions');
 
 var ComponentNav = require('./component-nav.jsx');
-var ComponentErrorList = require('./component-error-list.jsx');
+var ComponentReportList = require('./component-report-list.jsx');
 var ComponentBrowserList = require('./component-browser-list.jsx');
 
 var ws = new SockJS('/ws');
@@ -42,7 +42,7 @@ page('/',
 
 page('/messages',
     fetchReport('messages'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'messages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'messages'))
 );
 
 page('/browsers',
@@ -52,12 +52,12 @@ page('/browsers',
 
 page('/scripts',
     fetchReport('scripts'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'scripts'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'scripts'))
 );
 
 page('/pages',
     fetchReport('pages'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'pages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'pages'))
 );
 
 page('*',
@@ -68,7 +68,7 @@ page('*',
 
 $(page.start);
 
-},{"./component-browser-list.jsx":3,"./component-error-list.jsx":5,"./component-nav.jsx":6,"./regions":7,"./reports":8,"lodash":18,"page":19,"react":154}],2:[function(require,module,exports){
+},{"./component-browser-list.jsx":3,"./component-nav.jsx":4,"./component-report-list.jsx":6,"./regions":7,"./reports":8,"lodash":18,"page":19,"react":154}],2:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
 module.exports = React.createClass({displayName: 'exports',
@@ -105,40 +105,6 @@ module.exports = React.createClass({displayName: 'exports',
 
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
-        return React.DOM.div(null, 
-            React.DOM.b(null, this.props.message),
-            " "+' '+
-            "(",this.props.data.count,")"+' '+
-            " ",
-            this.props.data.browsers.join(', ')
-        );
-    }
-});
-
-},{"react":154}],5:[function(require,module,exports){
-/** @jsx React.DOM */var _ = require('lodash');
-var React = require('react');
-var ErrorItem = require('./component-error-item.jsx');
-
-module.exports = React.createClass({displayName: 'exports',
-    render: function() {
-        var items = _.map(this.props, function(data, message) {
-            return ErrorItem({
-                key: message,
-                message: message,
-                data: data
-            });
-        });
-
-        return React.DOM.div(null, _.isEmpty(items) ? 'Empty' : items);
-    }
-});
-
-},{"./component-error-item.jsx":4,"lodash":18,"react":154}],6:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
-
-module.exports = React.createClass({displayName: 'exports',
-    render: function() {
         return React.DOM.ul(null, 
             React.DOM.li(null,  this.link('/messages', 'Messages') ),
             React.DOM.li(null,  this.link('/browsers', 'Browsers') ),
@@ -157,7 +123,41 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"react":154}],7:[function(require,module,exports){
+},{"react":154}],5:[function(require,module,exports){
+/** @jsx React.DOM */var React = require('react');
+
+module.exports = React.createClass({displayName: 'exports',
+    render: function() {
+        return React.DOM.div(null, 
+            React.DOM.b(null, this.props.title),
+            " "+' '+
+            "(",this.props.data.count,")"+' '+
+            " ",
+            this.props.data.browsers.join(', ')
+        );
+    }
+});
+
+},{"react":154}],6:[function(require,module,exports){
+/** @jsx React.DOM */var _ = require('lodash');
+var React = require('react');
+var ReportItem = require('./component-report-item.jsx');
+
+module.exports = React.createClass({displayName: 'exports',
+    render: function() {
+        var items = _.map(this.props, function(data, title) {
+            return ReportItem({
+                key: title,
+                title: title,
+                data: data
+            });
+        });
+
+        return React.DOM.div(null, _.isEmpty(items) ? 'Empty' : items);
+    }
+});
+
+},{"./component-report-item.jsx":5,"lodash":18,"react":154}],7:[function(require,module,exports){
 var _ = require('lodash');
 var React = require('react');
 

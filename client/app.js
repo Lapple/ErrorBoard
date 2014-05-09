@@ -6,7 +6,7 @@ var Reports = require('./reports');
 var Regions = require('./regions');
 
 var ComponentNav = require('./component-nav.jsx');
-var ComponentErrorList = require('./component-error-list.jsx');
+var ComponentReportList = require('./component-report-list.jsx');
 var ComponentBrowserList = require('./component-browser-list.jsx');
 
 var ws = new SockJS('/ws');
@@ -41,7 +41,7 @@ page('/',
 
 page('/messages',
     fetchReport('messages'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'messages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'messages'))
 );
 
 page('/browsers',
@@ -51,12 +51,12 @@ page('/browsers',
 
 page('/scripts',
     fetchReport('scripts'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'scripts'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'scripts'))
 );
 
 page('/pages',
     fetchReport('pages'),
-    renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'pages'))
+    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'pages'))
 );
 
 page('*',
