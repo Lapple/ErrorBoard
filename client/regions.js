@@ -37,7 +37,10 @@ module.exports = {
     cleanup: function(selectors) {
         selectors = normalizeSelectorsArgument(selectors);
 
-        _.each(selectors, _.compose(React.unmountComponentAtNode, querySelector));
+        _.each(selectors, function(selector) {
+            React.unmountComponentAtNode(querySelector(selector));
+            delete _regions[selector];
+        });
     },
     list: function() {
         return _.keys(_regions);

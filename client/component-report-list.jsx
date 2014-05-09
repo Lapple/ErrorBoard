@@ -13,6 +13,16 @@ module.exports = React.createClass({
             });
         }, this);
 
-        return <div>{_.isEmpty(items) ? 'Empty' : items}</div>;
+        var empty = <tr>
+            <td>Empty</td>
+        </tr>;
+
+        return <div className="report">
+            <table className="report__table">
+                <tbody>
+                    {_.isEmpty(items) ? empty : items}
+                </tbody>
+            </table>
+        </div>;
     }
 });

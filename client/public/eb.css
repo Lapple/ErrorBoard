@@ -1,0 +1,81 @@
+/* TODO: Add normalize.css */
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+html, body, .container, .menu, .content {
+    height: 100%;
+}
+
+.container {
+    font: 15px/1.5 sans-serif;
+}
+
+.menu {
+    float: left;
+    color: rgb(255, 255, 255);
+    background: rgb(53, 64, 80);
+}
+
+.nav {
+    margin: 10px 0;
+}
+
+.nav__link {
+    display: block;
+    padding: 5px 20px;
+    min-width: 120px;
+
+    color: rgb(160, 171, 188);
+    text-decoration: none;
+}
+
+.nav__link_active {
+    color: rgb(255, 255, 255);
+    background: rgb(47, 57, 72);
+}
+
+.content {
+    overflow: hidden;
+    background: rgb(236, 242, 246);
+}
+
+.report {
+    margin: 30px;
+}
+
+.report__table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    color: rgb(48, 52, 54);
+}
+
+.report__row {
+    border-bottom: 1px solid rgb(217, 229, 236);
+}
+
+.report__cell {
+    padding: 3px 6px;
+    overflow: hidden;
+
+    vertical-align: top;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.report__cell_count {
+    width: 70px;
+    text-align: center;
+}
+
+.report__link {
+    color: rgb(0, 109, 170);
+    text-decoration: none;
+}
+
+.report__link:hover {
+    color: rgb(21, 135, 199);
+}

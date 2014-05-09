@@ -1,21 +1,23 @@
 var React = require('react');
+var cx = React.addons.classSet;
 
 module.exports = React.createClass({
     render: function() {
-        return <ul>
-            <li>{ this.link('/messages/', 'Messages') }</li>
-            <li>{ this.link('/browsers/', 'Browsers') }</li>
-            <li>{ this.link('/scripts/', 'Scripts') }</li>
-            <li>{ this.link('/pages/', 'Pages') }</li>
-        </ul>;
+        return <div className="nav">
+            { this.link('/messages/', 'Messages') }
+            { this.link('/browsers/', 'Browsers') }
+            { this.link('/scripts/', 'Scripts') }
+            { this.link('/pages/', 'Pages') }
+        </div>;
     },
     link: function(pathname, title) {
-        var content = title;
+        var classes = cx({
+            'nav__link': true,
+            'nav__link_active': this.props.pathname.indexOf(pathname) === 0
+        });
 
-        if (this.props.pathname.indexOf(pathname) === 0) {
-            content = <b>{ title }</b>;
-        }
-
-        return <a href={ pathname } title={ title }>{ content }</a>;
+        return <a className={ classes } href={ pathname } title={ title }>
+            { title }
+        </a>;
     }
 });

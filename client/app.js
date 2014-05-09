@@ -41,7 +41,12 @@ var afterRun = function(ctx) {
 
 page('/', redirectTo('/messages/'));
 
-page('*', beforeRun);
+page('*',
+    beforeRun,
+    renderRegion('#nav', ComponentNav, function(ctx) {
+        return { pathname: ctx.pathname };
+    })
+);
 
 page('/:type/*',
     function(ctx, next) {
@@ -75,12 +80,6 @@ page('/:type/:id/',
             data: Reports.get(type, {id: ctx.params.id}),
             type: displayType
         };
-    })
-);
-
-page('*',
-    renderRegion('#nav', ComponentNav, function() {
-        return { pathname: location.pathname };
     })
 );
 
