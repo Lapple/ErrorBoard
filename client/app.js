@@ -7,7 +7,6 @@ var Regions = require('./regions');
 
 var ComponentNav = require('./component-nav.jsx');
 var ComponentReportList = require('./component-report-list.jsx');
-var ComponentBrowserList = require('./component-browser-list.jsx');
 
 var ws = new SockJS('/ws');
 
@@ -51,14 +50,56 @@ page('/', redirectTo('/messages/'));
 
 page('*', beforeRun);
 
-page('/messages/',
+page('/messages/*',
     fetchReport('messages'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'messages', null))
+    renderRegion('#reports', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('messages'),
+            type: 'messages'
+        };
+    })
 );
 
 page('/browsers/*',
     fetchReport('browsers'),
-    renderRegion('#reports', ComponentBrowserList, _.partial(Reports.get, 'browsers', null))
+    renderRegion('#reports', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('browsers'),
+            type: 'browsers'
+        };
+    })
+);
+
+page('/scripts/*',
+    fetchReport('scripts'),
+    renderRegion('#reports', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('scripts'),
+            type: 'scripts'
+        };
+    })
+);
+
+page('/pages/*',
+    fetchReport('pages'),
+    renderRegion('#reports', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('pages'),
+            type: 'pages'
+        };
+    })
+);
+
+page('/messages/:id/',
+    fetchReport('message', function(ctx) {
+        return {id: ctx.params.id};
+    }),
+    renderRegion('#details', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('message', {id: ctx.params.id}),
+            type: 'browser'
+        };
+    })
 );
 
 page('/browsers/:id/',
@@ -66,18 +107,35 @@ page('/browsers/:id/',
         return {id: ctx.params.id};
     }),
     renderRegion('#details', ComponentReportList, function(ctx) {
-        return Reports.get('browser', {id: ctx.params.id});
+        return {
+            data: Reports.get('browser', {id: ctx.params.id}),
+            type: 'messages'
+        };
     })
 );
 
-page('/scripts/',
-    fetchReport('scripts'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'scripts', null))
+page('/scripts/:id/',
+    fetchReport('script', function(ctx) {
+        return {id: ctx.params.id};
+    }),
+    renderRegion('#details', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('script', {id: ctx.params.id}),
+            type: 'messages'
+        };
+    })
 );
 
-page('/pages/',
-    fetchReport('pages'),
-    renderRegion('#reports', ComponentReportList, _.partial(Reports.get, 'pages', null))
+page('/pages/:id/',
+    fetchReport('page', function(ctx) {
+        return {id: ctx.params.id};
+    }),
+    renderRegion('#details', ComponentReportList, function(ctx) {
+        return {
+            data: Reports.get('page', {id: ctx.params.id}),
+            type: 'messages'
+        };
+    })
 );
 
 page('*',

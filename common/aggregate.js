@@ -9,7 +9,7 @@ var prop = function(name) {
 var value = function(v) {
     return function() {
         if (_.isObject(v)) {
-            return _.clone(v);
+            return _.cloneDeep(v);
         } else {
             return v;
         }

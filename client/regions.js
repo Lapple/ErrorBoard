@@ -29,7 +29,9 @@ module.exports = {
         selectors = normalizeSelectorsArgument(selectors);
 
         _.each(selectors, function(selector) {
-            _regions[selector]();
+            if (_regions[selector]) {
+                _regions[selector]();
+            }
         });
     },
     cleanup: function(selectors) {
