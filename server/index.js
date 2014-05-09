@@ -13,7 +13,7 @@ var publicPath = path.join(__dirname, '..', 'client/public');
 
 app.use('/static', express.static(publicPath));
 app.get('/reports/:type', require('./route-reports'));
-app.get('/error', require('./route-logger'));
+app.get('/error', require('./module-logger'));
 app.get('/*', serveStaticFile(path.join(publicPath, 'index.html')));
 
 ws.installHandlers(server, {prefix: '/ws'});
