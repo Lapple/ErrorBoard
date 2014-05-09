@@ -5,7 +5,7 @@ module.exports = React.createClass({
         return <div>
             <b>{this.props.name}</b>
             &nbsp;
-            ({this.props.count})
+            ({this.props.data.count})
         </div>;
     }
 });

@@ -5,9 +5,9 @@ module.exports = React.createClass({
         return <div>
             <b>{this.props.message}</b>
             &nbsp;
-            ({this.props.count})
+            ({this.props.data.count})
             &nbsp;
-            {this.props.browsers.join(', ')}
+            {this.props.data.browsers.join(', ')}
         </div>;
     }
 });

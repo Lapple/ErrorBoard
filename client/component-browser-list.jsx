@@ -8,7 +8,7 @@ module.exports = React.createClass({
             return BrowserItem({
                 key: name,
                 name: name,
-                count: data.count
+                data: data
             });
         });
 

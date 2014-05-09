@@ -3,9 +3,15 @@ var _ = require('lodash');
 var page = require('page');
 var React = require('react');
 
-var data = require('./data');
+var Reports = require('./reports');
 var ErrorList = require('./component-error-list.jsx');
 var BrowserList = require('./component-browser-list.jsx');
+
+var ws = new SockJS('/ws');
+
+ws.onmessage = function(e) {
+    Reports.update(JSON.parse(e.data));
+};
 
 var extendCtx = function(params) {
     return function(ctx, next) {
@@ -14,33 +20,26 @@ var extendCtx = function(params) {
     };
 };
 
-var load = function(ctx, next) {
-    data.fetch(ctx.type).done(next);
+var fetchReport = function(ctx, next) {
+    Reports.fetch(ctx.report).done(next);
 };
 
 var render = function(selector, component) {
     return function(ctx, next) {
         React.renderComponent(
-            component({data: data.get(ctx.type)}),
+            component({data: Reports.get(ctx.report)}),
             document.querySelector(selector)
         );
         next();
     };
 };
 
-page('/',         extendCtx({type: 'messages'}), load, render('#app', ErrorList));
-page('/browsers', extendCtx({type: 'browsers'}), load, render('#app', BrowserList));
+page('/',         extendCtx({report: 'messages'}), fetchReport, render('#app', ErrorList));
+page('/browsers', extendCtx({report: 'browsers'}), fetchReport, render('#app', BrowserList));
 
 $(page.start);
 
-var ws = new SockJS('/ws');
-
-ws.onmessage = function(e) {
-    data.update(JSON.parse(e.data));
-    // React.renderComponent(ErrorList({data: data.get('messages')}), app);
-};
-
-},{"./component-browser-list.jsx":3,"./component-error-list.jsx":5,"./data":6,"lodash":12,"page":13,"react":148}],2:[function(require,module,exports){
+},{"./component-browser-list.jsx":3,"./component-error-list.jsx":5,"./reports":6,"lodash":12,"page":13,"react":148}],2:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
 module.exports = React.createClass({displayName: 'exports',
@@ -48,7 +47,7 @@ module.exports = React.createClass({displayName: 'exports',
         return React.DOM.div(null, 
             React.DOM.b(null, this.props.name),
             " "+' '+
-            "(",this.props.count,")"
+            "(",this.props.data.count,")"
         );
     }
 });
@@ -64,7 +63,7 @@ module.exports = React.createClass({displayName: 'exports',
             return BrowserItem({
                 key: name,
                 name: name,
-                count: data.count
+                data: data
             });
         });
 
@@ -80,9 +79,9 @@ module.exports = React.createClass({displayName: 'exports',
         return React.DOM.div(null, 
             React.DOM.b(null, this.props.message),
             " "+' '+
-            "(",this.props.count,")"+' '+
+            "(",this.props.data.count,")"+' '+
             " ",
-            this.props.browsers.join(', ')
+            this.props.data.browsers.join(', ')
         );
     }
 });
@@ -98,8 +97,7 @@ module.exports = React.createClass({displayName: 'exports',
             return ErrorItem({
                 key: message,
                 message: message,
-                browsers: data.browsers,
-                count: data.count
+                data: data
             });
         });
 
@@ -108,35 +106,38 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"./component-error-item.jsx":4,"lodash":12,"react":148}],6:[function(require,module,exports){
+var _ = require('lodash');
 var aggregators = require('../common/aggregators');
 
-var _data = {};
+var _reports = {};
 
 module.exports = {
     fetch: function(type) {
-        if (_data[type]) {
-            return $.Deferred().resolve(_data[type]);
+        if (_reports[type]) {
+            var deferred = $.Deferred();
+            _.defer(deferred.resolve, _reports[type]);
+            return deferred.promise();
         }
 
-        return $.getJSON('/data/' + type).done(function(response) {
-            _data[type] = response;
+        return $.getJSON('/reports/' + type).done(function(response) {
+            _reports[type] = response;
         });
     },
     get: function(type) {
-        return _data[type] || null;
+        return _reports[type] || null;
     },
     update: function(item) {
-        for (var type in _data) {
+        for (var type in _reports) {
             var aggregator = aggregators[type];
 
             if (aggregator) {
-                _data[type] = aggregator(_data[type], item);
+                _reports[type] = aggregator(_reports[type], item);
             }
         }
     }
 };
 
-},{"../common/aggregators":10}],7:[function(require,module,exports){
+},{"../common/aggregators":10,"lodash":12}],7:[function(require,module,exports){
 var _ = require('lodash');
 
 var prop = function(name) {
@@ -194,7 +195,6 @@ module.exports = aggregate({
 });
 
 },{"./aggregate":7}],9:[function(require,module,exports){
-var _ = require('lodash');
 var aggregate = require('./aggregate');
 
 module.exports = aggregate({
@@ -206,13 +206,21 @@ module.exports = aggregate({
     each: function(obj, next) {
         obj.count += 1;
 
-        if (!_.contains(obj.browsers, next.ua.name)) {
+        if (!obj.latest || next.timestamp > obj.latest) {
+            obj.latest = next.timestamp;
+        }
+
+        if (!obj.earliest || next.timestamp < obj.earliest) {
+            obj.earliest = next.timestamp;
+        }
+
+        if (obj.browsers.indexOf(next.ua.name) === -1) {
             obj.browsers.push(next.ua.name);
         }
     }
 });
 
-},{"./aggregate":7,"lodash":12}],10:[function(require,module,exports){
+},{"./aggregate":7}],10:[function(require,module,exports){
 module.exports = {
     messages: require('./aggregator-messages'),
     browsers: require('./aggregator-browsers')

@@ -2,9 +2,15 @@ var _ = require('lodash');
 var page = require('page');
 var React = require('react');
 
-var data = require('./data');
+var Reports = require('./reports');
 var ErrorList = require('./component-error-list.jsx');
 var BrowserList = require('./component-browser-list.jsx');
+
+var ws = new SockJS('/ws');
+
+ws.onmessage = function(e) {
+    Reports.update(JSON.parse(e.data));
+};
 
 var extendCtx = function(params) {
     return function(ctx, next) {
@@ -13,28 +19,21 @@ var extendCtx = function(params) {
     };
 };
 
-var load = function(ctx, next) {
-    data.fetch(ctx.type).done(next);
+var fetchReport = function(ctx, next) {
+    Reports.fetch(ctx.report).done(next);
 };
 
 var render = function(selector, component) {
     return function(ctx, next) {
         React.renderComponent(
-            component({data: data.get(ctx.type)}),
+            component({data: Reports.get(ctx.report)}),
             document.querySelector(selector)
         );
         next();
     };
 };
 
-page('/',         extendCtx({type: 'messages'}), load, render('#app', ErrorList));
-page('/browsers', extendCtx({type: 'browsers'}), load, render('#app', BrowserList));
+page('/',         extendCtx({report: 'messages'}), fetchReport, render('#app', ErrorList));
+page('/browsers', extendCtx({report: 'browsers'}), fetchReport, render('#app', BrowserList));
 
 $(page.start);
-
-var ws = new SockJS('/ws');
-
-ws.onmessage = function(e) {
-    data.update(JSON.parse(e.data));
-    // React.renderComponent(ErrorList({data: data.get('messages')}), app);
-};

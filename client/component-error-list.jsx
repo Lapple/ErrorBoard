@@ -8,8 +8,7 @@ module.exports = React.createClass({
             return ErrorItem({
                 key: message,
                 message: message,
-                browsers: data.browsers,
-                count: data.count
+                data: data
             });
         });
 
