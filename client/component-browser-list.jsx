@@ -4,7 +4,7 @@ var BrowserItem = require('./component-browser-item.jsx');
 
 module.exports = React.createClass({
     render: function() {
-        var items = _.map(this.props.data, function(data, name) {
+        var items = _.map(this.props, function(data, name) {
             return BrowserItem({
                 key: name,
                 name: name,

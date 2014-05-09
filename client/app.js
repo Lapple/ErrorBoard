@@ -3,37 +3,39 @@ var page = require('page');
 var React = require('react');
 
 var Reports = require('./reports');
-var ErrorList = require('./component-error-list.jsx');
-var BrowserList = require('./component-browser-list.jsx');
+var Regions = require('./regions');
+
+var ComponentErrorList = require('./component-error-list.jsx');
+var ComponentBrowserList = require('./component-browser-list.jsx');
 
 var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
+    Regions.update();
 };
 
-var extendCtx = function(params) {
+var fetchReport = function(type) {
     return function(ctx, next) {
-        _.extend(ctx, params);
+        Reports.fetch(type).done(next);
+    };
+};
+
+var renderRegion = function(selector, Component, props) {
+    return function(ctx, next) {
+        Regions.render(selector, Component, props);
         next();
     };
 };
 
-var fetchReport = function(ctx, next) {
-    Reports.fetch(ctx.report).done(next);
-};
+page('/',
+    fetchReport('messages'),
+    renderRegion('#app', ComponentErrorList, _.partial(Reports.get, 'messages'))
+);
 
-var render = function(selector, component) {
-    return function(ctx, next) {
-        React.renderComponent(
-            component({data: Reports.get(ctx.report)}),
-            document.querySelector(selector)
-        );
-        next();
-    };
-};
-
-page('/',         extendCtx({report: 'messages'}), fetchReport, render('#app', ErrorList));
-page('/browsers', extendCtx({report: 'browsers'}), fetchReport, render('#app', BrowserList));
+page('/browsers',
+    fetchReport('browsers'),
+    renderRegion('#app', ComponentBrowserList, _.partial(Reports.get, 'browsers'))
+);
 
 $(page.start);
