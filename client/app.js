@@ -27,6 +27,7 @@ var renderRegion = function(selector, Component, props) {
     return function(ctx, next) {
         var p = _.isFunction(props) ? props(ctx) : props;
         Regions.render(selector, Component, p);
+        ctx.regions.push(selector);
         next();
     };
 };
@@ -37,9 +38,18 @@ var redirectTo = function(url) {
     };
 };
 
-page('/',
-    redirectTo('/messages/')
-);
+var beforeRun = function(ctx, next) {
+    ctx.regions = [];
+    next();
+};
+
+var afterRun = function(ctx) {
+    Regions.cleanup(_.difference(Regions.list(), ctx.regions));
+};
+
+page('/', redirectTo('/messages/'));
+
+page('*', beforeRun);
 
 page('/messages/',
     fetchReport('messages'),
@@ -75,5 +85,7 @@ page('*',
         return { pathname: location.pathname };
     })
 );
+
+page('*', afterRun);
 
 $(page.start);

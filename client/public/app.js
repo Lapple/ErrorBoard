@@ -28,6 +28,7 @@ var renderRegion = function(selector, Component, props) {
     return function(ctx, next) {
         var p = _.isFunction(props) ? props(ctx) : props;
         Regions.render(selector, Component, p);
+        ctx.regions.push(selector);
         next();
     };
 };
@@ -38,9 +39,18 @@ var redirectTo = function(url) {
     };
 };
 
-page('/',
-    redirectTo('/messages/')
-);
+var beforeRun = function(ctx, next) {
+    ctx.regions = [];
+    next();
+};
+
+var afterRun = function(ctx) {
+    Regions.cleanup(_.difference(Regions.list(), ctx.regions));
+};
+
+page('/', redirectTo('/messages/'));
+
+page('*', beforeRun);
 
 page('/messages/',
     fetchReport('messages'),
@@ -76,6 +86,8 @@ page('*',
         return { pathname: location.pathname };
     })
 );
+
+page('*', afterRun);
 
 $(page.start);
 
@@ -179,26 +191,42 @@ var React = require('react');
 
 var _regions = {};
 
+var querySelector = document.querySelector.bind(document);
+
+var normalizeSelectorsArgument = function(selectors) {
+    if (_.isString(selectors)) {
+        return [selectors];
+    } else if (!selectors) {
+        return _.keys(_regions);
+    }
+
+    return selectors;
+};
+
 module.exports = {
     render: function(selector, Component, props) {
         var render = _regions[selector] = _.partial(
             React.renderComponent,
             Component(props),
-            document.querySelector(selector)
+            querySelector(selector)
         );
 
         render();
     },
     update: function(selectors) {
-        if (_.isString(selectors)) {
-            selectors = [selectors];
-        } else if (!selectors) {
-            selectors = _.keys(_regions);
-        }
+        selectors = normalizeSelectorsArgument(selectors);
 
         _.each(selectors, function(selector) {
             _regions[selector]();
         });
+    },
+    cleanup: function(selectors) {
+        selectors = normalizeSelectorsArgument(selectors);
+
+        _.each(selectors, _.compose(React.unmountComponentAtNode, querySelector));
+    },
+    list: function() {
+        return _.keys(_regions);
     }
 };
 
