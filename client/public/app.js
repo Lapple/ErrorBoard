@@ -30,7 +30,17 @@ var renderRegion = function(selector, Component, props) {
     };
 };
 
+var redirectTo = function(url) {
+    return function() {
+        _.defer(page, url);
+    };
+};
+
 page('/',
+    redirectTo('/messages')
+);
+
+page('/messages',
     fetchReport('messages'),
     renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'messages'))
 );
@@ -130,7 +140,7 @@ module.exports = React.createClass({displayName: 'exports',
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
         return React.DOM.ul(null, 
-            React.DOM.li(null,  this.link('/', 'Messages') ),
+            React.DOM.li(null,  this.link('/messages', 'Messages') ),
             React.DOM.li(null,  this.link('/browsers', 'Browsers') ),
             React.DOM.li(null,  this.link('/scripts', 'Scripts') ),
             React.DOM.li(null,  this.link('/pages', 'Pages') )

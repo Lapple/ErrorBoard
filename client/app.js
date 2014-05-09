@@ -29,7 +29,17 @@ var renderRegion = function(selector, Component, props) {
     };
 };
 
+var redirectTo = function(url) {
+    return function() {
+        _.defer(page, url);
+    };
+};
+
 page('/',
+    redirectTo('/messages')
+);
+
+page('/messages',
     fetchReport('messages'),
     renderRegion('#reports', ComponentErrorList, _.partial(Reports.get, 'messages'))
 );

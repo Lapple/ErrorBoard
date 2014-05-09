@@ -3,7 +3,7 @@ var React = require('react');
 module.exports = React.createClass({
     render: function() {
         return <ul>
-            <li>{ this.link('/', 'Messages') }</li>
+            <li>{ this.link('/messages', 'Messages') }</li>
             <li>{ this.link('/browsers', 'Browsers') }</li>
             <li>{ this.link('/scripts', 'Scripts') }</li>
             <li>{ this.link('/pages', 'Pages') }</li>
