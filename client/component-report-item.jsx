@@ -3,28 +3,19 @@ var React = require('react');
 var slug = require('speakingurl');
 
 var Timespan = require('./component-timespan.jsx');
+var Browsers = require('./component-browsers.jsx');
 
 module.exports = React.createClass({
     render: function() {
-        var title;
         var data = this.props.data;
         var overall = this.props.overall;
 
-        var href = '/' + this.props.type + '/' + slug(data.key) + '/';
-
-        if (this.props.type === 'browser') {
-            title = data.key;
-        } else {
-            title = <a href={ href } className='report__link'>
-                { data.key }
-            </a>
-        }
-
-        // { _.isEmpty(browsers) ? '' : this.td(browsers.join(', ')) }
-
         return <tr className='report__row'>
-            <td className='report__cell'>
-                { title }
+            <td className='report__cell report__cell_cut'>
+                { data.browsers ? <Browsers list={data.browsers} align='right' /> : null }
+                <div className='report__cut'>
+                    { this.renderTitle() }
+                </div>
             </td>
             <td className='report__cell report__cell_count'>
                 { data.count }
@@ -33,5 +24,16 @@ module.exports = React.createClass({
                 <Timespan min={overall.earliest} max={overall.latest} start={data.earliest} finish={data.latest} />
             </td>
         </tr>;
+    },
+    renderTitle: function() {
+        var href = '/' + this.props.type + '/' + slug(this.props.data.key) + '/';
+
+        if (this.props.type === 'browser') {
+            return this.props.data.key;
+        } else {
+            return <a href={ href } className='report__link'>
+                { this.props.data.key }
+            </a>
+        }
     }
 });

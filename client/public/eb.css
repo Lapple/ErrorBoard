@@ -59,9 +59,12 @@ html, body, .container, .menu, .content {
 
 .report__cell {
     padding: 3px 10px;
+    vertical-align: top;
+}
+
+.report__cut {
     overflow: hidden;
 
-    vertical-align: top;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -114,4 +117,47 @@ html, body, .container, .menu, .content {
 
 .timespan__point_end {
     margin-right: -3px;
+}
+
+.browsers {
+    display: inline-block;
+}
+
+.browsers_right {
+    display: inline;
+    float: right;
+}
+
+.browsers__item {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: -0.2em 2px 0;
+
+    vertical-align: middle;
+    background: url('/static/browser-unknown.png') 50% 50% no-repeat;
+}
+
+.browsers__item_ie, .browsers__item_ie-mobile {
+    background-image: url('/static/browser-ie.png');
+}
+
+.browsers__item_android-browser {
+    background-image: url('/static/browser-android.png');
+}
+
+.browsers__item_chrome {
+    background-image: url('/static/browser-chrome.png');
+}
+
+.browsers__item_firefox {
+    background-image: url('/static/browser-firefox.png');
+}
+
+.browsers__item_opera {
+    background-image: url('/static/browser-opera.png');
+}
+
+.browsers__item_safari {
+    background-image: url('/static/browser-safari.png');
 }
