@@ -12,7 +12,9 @@ module.exports = React.createClass({
         });
 
         var browsers = _.map(this.props.list, function(browser) {
-            return <div className={ 'browsers__item browsers__item_' + slug(browser) } title={ browser } key={ browser } />;
+            if (browser) {
+                return <div className={ 'browsers__item browsers__item_' + slug(browser) } title={ browser } key={ browser } />;
+            }
         });
 
         return <div className={ classes }>{ browsers }</div>;

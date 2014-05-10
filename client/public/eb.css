@@ -69,6 +69,10 @@ html, body, .container, .menu, .content {
     text-overflow: ellipsis;
 }
 
+.report__mono {
+    font: 13px/22px Consolas, Menlo, monospace;
+}
+
 .report__cell_count {
     width: 70px;
     text-align: right;
@@ -128,7 +132,11 @@ html, body, .container, .menu, .content {
     display: inline;
     float: right;
     margin-right: 0;
-    margin-left: 6px;
+    margin-left: 20px;
+}
+
+.browsers:empty {
+    margin: 0;
 }
 
 .browsers__item {

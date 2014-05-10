@@ -103,7 +103,9 @@ module.exports = React.createClass({displayName: 'exports',
         });
 
         var browsers = _.map(this.props.list, function(browser) {
-            return React.DOM.div( {className: 'browsers__item browsers__item_' + slug(browser),  title: browser,  key: browser } );
+            if (browser) {
+                return React.DOM.div( {className: 'browsers__item browsers__item_' + slug(browser),  title: browser,  key: browser } );
+            }
         });
 
         return React.DOM.div( {className: classes },  browsers );
@@ -140,6 +142,7 @@ module.exports = React.createClass({displayName: 'exports',
 var React = require('react');
 var slug = require('speakingurl');
 
+var cx = React.addons.classSet;
 var Timespan = require('./component-timespan.jsx');
 var Browsers = require('./component-browsers.jsx');
 
@@ -148,10 +151,15 @@ module.exports = React.createClass({displayName: 'exports',
         var data = this.props.data;
         var overall = this.props.overall;
 
+        var titleClasses = cx({
+            'report__cut': true,
+            'report__mono': _.contains(['messages', 'scripts'], this.props.type)
+        });
+
         return React.DOM.tr( {className:"report__row"}, 
             React.DOM.td( {className:"report__cell report__cell_cut"}, 
                  data.browsers ? Browsers( {list: data.browsers,  align:"right"} ) : null, 
-                React.DOM.div( {className:"report__cut"}, 
+                React.DOM.div( {className: titleClasses }, 
                      this.props.type === 'browsers' ? Browsers( {list: [data.key.split(' ').slice(0, -1).join(' ')] } ) : null, 
                      this.renderTitle() 
                 )
@@ -170,7 +178,7 @@ module.exports = React.createClass({displayName: 'exports',
         if (this.props.type === 'browser') {
             return this.props.data.key;
         } else {
-            return React.DOM.a( {href: href,  className:"report__link"}, 
+            return React.DOM.a( {href: href,  title: this.props.data.key,  className:"report__link"}, 
                  this.props.data.key 
             )
         }
@@ -418,12 +426,13 @@ var slug = require('speakingurl');
 
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
+var getBrowserName = require('./browser-name');
 
 module.exports = function(params) {
     return aggregate({
         groupBy: 'message',
         filter: function(item) {
-            return slug(item.ua.family) === params.id;
+            return slug(getBrowserName(item)) === params.id;
         },
         create: {
             count: 0
@@ -435,7 +444,7 @@ module.exports = function(params) {
     });
 };
 
-},{"./aggregate":9,"./reduce-timestamps":21,"speakingurl":174}],11:[function(require,module,exports){
+},{"./aggregate":9,"./browser-name":19,"./reduce-timestamps":21,"speakingurl":174}],11:[function(require,module,exports){
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var getBrowserName = require('./browser-name');
