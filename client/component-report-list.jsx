@@ -34,7 +34,8 @@ module.exports = React.createClass({
                 timespan: true,
                 overall: overall,
                 onClick: function() {
-                    page('/' + that.props.type + '/' + slug(data.key) + '/');
+                    var url = '/' + that.props.type + '/' + slug(data.key) + '/';
+                    page.show(url, {details: data.key});
                 },
             });
         });

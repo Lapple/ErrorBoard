@@ -10,6 +10,7 @@ html, body, .container, .menu, .content {
 
 .container {
     font: 16px/1.5 "Source Sans Pro", sans-serif;
+    color: rgb(66, 74, 78);
 }
 
 .menu {
@@ -60,12 +61,10 @@ html, body, .container, .menu, .content {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
-
-    color: rgb(48, 52, 54);
 }
 
 .report__table_details {
-    width: 400px;
+    width: 500px;
 }
 
 .report__row {
@@ -280,16 +279,43 @@ html, body, .container, .menu, .content {
     top: 0;
     bottom: 0;
     right: 0;
+
+    width: 500px;
     padding: 20px;
 
     visibility: visible;
-    background: rgba(244, 248, 252, 0.97);
-    transform: translateX(460px);
-    -webkit-transform: translateX(460px);
+    background: rgba(244, 248, 252, 0.95);
+    box-shadow: -1px 0 rgba(0, 10, 20, 0.05);
+
+    transform: translateX(540px);
+    -webkit-transform: translateX(540px);
     transition: 0.25s;
 }
 
 .curtain_visible {
     transform: translateX(0);
     -webkit-transform: translateX(0);
+}
+
+.curtain__close {
+    float: right;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    margin: 3px 0 10px 10px;
+
+    cursor: pointer;
+}
+
+.curtain__title {
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    font-size: 18px;
+    line-height: 1.3;
+    color: rgb(10, 10, 10);
+}
+
+.curtain__title_muted {
+    color: rgb(160, 170, 175);
 }

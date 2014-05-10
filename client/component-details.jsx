@@ -27,13 +27,27 @@ module.exports = React.createClass({
         });
 
         return <div className={ classes }>
-            <span onClick={ this.props.onClose }>
-                Close
-            </span>
+            <div onClick={ this.props.onClose } className='curtain__close'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'>
+                    <path fill='#777' d='M15 1.7l-.7-.7-6.3 6.299-6.3-6.299-.7.7 6.3 6.3-6.3 6.299.7.701 6.3-6.3 6.3 6.3.7-.701-6.3-6.299 6.3-6.3z'/>
+                </svg>
+            </div>
+            { this.title() }
             <table className="report__table report__table_details">
                 <tbody>{ items }</tbody>
             </table>
         </div>;
+    },
+    title: function() {
+        if (this.props.title) {
+            return <div className='curtain__title'>
+                { this.props.title }
+            </div>;
+        } else {
+            return <div className='curtain__title curtain__title_muted'>
+                No title
+            </div>;
+        }
     },
     show: function() {
         this.setState({visible: true});

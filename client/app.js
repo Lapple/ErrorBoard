@@ -26,9 +26,7 @@ var renderRegion = function(selector, Component, props) {
 };
 
 var redirectTo = function(url) {
-    return function() {
-        _.defer(page, url);
-    };
+    return _.defer.bind(_, page, url);
 };
 
 var beforeRun = function(ctx, next) {
@@ -78,10 +76,11 @@ page('/:type/:id/',
         }
 
         return {
+            title: ctx.state.details || null,
             data: Reports.get(type, {id: ctx.params.id}),
             type: displayType,
             onClose: function() {
-                page('/' + ctx.params.type + '/');
+                page.show('/' + ctx.params.type + '/');
             }
         };
     })

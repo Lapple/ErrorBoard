@@ -27,9 +27,7 @@ var renderRegion = function(selector, Component, props) {
 };
 
 var redirectTo = function(url) {
-    return function() {
-        _.defer(page, url);
-    };
+    return _.defer.bind(_, page, url);
 };
 
 var beforeRun = function(ctx, next) {
@@ -79,10 +77,11 @@ page('/:type/:id/',
         }
 
         return {
+            title: ctx.state.details || null,
             data: Reports.get(type, {id: ctx.params.id}),
             type: displayType,
             onClose: function() {
-                page('/' + ctx.params.type + '/');
+                page.show('/' + ctx.params.type + '/');
             }
         };
     })
@@ -146,13 +145,27 @@ module.exports = React.createClass({displayName: 'exports',
         });
 
         return React.DOM.div( {className: classes }, 
-            React.DOM.span( {onClick: this.props.onClose }, 
-                "Close"
+            React.DOM.div( {onClick: this.props.onClose,  className:"curtain__close"}, 
+                React.DOM.svg( {xmlns:"http://www.w3.org/2000/svg", width:"16", height:"16", viewBox:"0 0 16 16"}, 
+                    React.DOM.path( {fill:"#777", d:"M15 1.7l-.7-.7-6.3 6.299-6.3-6.299-.7.7 6.3 6.3-6.3 6.299.7.701 6.3-6.3 6.3 6.3.7-.701-6.3-6.299 6.3-6.3z"})
+                )
             ),
+             this.title(), 
             React.DOM.table( {className:"report__table report__table_details"}, 
                 React.DOM.tbody(null,  items )
             )
         );
+    },
+    title: function() {
+        if (this.props.title) {
+            return React.DOM.div( {className:"curtain__title"}, 
+                 this.props.title 
+            );
+        } else {
+            return React.DOM.div( {className:"curtain__title curtain__title_muted"}, 
+                "No title"
+            );
+        }
     },
     show: function() {
         this.setState({visible: true});
@@ -215,7 +228,7 @@ module.exports = React.createClass({displayName: 'exports',
         return React.DOM.tr( {className: rowClasses,  onClick: this.props.onClick }, 
             React.DOM.td( {className:"report__cell report__cell_cut"}, 
                  data.browsers ? Browsers( {list: data.browsers,  align:"right"} ) : null, 
-                React.DOM.div( {className: titleClasses }, 
+                React.DOM.div( {className: titleClasses,  title: data.key }, 
                      isBrowserType ? Browsers( {list: [data.key.split(' ').slice(0, -1).join(' ')] } ) : null, 
                      data.key 
                 )
@@ -270,7 +283,8 @@ module.exports = React.createClass({displayName: 'exports',
                 timespan: true,
                 overall: overall,
                 onClick: function() {
-                    page('/' + that.props.type + '/' + slug(data.key) + '/');
+                    var url = '/' + that.props.type + '/' + slug(data.key) + '/';
+                    page.show(url, {details: data.key});
                 },
             });
         });
