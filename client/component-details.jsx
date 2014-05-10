@@ -40,7 +40,7 @@ module.exports = React.createClass({
     },
     title: function() {
         if (this.props.title) {
-            return <div className='curtain__title'>
+            return <div className='title'>
                 { this.props.title }
             </div>;
         } else {

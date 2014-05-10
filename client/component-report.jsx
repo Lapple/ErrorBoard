@@ -7,13 +7,8 @@ var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
 var getOverallStats = function(obj, next) {
-    if (!obj.latest || next.latest > obj.latest) {
-        obj.latest = next.latest;
-    }
-
-    if (!obj.earliest || next.earliest < obj.earliest) {
-        obj.earliest = next.earliest;
-    }
+    obj.latest = _.max([obj.latest, next.latest]);
+    obj.earliest = _.min([obj.earliest, next.earliest]);
 
     return obj;
 };
@@ -51,7 +46,7 @@ module.exports = React.createClass({
     },
     empty: function() {
         return <tr>
-            <td colspan='3'>Empty</td>
+            <td colSpan='3'>Empty</td>
         </tr>;
     },
     thead: function() {

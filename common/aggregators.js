@@ -5,6 +5,7 @@ module.exports = {
     browser: require('./aggregator-browser'),
     scripts: require('./aggregator-scripts'),
     script: require('./aggregator-script'),
+    hourly: require('./aggregator-hourly'),
     pages: require('./aggregator-pages'),
     page: require('./aggregator-page')
 };

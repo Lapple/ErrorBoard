@@ -6,14 +6,15 @@ var Reports = require('./reports');
 var Regions = require('./regions');
 
 var ComponentNav = require('./component-nav.jsx');
-var ComponentReportList = require('./component-report-list.jsx');
+var ComponentReport = require('./component-report.jsx');
 var ComponentDetails = require('./component-details.jsx');
+var ComponentGraph = require('./component-graph.jsx');
 
 var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
-    Regions.update(['#reports', '#details']);
+    Regions.update(['#reports', '#details', '#graph']);
 };
 
 var renderRegion = function(selector, Component, props) {
@@ -51,7 +52,7 @@ page('/:type/*',
     function(ctx, next) {
         Reports.fetch(ctx.params.type).always(next);
     },
-    renderRegion('#reports', ComponentReportList, function(ctx) {
+    renderRegion('#reports', ComponentReport, function(ctx) {
         return {
             data: Reports.get(ctx.params.type),
             type: ctx.params.type
@@ -86,6 +87,17 @@ page('/:type/:id/',
     })
 );
 
-page('*', afterRun);
+page('*',
+    function(ctx, next) {
+        Reports.fetch('hourly').always(next);
+    },
+    renderRegion('#graph', ComponentGraph, function() {
+        return {
+            data: Reports.get('hourly'),
+            height: 250
+        };
+    }),
+    afterRun
+);
 
 $(page.start);

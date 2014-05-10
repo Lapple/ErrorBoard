@@ -29,13 +29,13 @@ module.exports = React.createClass({
             <div className='timespan__point timespan__point_start' style={_.pick(position, 'left')}>
                 <div className='timespan__tooltip'>
                     <div className='timespan__caption'>Earliest report</div>
-                    { moment(this.props.start).format('DD.MM.YYYY HH:mm') }
+                    { moment(this.props.start).format('MMMM Do YYYY, HH:mm') }
                 </div>
             </div>
             <div className='timespan__point timespan__point_end' style={_.pick(position, 'right')}>
                 <div className='timespan__tooltip'>
                     <div className='timespan__caption'>Latest report</div>
-                    { moment(this.props.end).format('DD.MM.YYYY HH:mm') }
+                    { moment(this.props.end).format('MMMM Do YYYY, HH:mm') }
                 </div>
             </div>
         </div>
