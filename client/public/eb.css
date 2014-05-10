@@ -37,8 +37,19 @@ html, body, .container, .menu, .content {
 }
 
 .content {
+    position: relative;
     overflow: hidden;
     background: rgb(236, 242, 246);
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    visibility: hidden;
 }
 
 .report {
@@ -51,6 +62,10 @@ html, body, .container, .menu, .content {
     border-collapse: collapse;
 
     color: rgb(48, 52, 54);
+}
+
+.report__table_details {
+    width: 400px;
 }
 
 .report__row {
@@ -175,4 +190,23 @@ html, body, .container, .menu, .content {
 
 .browsers__item_mobile-safari {
     background-image: url('/static/browser-ipad.png');
+}
+
+.curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding: 20px;
+
+    visibility: visible;
+    background: rgba(244, 248, 252, 0.97);
+    transform: translateX(460px);
+    -webkit-transform: translateX(460px);
+    transition: 0.25s;
+}
+
+.curtain_visible {
+    transform: translateX(0);
+    -webkit-transform: translateX(0);
 }

@@ -16,20 +16,25 @@ module.exports = React.createClass({
             'report__mono': _.contains(['messages', 'scripts'], this.props.type)
         });
 
+        var isBrowserType = _.contains(['browsers', 'browser'], this.props.type);
+
         return <tr className='report__row'>
             <td className='report__cell report__cell_cut'>
                 { data.browsers ? <Browsers list={ data.browsers } align='right' /> : null }
                 <div className={ titleClasses }>
-                    { this.props.type === 'browsers' ? <Browsers list={ [data.key.split(' ').slice(0, -1).join(' ')] } /> : null }
+                    { isBrowserType ? <Browsers list={ [data.key.split(' ').slice(0, -1).join(' ')] } /> : null }
                     { this.renderTitle() }
                 </div>
             </td>
             <td className='report__cell report__cell_count'>
                 { data.count }
             </td>
-            <td className='report__cell report__cell_timespan'>
-                <Timespan min={ overall.earliest } max={ overall.latest } start={ data.earliest } finish={ data.latest } />
-            </td>
+            {
+                this.props.timespan ?
+                    <td className='report__cell report__cell_timespan'>
+                        <Timespan min={ overall.earliest } max={ overall.latest } start={ data.earliest } finish={ data.latest } />
+                    </td> : null
+            }
         </tr>;
     },
     renderTitle: function() {

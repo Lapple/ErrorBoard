@@ -7,6 +7,7 @@ var Regions = require('./regions');
 
 var ComponentNav = require('./component-nav.jsx');
 var ComponentReportList = require('./component-report-list.jsx');
+var ComponentDetails = require('./component-details.jsx');
 
 var ws = new SockJS('/ws');
 
@@ -68,7 +69,7 @@ page('/:type/:id/',
     function(ctx, next) {
         Reports.fetch(ctx.params.detailsType, {id: ctx.params.id}).always(next);
     },
-    renderRegion('#details', ComponentReportList, function(ctx) {
+    renderRegion('#details', ComponentDetails, function(ctx) {
         var type = ctx.params.detailsType;
         var displayType = 'messages';
 
@@ -78,7 +79,10 @@ page('/:type/:id/',
 
         return {
             data: Reports.get(type, {id: ctx.params.id}),
-            type: displayType
+            type: displayType,
+            onClose: function() {
+                page('/' + ctx.params.type + '/');
+            }
         };
     })
 );
