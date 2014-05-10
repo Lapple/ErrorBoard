@@ -16,12 +16,12 @@
   "dependencies": {
     "nedb": "^0.10.5",
     "express": "^4.1.1",
-    "platform": "^1.0.0",
     "moment": "^2.6.0",
     "envify": "^1.2.1",
     "lodash": "^2.4.1",
     "sockjs": "^0.3.8",
-    "speakingurl": "^0.9.1"
+    "speakingurl": "^0.9.1",
+    "useragent": "^2.0.8"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",

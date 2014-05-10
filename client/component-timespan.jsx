@@ -7,9 +7,16 @@ var percent = function(value) {
 
 module.exports = React.createClass({
     render: function() {
+        var start, finish;
         var timespan = this.props.max - this.props.min;
-        var start = (this.props.start - this.props.min) / timespan;
-        var finish = (this.props.finish - this.props.min) / timespan;
+
+        if (timespan > 0) {
+            start = (this.props.start - this.props.min) / timespan;
+            finish = (this.props.finish - this.props.min) / timespan;
+        } else {
+            start = 0;
+            finish = 1;
+        }
 
         var position = {
             left: percent(start) + '%',

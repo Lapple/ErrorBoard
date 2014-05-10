@@ -121,11 +121,14 @@ html, body, .container, .menu, .content {
 
 .browsers {
     display: inline-block;
+    margin-right: 6px;
 }
 
 .browsers_right {
     display: inline;
     float: right;
+    margin-right: 0;
+    margin-left: 6px;
 }
 
 .browsers__item {
@@ -142,7 +145,7 @@ html, body, .container, .menu, .content {
     background-image: url('/static/browser-ie.png');
 }
 
-.browsers__item_android-browser {
+.browsers__item_android {
     background-image: url('/static/browser-android.png');
 }
 
@@ -160,4 +163,8 @@ html, body, .container, .menu, .content {
 
 .browsers__item_safari {
     background-image: url('/static/browser-safari.png');
+}
+
+.browsers__item_mobile-safari {
+    background-image: url('/static/browser-ipad.png');
 }

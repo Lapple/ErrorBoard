@@ -7,7 +7,7 @@ module.exports = function(params) {
     return aggregate({
         groupBy: 'message',
         filter: function(item) {
-            return slug(item.ua.name) === params.id;
+            return slug(item.ua.family) === params.id;
         },
         create: {
             count: 0

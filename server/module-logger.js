@@ -1,5 +1,5 @@
 var express = require('express');
-var platform = require('platform');
+var useragent = require('useragent');
 var moment = require('moment');
 
 var config = require('../package.json').config;
@@ -14,7 +14,7 @@ app.use(function(req, res) {
         return res.end(400);
     }
 
-    var ua = platform.parse(req.headers['user-agent']);
+    var ua = useragent.parse(req.headers['user-agent']).toJSON();
     var referer = req.headers.referer;
     var timestamp = Date.now();
     var date = moment(timestamp).format('DD-MM-YYYY');

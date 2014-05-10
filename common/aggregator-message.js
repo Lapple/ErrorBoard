@@ -2,12 +2,11 @@ var slug = require('speakingurl');
 
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
+var getBrowserName = require('./browser-name');
 
 module.exports = function(params) {
     return aggregate({
-        groupBy: function(item) {
-            return item.ua.name + ' ' + item.ua.version;
-        },
+        groupBy: getBrowserName,
         filter: function(item) {
             return slug(item.message) === params.id;
         },

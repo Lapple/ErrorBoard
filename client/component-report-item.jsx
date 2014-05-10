@@ -12,8 +12,9 @@ module.exports = React.createClass({
 
         return <tr className='report__row'>
             <td className='report__cell report__cell_cut'>
-                { data.browsers ? <Browsers list={data.browsers} align='right' /> : null }
+                { data.browsers ? <Browsers list={ data.browsers } align='right' /> : null }
                 <div className='report__cut'>
+                    { this.props.type === 'browsers' ? <Browsers list={ [data.key.split(' ').slice(0, -1).join(' ')] } /> : null }
                     { this.renderTitle() }
                 </div>
             </td>
@@ -21,7 +22,7 @@ module.exports = React.createClass({
                 { data.count }
             </td>
             <td className='report__cell report__cell_timespan'>
-                <Timespan min={overall.earliest} max={overall.latest} start={data.earliest} finish={data.latest} />
+                <Timespan min={ overall.earliest } max={ overall.latest } start={ data.earliest } finish={ data.latest } />
             </td>
         </tr>;
     },

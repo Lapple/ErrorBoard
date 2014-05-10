@@ -1,11 +1,10 @@
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
+var getBrowserName = require('./browser-name');
 
 module.exports = function() {
     return aggregate({
-        groupBy: function(item) {
-            return item.ua.name;
-        },
+        groupBy: getBrowserName,
         create: {
             count: 0
         },
