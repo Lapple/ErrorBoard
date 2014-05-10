@@ -5,14 +5,14 @@ var _regions = {};
 
 var querySelector = document.querySelector.bind(document);
 
-var normalizeSelectorsArgument = function(selectors) {
+var normalizeInput = function(fn, selectors) {
     if (_.isString(selectors)) {
-        return [selectors];
+        selectors = [selectors];
     } else if (!selectors) {
-        return _.keys(_regions);
+        selectors = _.keys(_regions);
     }
 
-    return selectors;
+    return fn(selectors);
 };
 
 module.exports = {
@@ -25,23 +25,19 @@ module.exports = {
 
         render();
     },
-    update: function(selectors) {
-        selectors = normalizeSelectorsArgument(selectors);
-
+    update: _.wrap(function(selectors) {
         _.each(selectors, function(selector) {
             if (_regions[selector]) {
                 _regions[selector]();
             }
         });
-    },
-    cleanup: function(selectors) {
-        selectors = normalizeSelectorsArgument(selectors);
-
+    }, normalizeInput),
+    cleanup: _.wrap(function(selectors) {
         _.each(selectors, function(selector) {
             React.unmountComponentAtNode(querySelector(selector));
             delete _regions[selector];
         });
-    },
+    }, normalizeInput),
     list: function() {
         return _.keys(_regions);
     }

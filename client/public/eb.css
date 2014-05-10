@@ -58,7 +58,7 @@ html, body, .container, .menu, .content {
 }
 
 .report__cell {
-    padding: 3px 6px;
+    padding: 3px 10px;
     overflow: hidden;
 
     vertical-align: top;
@@ -68,7 +68,11 @@ html, body, .container, .menu, .content {
 
 .report__cell_count {
     width: 70px;
-    text-align: center;
+    text-align: right;
+}
+
+.report__cell_timespan {
+    width: 200px;
 }
 
 .report__link {
@@ -78,4 +82,36 @@ html, body, .container, .menu, .content {
 
 .report__link:hover {
     color: rgb(21, 135, 199);
+}
+
+.timespan {
+    position: relative;
+    height: 22px;
+}
+
+.timespan__bar {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+
+    background: rgb(186, 202, 214);
+}
+
+.timespan__point {
+    position: absolute;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-top: -3px;
+
+    border-radius: 50%;
+    background: rgb(174, 192, 206);
+}
+
+.timespan__point_start {
+    margin-left: -3px;
+}
+
+.timespan__point_end {
+    margin-right: -3px;
 }
