@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var React = require('react');
+var moment = require('moment');
 
 var percent = function(value) {
     return Math.floor(value * 100);
@@ -25,8 +26,18 @@ module.exports = React.createClass({
 
         return <div className='timespan'>
             <div className='timespan__bar' style={position} />
-            <div className='timespan__point timespan__point_start' style={_.pick(position, 'left')} />
-            <div className='timespan__point timespan__point_end' style={_.pick(position, 'right')} />
+            <div className='timespan__point timespan__point_start' style={_.pick(position, 'left')}>
+                <div className='timespan__tooltip'>
+                    <div className='timespan__caption'>Earliest report</div>
+                    { moment(this.props.start).format('DD.MM.YYYY HH:mm') }
+                </div>
+            </div>
+            <div className='timespan__point timespan__point_end' style={_.pick(position, 'right')}>
+                <div className='timespan__tooltip'>
+                    <div className='timespan__caption'>Latest report</div>
+                    { moment(this.props.end).format('DD.MM.YYYY HH:mm') }
+                </div>
+            </div>
         </div>
     }
 });

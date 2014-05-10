@@ -9,7 +9,7 @@ html, body, .container, .menu, .content {
 }
 
 .container {
-    font: 15px/1.5 sans-serif;
+    font: 16px/1.5 "Source Sans Pro", sans-serif;
 }
 
 .menu {
@@ -72,9 +72,26 @@ html, body, .container, .menu, .content {
     border-bottom: 1px solid rgb(217, 229, 236);
 }
 
+.report__row_head {
+    border-bottom-color: rgb(203, 218, 226);
+}
+
 .report__cell {
-    padding: 3px 10px;
+    padding: 5px 10px;
+
+    font-weight: 400;
     vertical-align: top;
+    text-align: left;
+}
+
+.report__cell_head {
+    padding-top: 8px;
+    padding-bottom: 10px;
+
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: rgb(153, 167, 177);
 }
 
 .report__cut {
@@ -85,7 +102,7 @@ html, body, .container, .menu, .content {
 }
 
 .report__mono {
-    font: 13px/22px Consolas, Menlo, monospace;
+    font: 13px/24px Consolas, Menlo, monospace;
 }
 
 .report__cell_count {
@@ -108,13 +125,13 @@ html, body, .container, .menu, .content {
 
 .timespan {
     position: relative;
-    height: 22px;
+    height: 24px;
 }
 
 .timespan__bar {
     position: absolute;
-    top: 8px;
-    bottom: 8px;
+    top: 9px;
+    bottom: 9px;
 
     background: rgb(186, 202, 214);
 }
@@ -130,12 +147,74 @@ html, body, .container, .menu, .content {
     background: rgb(174, 192, 206);
 }
 
+.timespan__point:hover {
+    background: rgb(16, 22, 31)
+}
+
+.timespan__point:before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+}
+
 .timespan__point_start {
     margin-left: -3px;
 }
 
 .timespan__point_end {
     margin-right: -3px;
+}
+
+.timespan__tooltip {
+    display: none;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+
+    min-width: 150px;
+    height: 42px;
+    margin-top: -25px;
+    padding: 4px;
+
+    font-size: 14px;
+    text-align: center;
+    color: rgb(220, 220, 220);
+    background: rgba(16, 22, 31, 0.9);
+    border-radius: 3px;
+}
+
+.timespan__tooltip:after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 50%;
+
+    margin-top: -4px;
+
+    border-left: 4px solid rgba(16, 22, 31, 0.9);
+    border-top: 4px solid rgba(16, 22, 31, 0);
+    border-bottom: 4px solid rgba(16, 22, 31, 0);
+}
+
+.timespan__tooltip:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -20px;
+
+    width: 20px;
+}
+
+.timespan__point:hover .timespan__tooltip {
+    display: block;
+}
+
+.timespan__caption {
+    color: rgb(142, 147, 153);
 }
 
 .browsers {

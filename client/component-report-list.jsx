@@ -38,10 +38,30 @@ module.exports = React.createClass({
 
         return <div className="report">
             <table className="report__table">
+                { this.thead() }
                 <tbody>
-                    {_.isEmpty(items) ? empty : items}
+                    { _.isEmpty(items) ? empty : items }
                 </tbody>
             </table>
         </div>;
+    },
+    thead: function() {
+        var title = 'Message';
+
+        if (this.props.type === 'browsers') {
+            title = 'Browser';
+        } else if (this.props.type === 'scripts') {
+            title = 'Script';
+        } else if (this.props.type === 'pages') {
+            title = 'Page URL';
+        }
+
+        return <thead>
+            <tr className='report__row report__row_head'>
+                <th className='report__cell report__cell_head'>{ title }</th>
+                <th className='report__cell report__cell_head report__cell_count'>Count</th>
+                <th className='report__cell report__cell_head report__cell_timespan'>Timespan</th>
+            </tr>
+        </thead>;
     }
 });
