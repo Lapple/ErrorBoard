@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var React = require('react');
-var slug = require('speakingurl');
 
 var cx = React.addons.classSet;
 var Timespan = require('./component-timespan.jsx');
@@ -11,6 +10,11 @@ module.exports = React.createClass({
         var data = this.props.data;
         var overall = this.props.overall;
 
+        var rowClasses = cx({
+            'report__row': true,
+            'report__row_clickable': _.isFunction(this.props.onClick),
+        });
+
         var titleClasses = cx({
             'report__cut': true,
             'report__mono': _.contains(['messages', 'scripts'], this.props.type)
@@ -18,12 +22,12 @@ module.exports = React.createClass({
 
         var isBrowserType = _.contains(['browsers', 'browser'], this.props.type);
 
-        return <tr className='report__row'>
+        return <tr className={ rowClasses } onClick={ this.props.onClick }>
             <td className='report__cell report__cell_cut'>
                 { data.browsers ? <Browsers list={ data.browsers } align='right' /> : null }
                 <div className={ titleClasses }>
                     { isBrowserType ? <Browsers list={ [data.key.split(' ').slice(0, -1).join(' ')] } /> : null }
-                    { this.renderTitle() }
+                    { data.key }
                 </div>
             </td>
             <td className='report__cell report__cell_count'>
@@ -36,16 +40,5 @@ module.exports = React.createClass({
                     </td> : null
             }
         </tr>;
-    },
-    renderTitle: function() {
-        var href = '/' + this.props.type + '/' + slug(this.props.data.key) + '/';
-
-        if (this.props.type === 'browser') {
-            return this.props.data.key;
-        } else {
-            return <a href={ href } title={ this.props.data.key } className='report__link'>
-                { this.props.data.key }
-            </a>
-        }
     }
 });

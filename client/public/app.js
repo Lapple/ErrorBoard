@@ -190,7 +190,6 @@ module.exports = React.createClass({displayName: 'exports',
 },{"react":28}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
-var slug = require('speakingurl');
 
 var cx = React.addons.classSet;
 var Timespan = require('./component-timespan.jsx');
@@ -201,6 +200,11 @@ module.exports = React.createClass({displayName: 'exports',
         var data = this.props.data;
         var overall = this.props.overall;
 
+        var rowClasses = cx({
+            'report__row': true,
+            'report__row_clickable': _.isFunction(this.props.onClick),
+        });
+
         var titleClasses = cx({
             'report__cut': true,
             'report__mono': _.contains(['messages', 'scripts'], this.props.type)
@@ -208,12 +212,12 @@ module.exports = React.createClass({displayName: 'exports',
 
         var isBrowserType = _.contains(['browsers', 'browser'], this.props.type);
 
-        return React.DOM.tr( {className:"report__row"}, 
+        return React.DOM.tr( {className: rowClasses,  onClick: this.props.onClick }, 
             React.DOM.td( {className:"report__cell report__cell_cut"}, 
                  data.browsers ? Browsers( {list: data.browsers,  align:"right"} ) : null, 
                 React.DOM.div( {className: titleClasses }, 
                      isBrowserType ? Browsers( {list: [data.key.split(' ').slice(0, -1).join(' ')] } ) : null, 
-                     this.renderTitle() 
+                     data.key 
                 )
             ),
             React.DOM.td( {className:"report__cell report__cell_count"}, 
@@ -226,22 +230,13 @@ module.exports = React.createClass({displayName: 'exports',
                     ) : null
             
         );
-    },
-    renderTitle: function() {
-        var href = '/' + this.props.type + '/' + slug(this.props.data.key) + '/';
-
-        if (this.props.type === 'browser') {
-            return this.props.data.key;
-        } else {
-            return React.DOM.a( {href: href,  title: this.props.data.key,  className:"report__link"}, 
-                 this.props.data.key 
-            )
-        }
     }
 });
 
-},{"./component-browsers.jsx":2,"./component-timespan.jsx":7,"lodash":25,"react":28,"speakingurl":177}],6:[function(require,module,exports){
+},{"./component-browsers.jsx":2,"./component-timespan.jsx":7,"lodash":25,"react":28}],6:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
+var slug = require('speakingurl');
+var page = require('page');
 var React = require('react');
 
 var ReportItem = require('./component-report-item.jsx');
@@ -262,30 +257,36 @@ var getOverallStats = function(obj, next) {
 module.exports = React.createClass({displayName: 'exports',
     mixins: [ReporterMixin],
     render: function() {
+        var that = this;
+
         var report = this.getReport();
         var overall = _.reduce(report, getOverallStats, {});
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
-                type: this.props.type,
+                type: that.props.type,
                 data: data,
                 timespan: true,
-                overall: overall
+                overall: overall,
+                onClick: function() {
+                    page('/' + that.props.type + '/' + slug(data.key) + '/');
+                },
             });
-        }, this);
-
-        var empty = React.DOM.tr(null, 
-            React.DOM.td(null, "Empty")
-        );
+        });
 
         return React.DOM.div( {className:"report"}, 
             React.DOM.table( {className:"report__table"}, 
                  this.thead(), 
                 React.DOM.tbody(null, 
-                     _.isEmpty(items) ? empty : items 
+                     _.isEmpty(items) ? this.empty() : items 
                 )
             )
+        );
+    },
+    empty: function() {
+        return React.DOM.tr(null, 
+            React.DOM.td( {colspan:"3"}, "Empty")
         );
     },
     thead: function() {
@@ -309,7 +310,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-report-item.jsx":5,"./mixin-reporter":8,"lodash":25,"react":28}],7:[function(require,module,exports){
+},{"./component-report-item.jsx":5,"./mixin-reporter":8,"lodash":25,"page":27,"react":28,"speakingurl":177}],7:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');

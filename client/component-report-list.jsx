@@ -1,4 +1,6 @@
 var _ = require('lodash');
+var slug = require('speakingurl');
+var page = require('page');
 var React = require('react');
 
 var ReportItem = require('./component-report-item.jsx');
@@ -19,31 +21,37 @@ var getOverallStats = function(obj, next) {
 module.exports = React.createClass({
     mixins: [ReporterMixin],
     render: function() {
+        var that = this;
+
         var report = this.getReport();
         var overall = _.reduce(report, getOverallStats, {});
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
-                type: this.props.type,
+                type: that.props.type,
                 data: data,
                 timespan: true,
-                overall: overall
+                overall: overall,
+                onClick: function() {
+                    page('/' + that.props.type + '/' + slug(data.key) + '/');
+                },
             });
-        }, this);
-
-        var empty = <tr>
-            <td>Empty</td>
-        </tr>;
+        });
 
         return <div className="report">
             <table className="report__table">
                 { this.thead() }
                 <tbody>
-                    { _.isEmpty(items) ? empty : items }
+                    { _.isEmpty(items) ? this.empty() : items }
                 </tbody>
             </table>
         </div>;
+    },
+    empty: function() {
+        return <tr>
+            <td colspan='3'>Empty</td>
+        </tr>;
     },
     thead: function() {
         var title = 'Message';

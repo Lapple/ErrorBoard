@@ -38,12 +38,12 @@ html, body, .container, .menu, .content {
 
 .content {
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
     background: rgb(236, 242, 246);
 }
 
 .screen {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -53,7 +53,7 @@ html, body, .container, .menu, .content {
 }
 
 .report {
-    margin: 30px;
+    margin: 28px 35px;
 }
 
 .report__table {
@@ -76,12 +76,25 @@ html, body, .container, .menu, .content {
     border-bottom-color: rgb(203, 218, 226);
 }
 
+.report__row_clickable:hover {
+    cursor: pointer;
+    color: rgb(0, 109, 170);
+}
+
 .report__cell {
     padding: 5px 10px;
 
     font-weight: 400;
     vertical-align: top;
     text-align: left;
+}
+
+.report__cell:first-child {
+    padding-left: 0
+}
+
+.report__cell:last-child {
+    padding-right: 0
 }
 
 .report__cell_head {
@@ -112,15 +125,6 @@ html, body, .container, .menu, .content {
 
 .report__cell_timespan {
     width: 200px;
-}
-
-.report__link {
-    color: rgb(0, 109, 170);
-    text-decoration: none;
-}
-
-.report__link:hover {
-    color: rgb(21, 135, 199);
 }
 
 .timespan {
