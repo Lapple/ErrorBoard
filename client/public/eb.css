@@ -25,16 +25,26 @@ html, body, .container, .menu, .content {
 
 .nav__link {
     display: block;
-    padding: 5px 20px;
-    min-width: 120px;
+    padding: 4px 18px;
+    min-width: 140px;
 
+    line-height: 24px;
     color: rgb(160, 171, 188);
     text-decoration: none;
 }
 
 .nav__link_active {
-    color: rgb(255, 255, 255);
+    color: rgb(223, 227, 233);
     background: rgb(47, 57, 72);
+}
+
+.nav__icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+
+    vertical-align: top;
 }
 
 .content {
@@ -304,14 +314,14 @@ html, body, .container, .menu, .content {
     background: rgba(244, 248, 252, 0.95);
     box-shadow: -1px 0 rgba(0, 10, 20, 0.05);
 
-    transform: translateX(540px);
     -webkit-transform: translateX(540px);
+    transform: translateX(540px);
     transition: 0.25s;
 }
 
 .curtain_visible {
-    transform: translateX(0);
     -webkit-transform: translateX(0);
+    transform: translateX(0);
 }
 
 .curtain__close {

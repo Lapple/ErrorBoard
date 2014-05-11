@@ -15,7 +15,7 @@ var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
-    Regions.update(['#reports', '#details', '#graph']);
+    Regions.update();
 };
 
 var renderRegion = function(selector, Component, props) {
