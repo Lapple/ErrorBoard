@@ -40,7 +40,7 @@ var afterRun = function(ctx) {
     Regions.cleanup(_.difference(Regions.list(), ctx.regions));
 };
 
-page('/', redirectTo('/messages/'));
+page('/', redirectTo('/dashboard/'));
 
 page('*',
     beforeRun,
@@ -49,10 +49,10 @@ page('*',
     })
 );
 
-page('/graph/',
+page('/dashboard/',
     function(ctx, next) {
         var timespan = {
-            from: moment().startOf('hour').subtract('days', 7).valueOf(),
+            from: moment().startOf('hour').subtract('days', 4).valueOf(),
             to: moment().endOf('hour').valueOf()
         };
 

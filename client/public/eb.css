@@ -15,12 +15,27 @@ html, body, .container, .menu, .content {
 
 .menu {
     float: left;
-    color: rgb(255, 255, 255);
-    background: rgb(53, 64, 80);
+    color: rgb(223, 227, 233);
+    background: rgb(53, 59, 80);
 }
 
-.nav {
-    margin: 10px 0;
+.logo {
+    font: 300 18px/20px "Raleway" sans-serif;
+}
+
+.logo__info {
+    float: right;
+    width: 20px;
+    height: 20px;
+
+    color: rgb(97, 106, 119);
+    box-shadow: 0 0 0 1px rgb(97, 106, 119);
+    border-radius: 50%;
+}
+
+.nav__logo {
+    padding: 18px;
+    margin-bottom: 20px;
 }
 
 .nav__link {
@@ -34,8 +49,9 @@ html, body, .container, .menu, .content {
 }
 
 .nav__link_active {
-    color: rgb(223, 227, 233);
-    background: rgb(47, 57, 72);
+    /*color: rgb(163, 210, 216);*/
+    color: rgb(214, 222, 231);
+    background: rgb(47, 52, 72);
 }
 
 .nav__icon {

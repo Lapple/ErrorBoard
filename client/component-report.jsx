@@ -6,27 +6,32 @@ var React = require('react');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
-var getOverallStats = function(obj, next) {
-    obj.earliest = _.min([obj.earliest, next.earliest]);
+var HOUR = 60 * 60 * 1000;
 
-    return obj;
+var getEarliest = function(memo, item) {
+    return _.min([memo, item.earliest]);
 };
 
 module.exports = React.createClass({
     mixins: [ReporterMixin],
+    getInitialState: function() {
+        return {now: Date.now()};
+    },
     render: function() {
         var that = this;
 
         var report = this.getReport();
-        var overall = _.reduce(report, getOverallStats, {latest: Date.now()});
+        var earliest = _.reduce(report, getEarliest);
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
                 type: that.props.type,
                 data: data,
-                timespan: true,
-                overall: overall,
+                timespan: {
+                    earliest: earliest,
+                    latest: that.state.now
+                },
                 onClick: function() {
                     var url = '/' + that.props.type + '/' + slug(data.key) + '/';
                     page.show(url, {details: data.key});
@@ -66,5 +71,14 @@ module.exports = React.createClass({
                 <th className='report__cell report__cell_head report__cell_timespan'>Timespan</th>
             </tr>
         </thead>;
+    },
+    componentDidMount: function() {
+        this._interval = setInterval(this.updateNow, HOUR);
+    },
+    componentWillUnmount: function() {
+        clearInterval(this._interval);
+    },
+    updateNow: function() {
+        this.setState({now: Date.now()});
     }
 });

@@ -8,7 +8,7 @@ var Browsers = require('./component-browsers.jsx');
 module.exports = React.createClass({
     render: function() {
         var data = this.props.data;
-        var overall = this.props.overall;
+        var timespan = this.props.timespan;
 
         var rowClasses = cx({
             'report__row': true,
@@ -34,9 +34,9 @@ module.exports = React.createClass({
                 { data.count }
             </td>
             {
-                this.props.timespan ?
+                timespan ?
                     <td className='report__cell report__cell_timespan'>
-                        <Timespan min={ overall.earliest } max={ overall.latest } start={ data.earliest } finish={ data.latest } />
+                        <Timespan min={ timespan.earliest } max={ timespan.latest } start={ data.earliest } finish={ data.latest } />
                     </td> : null
             }
         </tr>;

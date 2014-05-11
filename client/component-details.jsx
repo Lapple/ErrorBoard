@@ -49,10 +49,19 @@ module.exports = React.createClass({
             </div>;
         }
     },
+    onKeyUp: function(e) {
+        if (e && e.keyCode === 27) {
+            this.props.onClose();
+        }
+    },
     show: function() {
         this.setState({visible: true});
     },
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
+        $(document).on('keyup', this.onKeyUp);
+    },
+    componentWillUnmount: function() {
+        $(document).off('keyup', this.onKeyUp);
     }
 });

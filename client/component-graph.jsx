@@ -3,7 +3,9 @@ var React = require('react');
 var moment = require('moment');
 
 var GraphMixin = require('./mixin-graph');
+
 var HOUR = 60 * 60 * 1000;
+var Y_CAP = 0.9;
 
 module.exports = React.createClass({
     mixins: [GraphMixin],
@@ -17,7 +19,7 @@ module.exports = React.createClass({
         var points = _.map(plot.points, function(item, index, array) {
             return {
                 x: index * (width / (array.length - 1)),
-                y: height - (item.count / plot.max * height * 0.9),
+                y: height - (item.count / plot.max * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };
@@ -30,7 +32,7 @@ module.exports = React.createClass({
 
         var circles = _.map(points, function(point, index) {
             if (point.value > 0) {
-                return <circle key={ index } cx={ point.x } cy={ point.y } r='1' />;
+                return <circle key={ point.time } cx={ point.x } cy={ point.y } r='1' />;
             }
         });
 
@@ -42,7 +44,7 @@ module.exports = React.createClass({
                 var labelOffset = isLeft ? 5 : -5;
                 var labelAnchor = isLeft ? 'start' : 'end';
 
-                return <g key={ index }>
+                return <g key={ point.time }>
                     <text x={ x + labelOffset } y='10' textAnchor={ labelAnchor } className='graph__day'>
                         { moment(point.time).format('DD.MM') }
                     </text>
@@ -53,7 +55,7 @@ module.exports = React.createClass({
 
         return <div className='graph'>
             <div className='title title_big'>
-                Hourly errors in the last 7 days
+                Hourly errors in the last 4 days
             </div>
             <svg xmlns='http://www.w3.org/2000/svg' width={ width } height={ height } viewBox={ viewBox }>
                 <line x1='0' y1={ height } x2={ width } y2={ height } className='graph__axis' />

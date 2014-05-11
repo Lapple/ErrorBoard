@@ -41,7 +41,7 @@ var afterRun = function(ctx) {
     Regions.cleanup(_.difference(Regions.list(), ctx.regions));
 };
 
-page('/', redirectTo('/messages/'));
+page('/', redirectTo('/dashboard/'));
 
 page('*',
     beforeRun,
@@ -50,10 +50,10 @@ page('*',
     })
 );
 
-page('/graph/',
+page('/dashboard/',
     function(ctx, next) {
         var timespan = {
-            from: moment().startOf('hour').subtract('days', 7).valueOf(),
+            from: moment().startOf('hour').subtract('days', 4).valueOf(),
             to: moment().endOf('hour').valueOf()
         };
 
@@ -194,11 +194,20 @@ module.exports = React.createClass({displayName: 'exports',
             );
         }
     },
+    onKeyUp: function(e) {
+        if (e && e.keyCode === 27) {
+            this.props.onClose();
+        }
+    },
     show: function() {
         this.setState({visible: true});
     },
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
+        $(document).on('keyup', this.onKeyUp);
+    },
+    componentWillUnmount: function() {
+        $(document).off('keyup', this.onKeyUp);
     }
 });
 
@@ -208,7 +217,9 @@ var React = require('react');
 var moment = require('moment');
 
 var GraphMixin = require('./mixin-graph');
+
 var HOUR = 60 * 60 * 1000;
+var Y_CAP = 0.9;
 
 module.exports = React.createClass({displayName: 'exports',
     mixins: [GraphMixin],
@@ -222,7 +233,7 @@ module.exports = React.createClass({displayName: 'exports',
         var points = _.map(plot.points, function(item, index, array) {
             return {
                 x: index * (width / (array.length - 1)),
-                y: height - (item.count / plot.max * height * 0.9),
+                y: height - (item.count / plot.max * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };
@@ -235,7 +246,7 @@ module.exports = React.createClass({displayName: 'exports',
 
         var circles = _.map(points, function(point, index) {
             if (point.value > 0) {
-                return React.DOM.circle( {key: index,  cx: point.x,  cy: point.y,  r:"1"} );
+                return React.DOM.circle( {key: point.time,  cx: point.x,  cy: point.y,  r:"1"} );
             }
         });
 
@@ -247,7 +258,7 @@ module.exports = React.createClass({displayName: 'exports',
                 var labelOffset = isLeft ? 5 : -5;
                 var labelAnchor = isLeft ? 'start' : 'end';
 
-                return React.DOM.g( {key: index }, 
+                return React.DOM.g( {key: point.time }, 
                     React.DOM.text( {x: x + labelOffset,  y:"10", textAnchor: labelAnchor,  className:"graph__day"}, 
                          moment(point.time).format('DD.MM') 
                     ),
@@ -258,7 +269,7 @@ module.exports = React.createClass({displayName: 'exports',
 
         return React.DOM.div( {className:"graph"}, 
             React.DOM.div( {className:"title title_big"}, 
-                "Hourly errors in the last 7 days"
+                "Hourly errors in the last 4 days"
             ),
             React.DOM.svg( {xmlns:"http://www.w3.org/2000/svg", width: width,  height: height,  viewBox: viewBox }, 
                 React.DOM.line( {x1:"0", y1: height,  x2: width,  y2: height,  className:"graph__axis"} ),
@@ -299,7 +310,7 @@ module.exports = React.createClass({displayName: 'exports',
 var cx = React.addons.classSet;
 
 var icons = {
-    graph: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 5c-.771 0-1.468.301-2 .779v-1.779c0-1.654-1.346-3-3-3s-3 1.346-3 3v4.779c-.532-.478-1.229-.779-2-.779-1.654 0-3 1.346-3 3v6h16v-9c0-1.654-1.346-3-3-3zm-5-2c.551 0 1 .448 1 1v11h-2v-11c0-.552.449-1 1-1zm-4 12h-2v-4c0-.552.449-1 1-1s1 .448 1 1v4zm10 0h-2v-7c0-.552.449-1 1-1s1 .448 1 1v7zM19 21h-14c-.552 0-1-.447-1-1s.448-1 1-1h14c.552 0 1 .447 1 1s-.448 1-1 1z"})),
+    dashboard: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 5c-.771 0-1.468.301-2 .779v-1.779c0-1.654-1.346-3-3-3s-3 1.346-3 3v4.779c-.532-.478-1.229-.779-2-.779-1.654 0-3 1.346-3 3v6h16v-9c0-1.654-1.346-3-3-3zm-5-2c.551 0 1 .448 1 1v11h-2v-11c0-.552.449-1 1-1zm-4 12h-2v-4c0-.552.449-1 1-1s1 .448 1 1v4zm10 0h-2v-7c0-.552.449-1 1-1s1 .448 1 1v7zM19 21h-14c-.552 0-1-.447-1-1s.448-1 1-1h14c.552 0 1 .447 1 1s-.448 1-1 1z"})),
     messages: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M18.383 4.318c-.374-.155-.804-.069-1.09.217-1.264 1.263-3.321 1.264-4.586 0-2.045-2.043-5.37-2.043-7.414 0-.188.187-.293.442-.293.707v13c0 .552.448 1 1 1s1-.448 1-1v-4.553c1.271-.997 3.121-.911 4.293.26 2.045 2.043 5.371 2.043 7.414 0 .188-.188.293-.442.293-.707v-8c0-.405-.244-.769-.617-.924zm-7.09 1.631c1.54 1.539 3.808 1.918 5.707 1.138v2.311c-1.446.916-3.387.749-4.646-.51-1.448-1.447-3.598-1.743-5.354-.927v-2.272c1.271-.997 3.121-.912 4.293.26zm1.414 6.585c-1.022-1.021-2.365-1.532-3.707-1.532-.681 0-1.361.131-2 .394v-2.311c1.446-.916 3.387-.749 4.646.51.925.924 2.139 1.386 3.354 1.386.687 0 1.366-.164 2-.459v2.272c-1.272.997-3.122.911-4.293-.26z"})),
     browsers: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M21 4h-18c-1.104 0-2 .896-2 2v12c0 1.104.896 2 2 2h18c1.104 0 2-.896 2-2v-12c0-1.104-.896-2-2-2zm-18 2h8v12h-8v-12zm18 12h-9v-12h9.003l-.003 12zM20 13.5c0-.275-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h1c.275 0 .5-.225.5-.5v-3zM17 7.5c0-.275-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5v5c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-5zM18.5 10h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM18.5 12h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM13.5 15h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5s.225.5.5.5zM16.5 16h-3c-.275 0-.5.225-.5.5s.225.5.5.5h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5zM18.5 8h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM10 7.5c0-.275-.225-.5-.5-.5h-5c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h5c.275 0 .5-.225.5-.5v-3zM9.501 14h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 12h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 16h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5z"})),
     scripts: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 16c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-3.025c.838.634 1.87 1.025 3 1.025h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-.184c1.163-.413 2-1.512 2-2.816 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 1.304.837 2.403 2 2.816v7.184c0 2.757 2.243 5 5 5h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3zm0-5c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm-10-7c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm10 16c-.552 0-1-.449-1-1s.448-1 1-1 1 .449 1 1-.448 1-1 1z"})),
@@ -309,7 +320,8 @@ var icons = {
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
         return React.DOM.div( {className:"nav"}, 
-             this.link('/graph/', 'Graph', icons.graph), 
+             this.logo(), 
+             this.link('/dashboard/', 'Dashboard', icons.dashboard), 
              this.link('/messages/', 'Messages', icons.messages), 
              this.link('/browsers/', 'Browsers', icons.browsers), 
              this.link('/scripts/', 'Scripts', icons.scripts), 
@@ -329,10 +341,16 @@ module.exports = React.createClass({displayName: 'exports',
              title 
         );
     },
-    toggle: function() {
-        this.setState({
-            compact: !this.state.compact
-        });
+    logo: function() {
+        return React.DOM.div( {className:"logo nav__logo"}, 
+            React.DOM.a( {className:"logo__info tooltip__parent", href:"https://github.com/Lapple/eb"}, 
+                React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, 
+                    React.DOM.path( {d:"M13.839 17.525c-.006.002-.559.186-1.039.186-.265 0-.372-.055-.406-.079-.168-.117-.48-.336.054-1.4l1-1.994c.593-1.184.681-2.329.245-3.225-.356-.733-1.039-1.236-1.92-1.416-.317-.065-.639-.097-.958-.097-1.849 0-3.094 1.08-3.146 1.126-.179.158-.221.42-.102.626.12.206.367.3.595.222.005-.002.559-.187 1.039-.187.263 0 .369.055.402.078.169.118.482.34-.051 1.402l-1 1.995c-.594 1.185-.681 2.33-.245 3.225.356.733 1.038 1.236 1.921 1.416.314.063.636.097.954.097 1.85 0 3.096-1.08 3.148-1.126.179-.157.221-.42.102-.626-.12-.205-.369-.297-.593-.223z"}),
+                    React.DOM.circle( {cx:"13", cy:"6.001", r:"2.5"})
+                )
+            ),
+            "ErrorBoard"
+        );
     }
 });
 
@@ -347,7 +365,7 @@ var Browsers = require('./component-browsers.jsx');
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
         var data = this.props.data;
-        var overall = this.props.overall;
+        var timespan = this.props.timespan;
 
         var rowClasses = cx({
             'report__row': true,
@@ -373,9 +391,9 @@ module.exports = React.createClass({displayName: 'exports',
                  data.count 
             ),
             
-                this.props.timespan ?
+                timespan ?
                     React.DOM.td( {className:"report__cell report__cell_timespan"}, 
-                        Timespan( {min: overall.earliest,  max: overall.latest,  start: data.earliest,  finish: data.latest } )
+                        Timespan( {min: timespan.earliest,  max: timespan.latest,  start: data.earliest,  finish: data.latest } )
                     ) : null
             
         );
@@ -391,27 +409,32 @@ var React = require('react');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
-var getOverallStats = function(obj, next) {
-    obj.earliest = _.min([obj.earliest, next.earliest]);
+var HOUR = 60 * 60 * 1000;
 
-    return obj;
+var getEarliest = function(memo, item) {
+    return _.min([memo, item.earliest]);
 };
 
 module.exports = React.createClass({displayName: 'exports',
     mixins: [ReporterMixin],
+    getInitialState: function() {
+        return {now: Date.now()};
+    },
     render: function() {
         var that = this;
 
         var report = this.getReport();
-        var overall = _.reduce(report, getOverallStats, {latest: Date.now()});
+        var earliest = _.reduce(report, getEarliest);
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
                 type: that.props.type,
                 data: data,
-                timespan: true,
-                overall: overall,
+                timespan: {
+                    earliest: earliest,
+                    latest: that.state.now
+                },
                 onClick: function() {
                     var url = '/' + that.props.type + '/' + slug(data.key) + '/';
                     page.show(url, {details: data.key});
@@ -451,6 +474,15 @@ module.exports = React.createClass({displayName: 'exports',
                 React.DOM.th( {className:"report__cell report__cell_head report__cell_timespan"}, "Timespan")
             )
         );
+    },
+    componentDidMount: function() {
+        this._interval = setInterval(this.updateNow, HOUR);
+    },
+    componentWillUnmount: function() {
+        clearInterval(this._interval);
+    },
+    updateNow: function() {
+        this.setState({now: Date.now()});
     }
 });
 
