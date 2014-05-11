@@ -4,6 +4,7 @@ var cx = React.addons.classSet;
 module.exports = React.createClass({
     render: function() {
         return <div className="nav">
+            { this.link('/graph/', 'Graph') }
             { this.link('/messages/', 'Messages') }
             { this.link('/browsers/', 'Browsers') }
             { this.link('/scripts/', 'Scripts') }

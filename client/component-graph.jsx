@@ -2,51 +2,89 @@ var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
 
+var GraphMixin = require('./mixin-graph');
+var HOUR = 60 * 60 * 1000;
+
 module.exports = React.createClass({
+    mixins: [GraphMixin],
     render: function() {
-        var data = this.getGraphData();
+        var plot = this.plot();
 
-        var width = data.length - 1;
-        var height = 100;
-        var viewBox = '0 0 ' + width + ' ' + height;
+        var width = this.state.width;
+        var height = this.state.height;
+        var viewBox = '-0.5 0 ' + width + ' ' + height;
 
-        var points = _.map(data, function(item, i) {
+        var points = _.map(plot.points, function(item, index, array) {
             return {
-                x: i,
-                y: height - (item.count / item.max * height * 0.8),
-                value: item.count
+                x: index * (width / (array.length - 1)),
+                y: height - (item.count / plot.max * height * 0.9),
+                value: item.count,
+                time: item.timestamp
             };
         });
 
-        var path = _.reduce(points, function(d, point) {
-            return d + 'L' + point.x + ' ' + point.y;
-        }, 'M0 ' + height);
+        var path = _.reduce(points, function(d, point, index) {
+            var tool = index === 0 ? 'M' : 'L';
+            return d + tool + point.x + ' ' + point.y;
+        }, '');
 
-        return <div className="graph">
-            <svg xmlns='http://www.w3.org/2000/svg' height={ this.props.height } viewBox={ viewBox } preserveAspectRatio='none'>
-                <line x1='0' y1={ height } x2={ width } y2={ height } className='graph__axis' vectorEffect='non-scaling-stroke' />
-                <path d={ path } className='graph__main' vectorEffect='non-scaling-stroke' />
+        var circles = _.map(points, function(point, index) {
+            if (point.value > 0) {
+                return <circle key={ index } cx={ point.x } cy={ point.y } r='1' />;
+            }
+        });
+
+        var days = _.map(points, function(point, index) {
+            if (point.time === moment(point.time).startOf('day').valueOf()) {
+                var x = Math.floor(point.x);
+                var isLeft = (point.x / width) < 0.95;
+
+                var labelOffset = isLeft ? 5 : -5;
+                var labelAnchor = isLeft ? 'start' : 'end';
+
+                return <g key={ index }>
+                    <text x={ x + labelOffset } y='10' textAnchor={ labelAnchor } className='graph__day'>
+                        { moment(point.time).format('DD.MM') }
+                    </text>
+                    <line x1={ x } y1='0' x2={ x } y2={ height } className='graph__axis' />
+                </g>;
+            }
+        });
+
+        return <div className='graph'>
+            <div className='title title_big'>
+                Hourly errors in the last 7 days
+            </div>
+            <svg xmlns='http://www.w3.org/2000/svg' width={ width } height={ height } viewBox={ viewBox }>
+                <line x1='0' y1={ height } x2={ width } y2={ height } className='graph__axis' />
+                { days }
+                <path d={ path } className='graph__main' />
+                { circles }
             </svg>
         </div>;
     },
-    getGraphData: function() {
-        var overall = _.reduce(this.props.data, function(overall, item) {
-            overall.max = _.max([overall.max, item.count]);
-            // overall.min = 0; //_.min([overall.min, item.count]);
+    plot: function() {
+        var data = this.props.data;
+        var points = [];
+        var max = 0;
 
-            return overall;
-        }, {
-            min: 0
-        });
+        for (var t = this.props.from; t <= this.props.to; t += HOUR) {
+            var count = 0;
 
-        var report = _.map(this.props.data, function(data, time) {
-            var timestamp = +time;
+            if (data[t]) {
+                count = data[t].count;
+                max = Math.max(max, count);
+            }
 
-            return _.extend(data, overall, {
-                timestamp: timestamp,
+            points.push({
+                timestamp: t,
+                count: count
             });
-        });
+        }
 
-        return _.sortBy(report, 'timestamp');
+        return {
+            points: points,
+            max: max
+        };
     }
 });

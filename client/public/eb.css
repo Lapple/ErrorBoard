@@ -54,12 +54,20 @@ html, body, .container, .menu, .content {
 }
 
 .title {
-    margin-bottom: 24px;
+    margin-bottom: 1em;
     overflow: hidden;
 
     font-size: 18px;
     line-height: 1.3;
     color: rgb(10, 10, 10);
+}
+
+.title_muted {
+    color: rgb(160, 170, 175);
+}
+
+.title_big {
+    font-size: 24px;
 }
 
 .report, .graph {
@@ -316,17 +324,18 @@ html, body, .container, .menu, .content {
     cursor: pointer;
 }
 
-.curtain__title_muted {
-    color: rgb(160, 170, 175);
-}
-
 .graph__main {
     fill: none;
-    stroke: #777;
-    stroke-width: 2px;
+    stroke: #999;
     stroke-linejoin: round;
 }
 
 .graph__axis {
-    stroke: #ccc;
+    stroke: rgb(217, 229, 236);
+}
+
+.graph__day {
+    font-size: 13px;
+    fill: rgb(153, 167, 177);
+    -webkit-font-smoothing: antialiased;
 }

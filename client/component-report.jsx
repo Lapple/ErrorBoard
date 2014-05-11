@@ -7,7 +7,6 @@ var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
 var getOverallStats = function(obj, next) {
-    obj.latest = _.max([obj.latest, next.latest]);
     obj.earliest = _.min([obj.earliest, next.earliest]);
 
     return obj;
@@ -19,7 +18,7 @@ module.exports = React.createClass({
         var that = this;
 
         var report = this.getReport();
-        var overall = _.reduce(report, getOverallStats, {});
+        var overall = _.reduce(report, getOverallStats, {latest: Date.now()});
 
         var items = _.map(report, function(data) {
             return ReportItem({

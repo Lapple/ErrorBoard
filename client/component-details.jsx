@@ -44,7 +44,7 @@ module.exports = React.createClass({
                 { this.props.title }
             </div>;
         } else {
-            return <div className='curtain__title curtain__title_muted'>
+            return <div className='title title_muted'>
                 No title
             </div>;
         }

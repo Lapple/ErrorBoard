@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var page = require('page');
 var React = require('react');
+var moment = require('moment');
 
 var Reports = require('./reports');
 var Regions = require('./regions');
@@ -48,7 +49,32 @@ page('*',
     })
 );
 
-page('/:type/*',
+page('/graph/',
+    function(ctx, next) {
+        var timespan = {
+            from: moment().startOf('hour').subtract('days', 7).valueOf(),
+            to: moment().endOf('hour').valueOf()
+        };
+
+        ctx.params.timespan = timespan;
+        Reports.fetch('hourly', timespan).always(next);
+    },
+    renderRegion('#graph', ComponentGraph, function(ctx) {
+        var timespan = ctx.params.timespan;
+
+        return {
+            from: timespan.from,
+            to: timespan.to,
+            data: Reports.get('hourly', timespan)
+        };
+    })
+);
+
+page(/^\/(messages|browsers|scripts|pages)\/.*/,
+    function(ctx, next) {
+        ctx.params.type = ctx.params[2];
+        next();
+    },
     function(ctx, next) {
         Reports.fetch(ctx.params.type).always(next);
     },
@@ -87,17 +113,6 @@ page('/:type/:id/',
     })
 );
 
-page('*',
-    function(ctx, next) {
-        Reports.fetch('hourly').always(next);
-    },
-    renderRegion('#graph', ComponentGraph, function() {
-        return {
-            data: Reports.get('hourly'),
-            height: 250
-        };
-    }),
-    afterRun
-);
+page('*', afterRun);
 
 $(page.start);
