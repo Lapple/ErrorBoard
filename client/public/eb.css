@@ -345,7 +345,7 @@ html, body, .container, .menu, .content {
     position: relative;
     width: 16px;
     height: 16px;
-    margin: 3px 0 10px 10px;
+    margin: 1px 0 10px 10px;
 
     cursor: pointer;
 }
