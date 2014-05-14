@@ -54,9 +54,6 @@ module.exports = React.createClass({
         });
 
         return <div className='graph'>
-            <div className='title title_big'>
-                Hourly errors in the last 4 days
-            </div>
             <svg xmlns='http://www.w3.org/2000/svg' width={ width } height={ height } viewBox={ viewBox }>
                 <line x1='0' y1={ height } x2={ width } y2={ height } className='graph__axis' />
                 { days }

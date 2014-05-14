@@ -9,7 +9,7 @@ var Regions = require('./regions');
 var ComponentNav = require('./component-nav.jsx');
 var ComponentReport = require('./component-report.jsx');
 var ComponentDetails = require('./component-details.jsx');
-var ComponentGraph = require('./component-graph.jsx');
+var ComponentDashboard = require('./component-dashboard.jsx');
 
 var ws = new SockJS('/ws');
 
@@ -59,13 +59,13 @@ page('/dashboard/',
         ctx.params.timespan = timespan;
         Reports.fetch('hourly', timespan).always(next);
     },
-    renderRegion('#graph', ComponentGraph, function(ctx) {
+    renderRegion('#main', ComponentDashboard, function(ctx) {
         var timespan = ctx.params.timespan;
 
         return {
             from: timespan.from,
             to: timespan.to,
-            data: Reports.get('hourly', timespan)
+            hourly: Reports.get('hourly', timespan)
         };
     })
 );
@@ -78,7 +78,7 @@ page(/^\/(messages|browsers|scripts|pages)\/.*/,
     function(ctx, next) {
         Reports.fetch(ctx.params.type).always(next);
     },
-    renderRegion('#reports', ComponentReport, function(ctx) {
+    renderRegion('#main', ComponentReport, function(ctx) {
         return {
             data: Reports.get(ctx.params.type),
             type: ctx.params.type
