@@ -20,7 +20,7 @@ module.exports = React.createClass({
             'report__mono': _.contains(['messages', 'scripts'], this.props.type)
         });
 
-        var isBrowserType = _.contains(['browsers', 'browser'], this.props.type);
+        var isBrowserType = this.props.type === 'browsers';
 
         return <tr className={ rowClasses } onClick={ this.props.onClick }>
             <td className='report__cell report__cell_cut'>

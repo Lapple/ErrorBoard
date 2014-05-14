@@ -5,8 +5,8 @@ var sortByLatestReport = function(a, b) {
 };
 
 module.exports = {
-    getReport: function() {
-        var rows = _.map(this.props.data, function(value, key) {
+    getReport: function(data) {
+        var rows = _.map(data, function(value, key) {
             return _.extend(value, {key: key});
         });
 

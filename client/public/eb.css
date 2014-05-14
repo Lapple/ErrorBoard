@@ -4,7 +4,7 @@ html, body {
     margin: 0;
 }
 
-html, body, .container, .menu, .content {
+html, body, .app, .container, .menu, .content {
     height: 100%;
 }
 

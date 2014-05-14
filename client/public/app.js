@@ -2,160 +2,101 @@
 var _ = require('lodash');
 var page = require('page');
 var React = require('react');
-var moment = require('moment');
 
 var Reports = require('./reports');
-var Regions = require('./regions');
-
-var ComponentNav = require('./component-nav.jsx');
-var ComponentReport = require('./component-report.jsx');
-var ComponentDetails = require('./component-details.jsx');
-var ComponentDashboard = require('./component-dashboard.jsx');
+var ComponentApp = require('./component-app.jsx');
 
 var ws = new SockJS('/ws');
 
 ws.onmessage = function(e) {
     Reports.update(JSON.parse(e.data));
-    Regions.update();
-};
-
-var renderRegion = function(selector, Component, props) {
-    return function(ctx, next) {
-        var p = _.isFunction(props) ? props(ctx) : props;
-        Regions.render(selector, Component, p);
-        ctx.regions.push(selector);
-        next();
-    };
-};
-
-var setTimespan = function(from, to) {
-    return function(ctx, next) {
-        ctx.params.timespan = {
-            from: from || moment().startOf('hour').subtract('days', 4).valueOf(),
-            to: to || moment().endOf('hour').valueOf()
-        };
-        next();
-    };
+    updateApp();
 };
 
 var redirectTo = function(url) {
     return _.defer.bind(_, page, url);
 };
 
-var beforeRun = function(ctx, next) {
-    ctx.regions = [];
-    next();
-};
+var _context;
+var updateApp = function(ctx) {
+    var app = document.getElementById('app');
 
-var afterRun = function(ctx) {
-    Regions.cleanup(_.difference(Regions.list(), ctx.regions));
+    if (ctx) {
+        _context = ctx;
+    }
+
+    React.renderComponent(ComponentApp({ctx: _context}), app);
 };
 
 page('/', redirectTo('/dashboard/'));
-
-page('*',
-    beforeRun,
-    renderRegion('#nav', ComponentNav, function(ctx) {
-        return { pathname: ctx.pathname };
-    })
-);
-
-page('/dashboard/',
-    setTimespan(),
-    function(ctx, next) {
-        Reports.fetch('hourly', ctx.params.timespan).always(next);
-    },
-    renderRegion('#main', ComponentDashboard, function(ctx) {
-        var timespan = ctx.params.timespan;
-
-        return {
-            hourly: {
-                from: timespan.from,
-                to: timespan.to,
-                data: Reports.get('hourly', timespan)
-            }
-        };
-    })
-);
-
-page(/^\/(messages|browsers|scripts|pages)\/.*/,
-    function(ctx, next) {
-        ctx.params.type = ctx.params[2];
-        next();
-    },
-    function(ctx, next) {
-        Reports.fetch(ctx.params.type).always(next);
-    },
-    renderRegion('#main', ComponentReport, function(ctx) {
-        return {
-            data: Reports.get(ctx.params.type),
-            type: ctx.params.type
-        };
-    })
-);
-
-page('/:type/:id/',
-    setTimespan(),
-    function(ctx, next) {
-        ctx.params.detailsType = ctx.params.type.slice(0, -1);
-        next();
-    },
-    function(ctx, next) {
-        Reports.fetch(ctx.params.detailsType, {id: ctx.params.id}).always(next);
-    },
-    function(ctx, next) {
-        if (ctx.params.detailsType === 'message') {
-            Reports.fetch('hourly', {
-                from: ctx.params.timespan.from,
-                to: ctx.params.timespan.to,
-                message: ctx.params.id
-            }).always(next);
-        } else {
-            next();
-        }
-    },
-    renderRegion('#details', ComponentDetails, function(ctx) {
-        var type = ctx.params.detailsType;
-        var timespan = ctx.params.timespan;
-
-        var props = {
-            title: ctx.state.details || null,
-            data: Reports.get(type, {id: ctx.params.id}),
-            type: 'messages',
-            onClose: function() {
-                page.show('/' + ctx.params.type + '/');
-            }
-        };
-
-        var graphReport;
-
-        if (type === 'message') {
-            props.type = 'browser';
-
-            graphReport = Reports.get('hourly', {
-                from: timespan.from,
-                to: timespan.to,
-                message: ctx.params.id
-            });
-
-            if (!_.isEmpty(graphReport)) {
-                props.graph = {
-                    from: timespan.from,
-                    to: timespan.to,
-                    data: graphReport
-                };
-            }
-        }
-
-        return props;
-    })
-);
-
-page('*', afterRun);
+page('/:type/:id?', updateApp);
 
 $(page.start);
 
-},{"./component-dashboard.jsx":3,"./component-details.jsx":4,"./component-nav.jsx":6,"./component-report.jsx":8,"./regions":12,"./reports":13,"lodash":29,"moment":30,"page":31,"react":32}],2:[function(require,module,exports){
+},{"./component-app.jsx":2,"./reports":13,"lodash":29,"page":31,"react":32}],2:[function(require,module,exports){
+/** @jsx React.DOM */var page = require('page');
+var slug = require('speakingurl');
+var React = require('react');
+var moment = require('moment');
+
+var Nav = require('./component-nav.jsx');
+var Dashboard = require('./component-dashboard.jsx');
+var Report = require('./component-report.jsx');
+var Details = require('./component-details.jsx');
+
+module.exports = React.createClass({displayName: 'exports',
+    getDefaultProps: function() {
+        return {
+            graphs: {
+                from: moment().startOf('hour').subtract('days', 4).valueOf(),
+                to: moment().endOf('hour').valueOf()
+            }
+        };
+    },
+    render: function() {
+        return React.DOM.div( {className:"container"}, 
+            React.DOM.div( {className:"menu"}, 
+                Nav( {pathname: this.props.ctx.pathname } )
+            ),
+            React.DOM.div( {className:"content"}, 
+                 this.renderMain(), 
+                React.DOM.div( {className:"screen"}, 
+                     this.renderDetails() 
+                )
+            )
+        );
+    },
+    renderMain: function() {
+        if (this.props.ctx.params.type === 'dashboard') {
+            return Dashboard( {graph: this.props.graphs } );
+        }
+
+        return Report( {type: this.props.ctx.params.type,  onClick: this._showDetails } );
+    },
+    renderDetails: function() {
+        var ctx = this.props.ctx;
+        var detailsType = ctx.params.type.slice(0, -1);
+
+        if (ctx.params.id) {
+            return Details({
+                type: detailsType,
+                id: ctx.params.id,
+                title: ctx.state.details || null,
+                graph: this.props.graphs,
+                onClose: this._hideDetails
+            });
+        }
+    },
+    _showDetails: function(data) {
+        var url = '/' + this.props.ctx.params.type + '/' + slug(data.key) + '/';
+        page.show(url, {details: data.key});
+    },
+    _hideDetails: function() {
+        page.show('/' + this.props.ctx.params.type + '/');
+    }
+});
+
+},{"./component-dashboard.jsx":4,"./component-details.jsx":5,"./component-nav.jsx":7,"./component-report.jsx":9,"moment":30,"page":31,"react":32,"speakingurl":181}],3:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var slug = require('speakingurl');
@@ -179,28 +120,43 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"lodash":29,"react":32,"speakingurl":181}],3:[function(require,module,exports){
+},{"lodash":29,"react":32,"speakingurl":181}],4:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
+var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
 
 module.exports = React.createClass({displayName: 'exports',
+    getInitialState: function() {
+        return {
+            graph: {}
+        };
+    },
     render: function() {
         return React.DOM.div( {className:"dashboard"}, 
             React.DOM.div( {className:"title title_big"}, 
                 "Hourly errors in the last 4 days"
             ),
-            Graph( {data: this.props.hourly.data,  from: this.props.hourly.from,  to: this.props.hourly.to } )
+            Graph( {data: this.state.graph,  from: this.props.graph.from,  to: this.props.graph.to } )
         );
+    },
+    componentDidMount: function() {
+        Reports.fetch('hourly', this.props.graph).done(this.updateGraphData);
+    },
+    updateGraphData: function() {
+        this.setState({
+            graph: Reports.get('hourly', this.props.graph)
+        });
     }
 });
 
-},{"./component-graph.jsx":5,"react":32}],4:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./reports":13,"react":32}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 
 var cx = React.addons.classSet;
 
+var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
@@ -208,18 +164,18 @@ var ReporterMixin = require('./mixin-reporter');
 module.exports = React.createClass({displayName: 'exports',
     mixins: [ReporterMixin],
     getInitialState: function() {
-        return {visible: false};
+        var state = {
+            visible: false,
+            data: {}
+        };
+
+        if (this.hasGraph(this.props)) {
+            state.graph = {};
+        }
+
+        return state;
     },
     render: function() {
-        var items = _.map(this.getReport(), function(data) {
-            return ReportItem({
-                key: data.key,
-                type: this.props.type,
-                data: data,
-                timespan: false
-            });
-        }, this);
-
         var classes = cx({
             'curtain': true,
             'curtain_visible': this.state.visible
@@ -233,9 +189,7 @@ module.exports = React.createClass({displayName: 'exports',
             ),
              this.title(), 
              this.graph(), 
-            React.DOM.table( {className:"report__table report__table_details"}, 
-                React.DOM.tbody(null,  items )
-            )
+             this.table() 
         );
     },
     title: function() {
@@ -250,14 +204,28 @@ module.exports = React.createClass({displayName: 'exports',
         }
     },
     graph: function() {
-        if (this.props.graph) {
+        if (this.state.graph) {
             return Graph({
-                data: this.props.graph.data,
+                data: this.state.graph,
                 from: this.props.graph.from,
                 to: this.props.graph.to,
                 height: 200
             });
         }
+    },
+    table: function() {
+        var items = _.map(this.getReport(this.state.data), function(data) {
+            return ReportItem({
+                key: data.key,
+                type: (this.props.type === 'message') ? 'browsers' : 'messages',
+                data: data,
+                timespan: false
+            });
+        }, this);
+
+        return React.DOM.table( {className:"report__table report__table_details"}, 
+            React.DOM.tbody(null,  items )
+        );
     },
     onKeyUp: function(e) {
         if (e && e.keyCode === 27) {
@@ -270,13 +238,46 @@ module.exports = React.createClass({displayName: 'exports',
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
         $(document).on('keyup', this.onKeyUp);
+
+        this.fetchData(this.props);
+    },
+    componentWillReceiveProps: function(props) {
+        this.fetchData(props);
     },
     componentWillUnmount: function() {
         $(document).off('keyup', this.onKeyUp);
+    },
+    updateData: function() {
+        this.setState({
+            data: Reports.get(this.props.type, {id: this.props.id}),
+        });
+    },
+    updateGraph: function() {
+        this.setState({
+            graph: Reports.get('hourly', {
+                from: this.props.graph.from,
+                to: this.props.graph.to,
+                message: this.props.id
+            })
+        });
+    },
+    fetchData: function(props) {
+        Reports.fetch(props.type, {id: props.id}).done(this.updateData);
+
+        if (this.hasGraph(props)) {
+            Reports.fetch('hourly', {
+                from: props.graph.from,
+                to: props.graph.to,
+                message: props.id
+            }).done(this.updateGraph);
+        }
+    },
+    hasGraph: function(props) {
+        return props.type === 'message';
     }
 });
 
-},{"./component-graph.jsx":5,"./component-report-item.jsx":7,"./mixin-reporter":11,"lodash":29,"react":32}],5:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./component-report-item.jsx":8,"./mixin-reporter":12,"./reports":13,"lodash":29,"react":32}],6:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
@@ -299,9 +300,11 @@ module.exports = React.createClass({displayName: 'exports',
         var viewBox = '-0.5 0 ' + width + ' ' + height;
 
         var points = _.map(plot.points, function(item, index, array) {
+            var y = (item.count / plot.max) || 0;
+
             return {
                 x: index * (width / (array.length - 1)),
-                y: height - (item.count / plot.max * height * Y_CAP),
+                y: height - (y * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };
@@ -370,7 +373,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./mixin-graph":10,"lodash":29,"moment":30,"react":32}],6:[function(require,module,exports){
+},{"./mixin-graph":11,"lodash":29,"moment":30,"react":32}],7:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 var cx = React.addons.classSet;
 
@@ -419,7 +422,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"react":32}],7:[function(require,module,exports){
+},{"react":32}],8:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 
@@ -442,7 +445,7 @@ module.exports = React.createClass({displayName: 'exports',
             'report__mono': _.contains(['messages', 'scripts'], this.props.type)
         });
 
-        var isBrowserType = _.contains(['browsers', 'browser'], this.props.type);
+        var isBrowserType = this.props.type === 'browsers';
 
         return React.DOM.tr( {className: rowClasses,  onClick: this.props.onClick }, 
             React.DOM.td( {className:"report__cell report__cell_cut"}, 
@@ -465,12 +468,11 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-browsers.jsx":2,"./component-timespan.jsx":9,"lodash":29,"react":32}],8:[function(require,module,exports){
+},{"./component-browsers.jsx":3,"./component-timespan.jsx":10,"lodash":29,"react":32}],9:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
-var slug = require('speakingurl');
-var page = require('page');
 var React = require('react');
 
+var Reports = require('./reports');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
@@ -483,29 +485,29 @@ var getEarliest = function(memo, item) {
 module.exports = React.createClass({displayName: 'exports',
     mixins: [ReporterMixin],
     getInitialState: function() {
-        return {now: Date.now()};
+        return {
+            now: Date.now(),
+            data: {}
+        };
     },
     render: function() {
         var that = this;
 
-        var report = this.getReport();
-        var earliest = _.reduce(report, getEarliest);
+        var report = this.getReport(this.state.data);
+        var earliest = _.reduce(report, getEarliest, this.state.now);
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
-                type: that.props.type,
+                type: this.props.type,
                 data: data,
                 timespan: {
                     earliest: earliest,
-                    latest: that.state.now
+                    latest: this.state.now
                 },
-                onClick: function() {
-                    var url = '/' + that.props.type + '/' + slug(data.key) + '/';
-                    page.show(url, {details: data.key});
-                },
+                onClick: _.partial(this.props.onClick, data)
             });
-        });
+        }, this);
 
         return React.DOM.div( {className:"report"}, 
             React.DOM.table( {className:"report__table"}, 
@@ -542,16 +544,26 @@ module.exports = React.createClass({displayName: 'exports',
     },
     componentDidMount: function() {
         this._interval = setInterval(this.updateNow, HOUR);
+        this.fetchData(this.props);
+    },
+    componentWillReceiveProps: function(props) {
+        this.fetchData(props);
     },
     componentWillUnmount: function() {
         clearInterval(this._interval);
     },
     updateNow: function() {
         this.setState({now: Date.now()});
+    },
+    updateData: function() {
+        this.setState({data: Reports.get(this.props.type)});
+    },
+    fetchData: function(props) {
+        Reports.fetch(props.type).done(this.updateData);
     }
 });
 
-},{"./component-report-item.jsx":7,"./mixin-reporter":11,"lodash":29,"page":31,"react":32,"speakingurl":181}],9:[function(require,module,exports){
+},{"./component-report-item.jsx":8,"./mixin-reporter":12,"./reports":13,"lodash":29,"react":32}],10:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
@@ -596,7 +608,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"lodash":29,"moment":30,"react":32}],10:[function(require,module,exports){
+},{"lodash":29,"moment":30,"react":32}],11:[function(require,module,exports){
 module.exports = {
     getInitialState: function() {
         return {width: 0};
@@ -615,7 +627,7 @@ module.exports = {
     }
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var _ = require('lodash');
 
 var sortByLatestReport = function(a, b) {
@@ -623,8 +635,8 @@ var sortByLatestReport = function(a, b) {
 };
 
 module.exports = {
-    getReport: function() {
-        var rows = _.map(this.props.data, function(value, key) {
+    getReport: function(data) {
+        var rows = _.map(data, function(value, key) {
             return _.extend(value, {key: key});
         });
 
@@ -632,53 +644,7 @@ module.exports = {
     }
 };
 
-},{"lodash":29}],12:[function(require,module,exports){
-var _ = require('lodash');
-var React = require('react');
-
-var _regions = {};
-
-var querySelector = document.querySelector.bind(document);
-
-var normalizeInput = function(fn, selectors) {
-    if (_.isString(selectors)) {
-        selectors = [selectors];
-    } else if (!selectors) {
-        selectors = _.keys(_regions);
-    }
-
-    return fn(selectors);
-};
-
-module.exports = {
-    render: function(selector, Component, props) {
-        var render = _regions[selector] = _.partial(
-            React.renderComponent,
-            Component(props),
-            querySelector(selector)
-        );
-
-        render();
-    },
-    update: _.wrap(function(selectors) {
-        _.each(selectors, function(selector) {
-            if (_regions[selector]) {
-                _regions[selector]();
-            }
-        });
-    }, normalizeInput),
-    cleanup: _.wrap(function(selectors) {
-        _.each(selectors, function(selector) {
-            React.unmountComponentAtNode(querySelector(selector));
-            delete _regions[selector];
-        });
-    }, normalizeInput),
-    list: function() {
-        return _.keys(_regions);
-    }
-};
-
-},{"lodash":29,"react":32}],13:[function(require,module,exports){
+},{"lodash":29}],13:[function(require,module,exports){
 var _ = require('lodash');
 var aggregators = require('../common/aggregators');
 

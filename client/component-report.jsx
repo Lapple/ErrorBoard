@@ -1,8 +1,7 @@
 var _ = require('lodash');
-var slug = require('speakingurl');
-var page = require('page');
 var React = require('react');
 
+var Reports = require('./reports');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
@@ -15,29 +14,29 @@ var getEarliest = function(memo, item) {
 module.exports = React.createClass({
     mixins: [ReporterMixin],
     getInitialState: function() {
-        return {now: Date.now()};
+        return {
+            now: Date.now(),
+            data: {}
+        };
     },
     render: function() {
         var that = this;
 
-        var report = this.getReport();
-        var earliest = _.reduce(report, getEarliest);
+        var report = this.getReport(this.state.data);
+        var earliest = _.reduce(report, getEarliest, this.state.now);
 
         var items = _.map(report, function(data) {
             return ReportItem({
                 key: data.key,
-                type: that.props.type,
+                type: this.props.type,
                 data: data,
                 timespan: {
                     earliest: earliest,
-                    latest: that.state.now
+                    latest: this.state.now
                 },
-                onClick: function() {
-                    var url = '/' + that.props.type + '/' + slug(data.key) + '/';
-                    page.show(url, {details: data.key});
-                },
+                onClick: _.partial(this.props.onClick, data)
             });
-        });
+        }, this);
 
         return <div className="report">
             <table className="report__table">
@@ -74,11 +73,21 @@ module.exports = React.createClass({
     },
     componentDidMount: function() {
         this._interval = setInterval(this.updateNow, HOUR);
+        this.fetchData(this.props);
+    },
+    componentWillReceiveProps: function(props) {
+        this.fetchData(props);
     },
     componentWillUnmount: function() {
         clearInterval(this._interval);
     },
     updateNow: function() {
         this.setState({now: Date.now()});
+    },
+    updateData: function() {
+        this.setState({data: Reports.get(this.props.type)});
+    },
+    fetchData: function(props) {
+        Reports.fetch(props.type).done(this.updateData);
     }
 });

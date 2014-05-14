@@ -20,9 +20,11 @@ module.exports = React.createClass({
         var viewBox = '-0.5 0 ' + width + ' ' + height;
 
         var points = _.map(plot.points, function(item, index, array) {
+            var y = (item.count / plot.max) || 0;
+
             return {
                 x: index * (width / (array.length - 1)),
-                y: height - (item.count / plot.max * height * Y_CAP),
+                y: height - (y * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };

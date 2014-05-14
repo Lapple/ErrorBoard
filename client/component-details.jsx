@@ -3,6 +3,7 @@ var React = require('react');
 
 var cx = React.addons.classSet;
 
+var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
@@ -10,18 +11,18 @@ var ReporterMixin = require('./mixin-reporter');
 module.exports = React.createClass({
     mixins: [ReporterMixin],
     getInitialState: function() {
-        return {visible: false};
+        var state = {
+            visible: false,
+            data: {}
+        };
+
+        if (this.hasGraph(this.props)) {
+            state.graph = {};
+        }
+
+        return state;
     },
     render: function() {
-        var items = _.map(this.getReport(), function(data) {
-            return ReportItem({
-                key: data.key,
-                type: this.props.type,
-                data: data,
-                timespan: false
-            });
-        }, this);
-
         var classes = cx({
             'curtain': true,
             'curtain_visible': this.state.visible
@@ -35,9 +36,7 @@ module.exports = React.createClass({
             </div>
             { this.title() }
             { this.graph() }
-            <table className="report__table report__table_details">
-                <tbody>{ items }</tbody>
-            </table>
+            { this.table() }
         </div>;
     },
     title: function() {
@@ -52,14 +51,28 @@ module.exports = React.createClass({
         }
     },
     graph: function() {
-        if (this.props.graph) {
+        if (this.state.graph) {
             return Graph({
-                data: this.props.graph.data,
+                data: this.state.graph,
                 from: this.props.graph.from,
                 to: this.props.graph.to,
                 height: 200
             });
         }
+    },
+    table: function() {
+        var items = _.map(this.getReport(this.state.data), function(data) {
+            return ReportItem({
+                key: data.key,
+                type: (this.props.type === 'message') ? 'browsers' : 'messages',
+                data: data,
+                timespan: false
+            });
+        }, this);
+
+        return <table className="report__table report__table_details">
+            <tbody>{ items }</tbody>
+        </table>;
     },
     onKeyUp: function(e) {
         if (e && e.keyCode === 27) {
@@ -72,8 +85,41 @@ module.exports = React.createClass({
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
         $(document).on('keyup', this.onKeyUp);
+
+        this.fetchData(this.props);
+    },
+    componentWillReceiveProps: function(props) {
+        this.fetchData(props);
     },
     componentWillUnmount: function() {
         $(document).off('keyup', this.onKeyUp);
+    },
+    updateData: function() {
+        this.setState({
+            data: Reports.get(this.props.type, {id: this.props.id}),
+        });
+    },
+    updateGraph: function() {
+        this.setState({
+            graph: Reports.get('hourly', {
+                from: this.props.graph.from,
+                to: this.props.graph.to,
+                message: this.props.id
+            })
+        });
+    },
+    fetchData: function(props) {
+        Reports.fetch(props.type, {id: props.id}).done(this.updateData);
+
+        if (this.hasGraph(props)) {
+            Reports.fetch('hourly', {
+                from: props.graph.from,
+                to: props.graph.to,
+                message: props.id
+            }).done(this.updateGraph);
+        }
+    },
+    hasGraph: function(props) {
+        return props.type === 'message';
     }
 });
