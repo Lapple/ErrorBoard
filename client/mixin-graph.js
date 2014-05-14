@@ -1,9 +1,6 @@
 module.exports = {
     getInitialState: function() {
-        return {
-            width: 0,
-            height: 300
-        };
+        return {width: 0};
     },
     calculateWidth: function() {
         this.setState({

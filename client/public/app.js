@@ -28,6 +28,16 @@ var renderRegion = function(selector, Component, props) {
     };
 };
 
+var setTimespan = function(from, to) {
+    return function(ctx, next) {
+        ctx.params.timespan = {
+            from: from || moment().startOf('hour').subtract('days', 4).valueOf(),
+            to: to || moment().endOf('hour').valueOf()
+        };
+        next();
+    };
+};
+
 var redirectTo = function(url) {
     return _.defer.bind(_, page, url);
 };
@@ -51,22 +61,19 @@ page('*',
 );
 
 page('/dashboard/',
+    setTimespan(),
     function(ctx, next) {
-        var timespan = {
-            from: moment().startOf('hour').subtract('days', 4).valueOf(),
-            to: moment().endOf('hour').valueOf()
-        };
-
-        ctx.params.timespan = timespan;
-        Reports.fetch('hourly', timespan).always(next);
+        Reports.fetch('hourly', ctx.params.timespan).always(next);
     },
     renderRegion('#main', ComponentDashboard, function(ctx) {
         var timespan = ctx.params.timespan;
 
         return {
-            from: timespan.from,
-            to: timespan.to,
-            hourly: Reports.get('hourly', timespan)
+            hourly: {
+                from: timespan.from,
+                to: timespan.to,
+                data: Reports.get('hourly', timespan)
+            }
         };
     })
 );
@@ -88,6 +95,7 @@ page(/^\/(messages|browsers|scripts|pages)\/.*/,
 );
 
 page('/:type/:id/',
+    setTimespan(),
     function(ctx, next) {
         ctx.params.detailsType = ctx.params.type.slice(0, -1);
         next();
@@ -95,22 +103,51 @@ page('/:type/:id/',
     function(ctx, next) {
         Reports.fetch(ctx.params.detailsType, {id: ctx.params.id}).always(next);
     },
+    function(ctx, next) {
+        if (ctx.params.detailsType === 'message') {
+            Reports.fetch('hourly', {
+                from: ctx.params.timespan.from,
+                to: ctx.params.timespan.to,
+                message: ctx.params.id
+            }).always(next);
+        } else {
+            next();
+        }
+    },
     renderRegion('#details', ComponentDetails, function(ctx) {
         var type = ctx.params.detailsType;
-        var displayType = 'messages';
+        var timespan = ctx.params.timespan;
 
-        if (type === 'message') {
-            displayType = 'browser';
-        }
-
-        return {
+        var props = {
             title: ctx.state.details || null,
             data: Reports.get(type, {id: ctx.params.id}),
-            type: displayType,
+            type: 'messages',
             onClose: function() {
                 page.show('/' + ctx.params.type + '/');
             }
         };
+
+        var graphReport;
+
+        if (type === 'message') {
+            props.type = 'browser';
+
+            graphReport = Reports.get('hourly', {
+                from: timespan.from,
+                to: timespan.to,
+                message: ctx.params.id
+            });
+
+            if (!_.isEmpty(graphReport)) {
+                props.graph = {
+                    from: timespan.from,
+                    to: timespan.to,
+                    data: graphReport
+                };
+            }
+        }
+
+        return props;
     })
 );
 
@@ -153,7 +190,7 @@ module.exports = React.createClass({displayName: 'exports',
             React.DOM.div( {className:"title title_big"}, 
                 "Hourly errors in the last 4 days"
             ),
-            Graph( {data: this.props.hourly,  from: this.props.from,  to: this.props.to } )
+            Graph( {data: this.props.hourly.data,  from: this.props.hourly.from,  to: this.props.hourly.to } )
         );
     }
 });
@@ -164,6 +201,7 @@ var React = require('react');
 
 var cx = React.addons.classSet;
 
+var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
@@ -194,6 +232,7 @@ module.exports = React.createClass({displayName: 'exports',
                 )
             ),
              this.title(), 
+             this.graph(), 
             React.DOM.table( {className:"report__table report__table_details"}, 
                 React.DOM.tbody(null,  items )
             )
@@ -208,6 +247,16 @@ module.exports = React.createClass({displayName: 'exports',
             return React.DOM.div( {className:"title title_muted"}, 
                 "No title"
             );
+        }
+    },
+    graph: function() {
+        if (this.props.graph) {
+            return Graph({
+                data: this.props.graph.data,
+                from: this.props.graph.from,
+                to: this.props.graph.to,
+                height: 200
+            });
         }
     },
     onKeyUp: function(e) {
@@ -227,7 +276,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-report-item.jsx":7,"./mixin-reporter":11,"lodash":29,"react":32}],5:[function(require,module,exports){
+},{"./component-graph.jsx":5,"./component-report-item.jsx":7,"./mixin-reporter":11,"lodash":29,"react":32}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
@@ -239,11 +288,14 @@ var Y_CAP = 0.9;
 
 module.exports = React.createClass({displayName: 'exports',
     mixins: [GraphMixin],
+    getDefaultProps: function() {
+        return {height: 300};
+    },
     render: function() {
         var plot = this.plot();
 
         var width = this.state.width;
-        var height = this.state.height;
+        var height = this.props.height;
         var viewBox = '-0.5 0 ' + width + ' ' + height;
 
         var points = _.map(plot.points, function(item, index, array) {
@@ -547,10 +599,7 @@ module.exports = React.createClass({displayName: 'exports',
 },{"lodash":29,"moment":30,"react":32}],10:[function(require,module,exports){
 module.exports = {
     getInitialState: function() {
-        return {
-            width: 0,
-            height: 300
-        };
+        return {width: 0};
     },
     calculateWidth: function() {
         this.setState({
@@ -774,6 +823,8 @@ module.exports = function() {
 
 },{"./aggregate":14,"./browser-name":25,"./reduce-timestamps":27}],17:[function(require,module,exports){
 var moment = require('moment');
+var slug = require('speakingurl');
+
 var aggregate = require('./aggregate');
 
 module.exports = function(params) {
@@ -782,7 +833,10 @@ module.exports = function(params) {
             return moment(item.timestamp).startOf('hour').valueOf();
         },
         filter: function(item) {
-            return item.timestamp >= params.from && item.timestamp <= params.to;
+            var isMatchingTime = item.timestamp >= params.from && item.timestamp <= params.to;
+            var isMatchingQuery = !params.message || slug(item.message) === params.message;
+
+            return isMatchingTime && isMatchingQuery;
         },
         create: {
             count: 0
@@ -793,7 +847,7 @@ module.exports = function(params) {
     });
 };
 
-},{"./aggregate":14,"moment":30}],18:[function(require,module,exports){
+},{"./aggregate":14,"moment":30,"speakingurl":181}],18:[function(require,module,exports){
 var slug = require('speakingurl');
 
 var aggregate = require('./aggregate');

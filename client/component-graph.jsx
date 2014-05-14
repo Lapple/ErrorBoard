@@ -9,11 +9,14 @@ var Y_CAP = 0.9;
 
 module.exports = React.createClass({
     mixins: [GraphMixin],
+    getDefaultProps: function() {
+        return {height: 300};
+    },
     render: function() {
         var plot = this.plot();
 
         var width = this.state.width;
-        var height = this.state.height;
+        var height = this.props.height;
         var viewBox = '-0.5 0 ' + width + ' ' + height;
 
         var points = _.map(plot.points, function(item, index, array) {

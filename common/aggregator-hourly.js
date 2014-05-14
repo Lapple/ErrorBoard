@@ -1,4 +1,6 @@
 var moment = require('moment');
+var slug = require('speakingurl');
+
 var aggregate = require('./aggregate');
 
 module.exports = function(params) {
@@ -7,7 +9,10 @@ module.exports = function(params) {
             return moment(item.timestamp).startOf('hour').valueOf();
         },
         filter: function(item) {
-            return item.timestamp >= params.from && item.timestamp <= params.to;
+            var isMatchingTime = item.timestamp >= params.from && item.timestamp <= params.to;
+            var isMatchingQuery = !params.message || slug(item.message) === params.message;
+
+            return isMatchingTime && isMatchingQuery;
         },
         create: {
             count: 0

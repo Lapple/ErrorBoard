@@ -3,6 +3,7 @@ var React = require('react');
 
 var cx = React.addons.classSet;
 
+var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
 var ReporterMixin = require('./mixin-reporter');
 
@@ -33,6 +34,7 @@ module.exports = React.createClass({
                 </svg>
             </div>
             { this.title() }
+            { this.graph() }
             <table className="report__table report__table_details">
                 <tbody>{ items }</tbody>
             </table>
@@ -47,6 +49,16 @@ module.exports = React.createClass({
             return <div className='title title_muted'>
                 No title
             </div>;
+        }
+    },
+    graph: function() {
+        if (this.props.graph) {
+            return Graph({
+                data: this.props.graph.data,
+                from: this.props.graph.from,
+                to: this.props.graph.to,
+                height: 200
+            });
         }
     },
     onKeyUp: function(e) {

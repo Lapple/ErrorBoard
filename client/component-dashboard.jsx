@@ -8,7 +8,7 @@ module.exports = React.createClass({
             <div className='title title_big'>
                 Hourly errors in the last 4 days
             </div>
-            <Graph data={ this.props.hourly } from={ this.props.from } to={ this.props.to } />
+            <Graph data={ this.props.hourly.data } from={ this.props.hourly.from } to={ this.props.hourly.to } />
         </div>;
     }
 });
