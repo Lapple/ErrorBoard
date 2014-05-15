@@ -1,7 +1,6 @@
 var page = require('page');
 var slug = require('speakingurl');
 var React = require('react');
-var moment = require('moment');
 
 var Nav = require('./component-nav.jsx');
 var Dashboard = require('./component-dashboard.jsx');
@@ -9,14 +8,6 @@ var Report = require('./component-report.jsx');
 var Details = require('./component-details.jsx');
 
 module.exports = React.createClass({
-    getDefaultProps: function() {
-        return {
-            graphs: {
-                from: moment().startOf('hour').subtract('days', 4).valueOf(),
-                to: moment().endOf('hour').valueOf()
-            }
-        };
-    },
     render: function() {
         return <div className='container'>
             <div className='menu'>
@@ -32,7 +23,7 @@ module.exports = React.createClass({
     },
     renderMain: function() {
         if (this.props.ctx.params.type === 'dashboard') {
-            return <Dashboard graph={ this.props.graphs } />;
+            return <Dashboard />;
         }
 
         return <Report type={ this.props.ctx.params.type } onClick={ this._showDetails } />;
@@ -46,7 +37,6 @@ module.exports = React.createClass({
                 type: detailsType,
                 id: ctx.params.id,
                 title: ctx.state.details || null,
-                graph: this.props.graphs,
                 onClose: this._hideDetails
             });
         }

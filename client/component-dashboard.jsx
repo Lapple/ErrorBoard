@@ -1,4 +1,5 @@
 var React = require('react');
+var moment = require('moment');
 
 var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
@@ -6,7 +7,9 @@ var Graph = require('./component-graph.jsx');
 module.exports = React.createClass({
     getInitialState: function() {
         return {
-            graph: {}
+            from: moment().startOf('hour').subtract('days', 4).valueOf(),
+            to: Date.now(),
+            hourly: {}
         };
     },
     render: function() {
@@ -14,15 +17,21 @@ module.exports = React.createClass({
             <div className='title title_big'>
                 Hourly errors in the last 4 days
             </div>
-            <Graph data={ this.state.graph } from={ this.props.graph.from } to={ this.props.graph.to } />
+            <Graph data={ this.state.hourly } from={ this.state.from } to={ this.state.to } />
         </div>;
     },
     componentDidMount: function() {
-        Reports.fetch('hourly', this.props.graph).done(this.updateGraphData);
+        Reports.fetch('hourly', this._getReportParams()).done(this.updateGraphData);
     },
     updateGraphData: function() {
         this.setState({
-            graph: Reports.get('hourly', this.props.graph)
+            hourly: Reports.get('hourly', this._getReportParams())
         });
-    }
+    },
+    _getReportParams: function() {
+        return {
+            from: this.state.from,
+            to: this.state.to
+        };
+    },
 });

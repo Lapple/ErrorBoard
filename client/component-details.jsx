@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var React = require('react');
+var moment = require('moment');
 
 var cx = React.addons.classSet;
 
@@ -17,7 +18,9 @@ module.exports = React.createClass({
         };
 
         if (this.hasGraph(this.props)) {
-            state.graph = {};
+            state.graphData = {};
+            state.from = moment().startOf('hour').subtract('days', 4).valueOf();
+            state.to = Date.now();
         }
 
         return state;
@@ -51,11 +54,11 @@ module.exports = React.createClass({
         }
     },
     graph: function() {
-        if (this.state.graph) {
+        if (this.hasGraph(this.props)) {
             return Graph({
-                data: this.state.graph,
-                from: this.props.graph.from,
-                to: this.props.graph.to,
+                data: this.state.graphData,
+                from: this.state.from,
+                to: this.state.to,
                 height: 200
             });
         }
@@ -101,9 +104,9 @@ module.exports = React.createClass({
     },
     updateGraph: function() {
         this.setState({
-            graph: Reports.get('hourly', {
-                from: this.props.graph.from,
-                to: this.props.graph.to,
+            graphData: Reports.get('hourly', {
+                from: this.state.from,
+                to: this.state.to,
                 message: this.props.id
             })
         });
@@ -113,8 +116,8 @@ module.exports = React.createClass({
 
         if (this.hasGraph(props)) {
             Reports.fetch('hourly', {
-                from: props.graph.from,
-                to: props.graph.to,
+                from: this.state.from,
+                to: this.state.to,
                 message: props.id
             }).done(this.updateGraph);
         }

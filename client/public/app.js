@@ -37,7 +37,6 @@ $(page.start);
 /** @jsx React.DOM */var page = require('page');
 var slug = require('speakingurl');
 var React = require('react');
-var moment = require('moment');
 
 var Nav = require('./component-nav.jsx');
 var Dashboard = require('./component-dashboard.jsx');
@@ -45,14 +44,6 @@ var Report = require('./component-report.jsx');
 var Details = require('./component-details.jsx');
 
 module.exports = React.createClass({displayName: 'exports',
-    getDefaultProps: function() {
-        return {
-            graphs: {
-                from: moment().startOf('hour').subtract('days', 4).valueOf(),
-                to: moment().endOf('hour').valueOf()
-            }
-        };
-    },
     render: function() {
         return React.DOM.div( {className:"container"}, 
             React.DOM.div( {className:"menu"}, 
@@ -68,7 +59,7 @@ module.exports = React.createClass({displayName: 'exports',
     },
     renderMain: function() {
         if (this.props.ctx.params.type === 'dashboard') {
-            return Dashboard( {graph: this.props.graphs } );
+            return Dashboard(null );
         }
 
         return Report( {type: this.props.ctx.params.type,  onClick: this._showDetails } );
@@ -82,7 +73,6 @@ module.exports = React.createClass({displayName: 'exports',
                 type: detailsType,
                 id: ctx.params.id,
                 title: ctx.state.details || null,
-                graph: this.props.graphs,
                 onClose: this._hideDetails
             });
         }
@@ -96,7 +86,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-dashboard.jsx":4,"./component-details.jsx":5,"./component-nav.jsx":7,"./component-report.jsx":9,"moment":30,"page":31,"react":32,"speakingurl":181}],3:[function(require,module,exports){
+},{"./component-dashboard.jsx":4,"./component-details.jsx":5,"./component-nav.jsx":7,"./component-report.jsx":9,"page":31,"react":32,"speakingurl":181}],3:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var slug = require('speakingurl');
@@ -122,6 +112,7 @@ module.exports = React.createClass({displayName: 'exports',
 
 },{"lodash":29,"react":32,"speakingurl":181}],4:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
+var moment = require('moment');
 
 var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
@@ -129,7 +120,9 @@ var Graph = require('./component-graph.jsx');
 module.exports = React.createClass({displayName: 'exports',
     getInitialState: function() {
         return {
-            graph: {}
+            from: moment().startOf('hour').subtract('days', 4).valueOf(),
+            to: Date.now(),
+            hourly: {}
         };
     },
     render: function() {
@@ -137,22 +130,29 @@ module.exports = React.createClass({displayName: 'exports',
             React.DOM.div( {className:"title title_big"}, 
                 "Hourly errors in the last 4 days"
             ),
-            Graph( {data: this.state.graph,  from: this.props.graph.from,  to: this.props.graph.to } )
+            Graph( {data: this.state.hourly,  from: this.state.from,  to: this.state.to } )
         );
     },
     componentDidMount: function() {
-        Reports.fetch('hourly', this.props.graph).done(this.updateGraphData);
+        Reports.fetch('hourly', this._getReportParams()).done(this.updateGraphData);
     },
     updateGraphData: function() {
         this.setState({
-            graph: Reports.get('hourly', this.props.graph)
+            hourly: Reports.get('hourly', this._getReportParams())
         });
-    }
+    },
+    _getReportParams: function() {
+        return {
+            from: this.state.from,
+            to: this.state.to
+        };
+    },
 });
 
-},{"./component-graph.jsx":6,"./reports":13,"react":32}],5:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./reports":13,"moment":30,"react":32}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
+var moment = require('moment');
 
 var cx = React.addons.classSet;
 
@@ -170,7 +170,9 @@ module.exports = React.createClass({displayName: 'exports',
         };
 
         if (this.hasGraph(this.props)) {
-            state.graph = {};
+            state.graphData = {};
+            state.from = moment().startOf('hour').subtract('days', 4).valueOf();
+            state.to = Date.now();
         }
 
         return state;
@@ -204,11 +206,11 @@ module.exports = React.createClass({displayName: 'exports',
         }
     },
     graph: function() {
-        if (this.state.graph) {
+        if (this.hasGraph(this.props)) {
             return Graph({
-                data: this.state.graph,
-                from: this.props.graph.from,
-                to: this.props.graph.to,
+                data: this.state.graphData,
+                from: this.state.from,
+                to: this.state.to,
                 height: 200
             });
         }
@@ -254,9 +256,9 @@ module.exports = React.createClass({displayName: 'exports',
     },
     updateGraph: function() {
         this.setState({
-            graph: Reports.get('hourly', {
-                from: this.props.graph.from,
-                to: this.props.graph.to,
+            graphData: Reports.get('hourly', {
+                from: this.state.from,
+                to: this.state.to,
                 message: this.props.id
             })
         });
@@ -266,8 +268,8 @@ module.exports = React.createClass({displayName: 'exports',
 
         if (this.hasGraph(props)) {
             Reports.fetch('hourly', {
-                from: props.graph.from,
-                to: props.graph.to,
+                from: this.state.from,
+                to: this.state.to,
                 message: props.id
             }).done(this.updateGraph);
         }
@@ -277,7 +279,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-graph.jsx":6,"./component-report-item.jsx":8,"./mixin-reporter":12,"./reports":13,"lodash":29,"react":32}],6:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./component-report-item.jsx":8,"./mixin-reporter":12,"./reports":13,"lodash":29,"moment":30,"react":32}],6:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
