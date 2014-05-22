@@ -300,26 +300,29 @@ module.exports = React.createClass({displayName: 'exports',
         var width = this.state.width;
         var height = this.props.height;
         var viewBox = '-0.5 0 ' + width + ' ' + height;
+        var xStep = width / (plot.points.length - 1);
 
         var points = _.map(plot.points, function(item, index, array) {
             var y = (item.count / plot.max) || 0;
 
             return {
-                x: index * (width / (array.length - 1)),
+                x: index * xStep,
                 y: height - (y * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };
         });
 
-        var path = _.reduce(points, function(d, point, index) {
-            var tool = index === 0 ? 'M' : 'L';
-            return d + tool + point.x + ' ' + point.y;
-        }, '');
+        var bars = _.map(points, function(point, index) {
+            var labelDistance = 8;
 
-        var circles = _.map(points, function(point, index) {
-            if (point.value > 0) {
-                return React.DOM.circle( {key: point.time,  cx: point.x,  cy: point.y,  r:"1"} );
+            if (point.value != 0) {
+                return React.DOM.g( {className:"graph__bar-group", key: point.time }, 
+                    React.DOM.rect( {x: point.x - xStep,  y: point.y,  width: xStep,  height: height - point.y,  className:"graph__bar"} ),
+                    React.DOM.text( {x: point.x - xStep / 2,  y: point.y - labelDistance,  className:"graph__label"}, 
+                         point.value 
+                    )
+                );
             }
         });
 
@@ -344,8 +347,7 @@ module.exports = React.createClass({displayName: 'exports',
             React.DOM.svg( {xmlns:"http://www.w3.org/2000/svg", width: width,  height: height,  viewBox: viewBox }, 
                 React.DOM.line( {x1:"0", y1: height,  x2: width,  y2: height,  className:"graph__axis"} ),
                  days, 
-                React.DOM.path( {d: path,  className:"graph__main"} ),
-                 circles 
+                 bars 
             )
         );
     },
