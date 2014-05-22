@@ -15,15 +15,15 @@ module.exports = React.createClass({
     mixins: [ReporterMixin],
     getInitialState: function() {
         return {
-            now: Date.now(),
             data: {}
         };
     },
     render: function() {
         var that = this;
 
+        var now = Date.now();
         var report = this.getReport(this.state.data);
-        var earliest = _.reduce(report, getEarliest, this.state.now);
+        var earliest = _.reduce(report, getEarliest, now);
 
         var items = _.map(report, function(data) {
             return ReportItem({
@@ -32,7 +32,7 @@ module.exports = React.createClass({
                 data: data,
                 timespan: {
                     earliest: earliest,
-                    latest: this.state.now
+                    latest: now
                 },
                 onClick: _.partial(this.props.onClick, data)
             });
@@ -72,7 +72,7 @@ module.exports = React.createClass({
         </thead>;
     },
     componentDidMount: function() {
-        this._interval = setInterval(this.updateNow, HOUR);
+        this._interval = setInterval(this.forceUpdate.bind(this), HOUR);
         this.fetchData(this.props);
     },
     componentWillReceiveProps: function(props) {
@@ -80,9 +80,6 @@ module.exports = React.createClass({
     },
     componentWillUnmount: function() {
         clearInterval(this._interval);
-    },
-    updateNow: function() {
-        this.setState({now: Date.now()});
     },
     updateData: function() {
         this.setState({data: Reports.get(this.props.type)});
