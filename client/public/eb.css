@@ -33,9 +33,14 @@ html, body, .app, .container, .menu, .content {
     border-radius: 50%;
 }
 
+.button {
+    display: inline-block;
+    cursor: pointer;
+}
+
 .nav__logo {
     padding: 18px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .nav__link {
@@ -98,6 +103,11 @@ html, body, .app, .container, .menu, .content {
 
 .report, .dashboard {
     margin: 28px 35px;
+}
+
+.report {
+    /* Padding for notices. */
+    padding-top: 35px;
 }
 
 .report__table {
@@ -167,6 +177,22 @@ html, body, .app, .container, .menu, .content {
 
 .report__cell_timespan {
     width: 200px;
+}
+
+.notice {
+    position: absolute;
+    top: 28px;
+    left: 35px;
+    right: 35px;
+    overflow: hidden;
+
+    line-height: 20px;
+}
+
+.notice__button {
+    float: right;
+
+    line-height: 20px;
 }
 
 .timespan {

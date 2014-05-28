@@ -478,29 +478,23 @@ var React = require('react');
 
 var Reports = require('./reports');
 var ReportItem = require('./component-report-item.jsx');
-var ReporterMixin = require('./mixin-reporter');
 
 var HOUR = 60 * 60 * 1000;
 
-var getEarliest = function(memo, item) {
-    return _.min([memo, item.earliest]);
-};
-
 module.exports = React.createClass({displayName: 'exports',
-    mixins: [ReporterMixin],
     getInitialState: function() {
         return {
-            data: {}
+            index: [],
+            hasOrderBroken: false
         };
     },
     render: function() {
         var that = this;
 
         var now = Date.now();
-        var report = this.getReport(this.state.data);
-        var earliest = _.reduce(report, getEarliest, now);
+        var earliest = _.reduce(this.state.index, getEarliest, now);
 
-        var items = _.map(report, function(data) {
+        var items = _.map(this.state.index, function(data) {
             return ReportItem({
                 key: data.key,
                 type: this.props.type,
@@ -514,6 +508,7 @@ module.exports = React.createClass({displayName: 'exports',
         }, this);
 
         return React.DOM.div( {className:"report"}, 
+             this.orderUpdateNotice(), 
             React.DOM.table( {className:"report__table"}, 
                  this.thead(), 
                 React.DOM.tbody(null, 
@@ -546,6 +541,16 @@ module.exports = React.createClass({displayName: 'exports',
             )
         );
     },
+    orderUpdateNotice: function() {
+        if (this.state.hasOrderBroken) {
+            return React.DOM.div( {className:"notice"}, 
+                React.DOM.div( {className:"button notice__button", onClick: this.refreshOrder }, 
+                    "Refresh order"
+                ),
+                "Note: Actual table order has changed after update."
+            )
+        }
+    },
     componentDidMount: function() {
         this._interval = setInterval(this.forceUpdate.bind(this), HOUR);
         this.fetchData(this.props);
@@ -557,14 +562,63 @@ module.exports = React.createClass({displayName: 'exports',
         clearInterval(this._interval);
     },
     updateData: function() {
-        this.setState({data: Reports.get(this.props.type)});
+        var data = Reports.get(this.props.type);
+        var isIndexEmpty = _.isEmpty(this.state.index);
+        var index = isIndexEmpty ? this.getFreshIndex(data) : this.getUpdatedIndex(data);
+
+        this.setState({
+            index: index,
+            hasOrderBroken: !isSortedByLatest(index)
+        });
+    },
+    refreshOrder: function() {
+        this.setState({
+            state: this.getFreshIndex(this.state.index),
+            hasOrderBroken: false
+        });
     },
     fetchData: function(props) {
         Reports.fetch(props.type).done(this.updateData);
+    },
+    getFreshIndex: function(data) {
+        var rows = _.isArray(data) ? data : toArray(data);
+
+        return rows.sort(sortByLatestReport);
+    },
+    getUpdatedIndex: function(data) {
+        var index = this.state.index;
+
+        return toArray(data).sort(function(a, b) {
+            return getCurrentIndex(index, a.key) - getCurrentIndex(index, b.key);
+        });
     }
 });
 
-},{"./component-report-item.jsx":8,"./mixin-reporter":12,"./reports":13,"lodash":29,"react":32}],10:[function(require,module,exports){
+function getEarliest(memo, item) {
+    return _.min([memo, item.earliest]);
+}
+
+function sortByLatestReport(a, b) {
+    return b.latest - a.latest;
+}
+
+function toArray(object) {
+    return _.map(object, function(value, key) {
+        return _.extend(_.clone(value), {key: key});
+    });
+}
+
+function getCurrentIndex(index, key) {
+    return _.findIndex(index, {key: key});
+}
+
+function isSortedByLatest(list) {
+    return _.every(list, function(item, index, list) {
+        return index === 0 || list[index - 1].latest > item.latest;
+    });
+}
+
+},{"./component-report-item.jsx":8,"./reports":13,"lodash":29,"react":32}],10:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
