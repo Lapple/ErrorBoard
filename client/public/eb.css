@@ -33,11 +33,6 @@ html, body, .app, .container, .menu, .content {
     border-radius: 50%;
 }
 
-.button {
-    display: inline-block;
-    cursor: pointer;
-}
-
 .nav__logo {
     padding: 18px;
     margin-bottom: 10px;
@@ -181,18 +176,28 @@ html, body, .app, .container, .menu, .content {
 
 .notice {
     position: absolute;
-    top: 28px;
+    top: 22px;
     left: 35px;
     right: 35px;
-    overflow: hidden;
+    padding-left: 35px;
 
-    line-height: 20px;
+    color: rgb(226, 140, 107);
+    font-size: 14px;
+    line-height: 24px;
+    cursor: pointer;
 }
 
-.notice__button {
-    float: right;
+.notice:hover {
+    color: rgb(230, 96, 44);
+}
 
-    line-height: 20px;
+.notice__icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 24px;
+    height: 24px;
 }
 
 .timespan {
