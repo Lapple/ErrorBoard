@@ -22,7 +22,9 @@
     "sockjs": "^0.3.8",
     "speakingurl": "^0.9.1",
     "useragent": "^2.0.8",
-    "serve-favicon": "^2.0.0"
+    "serve-favicon": "^2.0.0",
+    "superagent": "^0.18.0",
+    "vow": "^0.4.3"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",

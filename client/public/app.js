@@ -31,7 +31,7 @@ var updateApp = function(ctx) {
 page('/', redirectTo('/dashboard/'));
 page('/:type/:id?', updateApp);
 
-$(page.start);
+document.addEventListener('DOMContentLoaded', page.start);
 
 },{"./component-app.jsx":2,"./reports":13,"lodash":29,"page":31,"react":32}],2:[function(require,module,exports){
 /** @jsx React.DOM */var page = require('page');
@@ -239,7 +239,7 @@ module.exports = React.createClass({displayName: 'exports',
     },
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
-        $(document).on('keyup', this.onKeyUp);
+        document.addEventListener('keyup', this.onKeyUp);
 
         this.fetchData(this.props);
     },
@@ -247,7 +247,7 @@ module.exports = React.createClass({displayName: 'exports',
         this.fetchData(props);
     },
     componentWillUnmount: function() {
-        $(document).off('keyup', this.onKeyUp);
+        document.removeEventListener('keyup', this.onKeyUp);
     },
     updateData: function() {
         this.setState({
@@ -701,15 +701,15 @@ module.exports = {
     },
     calculateWidth: function() {
         this.setState({
-            width: $(this.getDOMNode()).width()
+            width: this.getDOMNode().offsetWidth
         });
     },
     componentDidMount: function() {
         this.calculateWidth();
-        $(window).on('resize', this.calculateWidth);
+        window.addEventListener('resize', this.calculateWidth);
     },
     componentWillUnmount: function() {
-        $(window).off('resize', this.calculateWidth);
+        window.removeEventListener('resize', this.calculateWidth);
     }
 };
 
@@ -732,6 +732,8 @@ module.exports = {
 
 },{"lodash":29}],13:[function(require,module,exports){
 var _ = require('lodash');
+var vow = require('vow');
+var request = require('superagent');
 var aggregators = require('../common/aggregators');
 
 var _reports = {};
@@ -755,20 +757,29 @@ var getParams = function(key) {
 module.exports = {
     fetch: function(type, params) {
         var key = getKey(params);
+        var deferred = vow.defer();
 
         if (!_reports[type]) {
             _reports[type] = {};
         }
 
         if (_reports[type][key]) {
-            var deferred = $.Deferred();
-            _.defer(deferred.resolve, _reports[type][key]);
-            return deferred.promise();
+            deferred.resolve(_reports[type][key]);
+        } else {
+            request
+                .get('/reports/' + type)
+                .query(params)
+                .set('Accept', 'application/json')
+                .end(function(res) {
+                    if (res.ok) {
+                        deferred.resolve(_reports[type][key] = res.body);
+                    } else {
+                        deferred.reject(res.text);
+                    }
+                });
         }
 
-        return $.getJSON('/reports/' + type, params).done(function(response) {
-            _reports[type][key] = response;
-        });
+        return deferred.promise();
     },
     get: function(type, params) {
         return (_reports[type] && _reports[type][getKey(params)]) || null;
@@ -786,7 +797,7 @@ module.exports = {
     }
 };
 
-},{"../common/aggregators":24,"lodash":29}],14:[function(require,module,exports){
+},{"../common/aggregators":24,"lodash":29,"superagent":183,"vow":186}],14:[function(require,module,exports){
 var _ = require('lodash');
 
 var prop = function(name) {
@@ -30593,4 +30604,2518 @@ module.exports = require('./lib/');
     }
 })();
 
-},{}]},{},[1])
+},{}],183:[function(require,module,exports){
+/**
+ * Module dependencies.
+ */
+
+var Emitter = require('emitter');
+var reduce = require('reduce');
+
+/**
+ * Root reference for iframes.
+ */
+
+var root = 'undefined' == typeof window
+  ? this
+  : window;
+
+/**
+ * Noop.
+ */
+
+function noop(){};
+
+/**
+ * Check if `obj` is a host object,
+ * we don't want to serialize these :)
+ *
+ * TODO: future proof, move to compoent land
+ *
+ * @param {Object} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isHost(obj) {
+  var str = {}.toString.call(obj);
+
+  switch (str) {
+    case '[object File]':
+    case '[object Blob]':
+    case '[object FormData]':
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Determine XHR.
+ */
+
+function getXHR() {
+  if (root.XMLHttpRequest
+    && ('file:' != root.location.protocol || !root.ActiveXObject)) {
+    return new XMLHttpRequest;
+  } else {
+    try { return new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP.6.0'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP.3.0'); } catch(e) {}
+    try { return new ActiveXObject('Msxml2.XMLHTTP'); } catch(e) {}
+  }
+  return false;
+}
+
+/**
+ * Removes leading and trailing whitespace, added to support IE.
+ *
+ * @param {String} s
+ * @return {String}
+ * @api private
+ */
+
+var trim = ''.trim
+  ? function(s) { return s.trim(); }
+  : function(s) { return s.replace(/(^\s*|\s*$)/g, ''); };
+
+/**
+ * Check if `obj` is an object.
+ *
+ * @param {Object} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isObject(obj) {
+  return obj === Object(obj);
+}
+
+/**
+ * Serialize the given `obj`.
+ *
+ * @param {Object} obj
+ * @return {String}
+ * @api private
+ */
+
+function serialize(obj) {
+  if (!isObject(obj)) return obj;
+  var pairs = [];
+  for (var key in obj) {
+    if (null != obj[key]) {
+      pairs.push(encodeURIComponent(key)
+        + '=' + encodeURIComponent(obj[key]));
+    }
+  }
+  return pairs.join('&');
+}
+
+/**
+ * Expose serialization method.
+ */
+
+ request.serializeObject = serialize;
+
+ /**
+  * Parse the given x-www-form-urlencoded `str`.
+  *
+  * @param {String} str
+  * @return {Object}
+  * @api private
+  */
+
+function parseString(str) {
+  var obj = {};
+  var pairs = str.split('&');
+  var parts;
+  var pair;
+
+  for (var i = 0, len = pairs.length; i < len; ++i) {
+    pair = pairs[i];
+    parts = pair.split('=');
+    obj[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+  }
+
+  return obj;
+}
+
+/**
+ * Expose parser.
+ */
+
+request.parseString = parseString;
+
+/**
+ * Default MIME type map.
+ *
+ *     superagent.types.xml = 'application/xml';
+ *
+ */
+
+request.types = {
+  html: 'text/html',
+  json: 'application/json',
+  xml: 'application/xml',
+  urlencoded: 'application/x-www-form-urlencoded',
+  'form': 'application/x-www-form-urlencoded',
+  'form-data': 'application/x-www-form-urlencoded'
+};
+
+/**
+ * Default serialization map.
+ *
+ *     superagent.serialize['application/xml'] = function(obj){
+ *       return 'generated xml here';
+ *     };
+ *
+ */
+
+ request.serialize = {
+   'application/x-www-form-urlencoded': serialize,
+   'application/json': JSON.stringify
+ };
+
+ /**
+  * Default parsers.
+  *
+  *     superagent.parse['application/xml'] = function(str){
+  *       return { object parsed from str };
+  *     };
+  *
+  */
+
+request.parse = {
+  'application/x-www-form-urlencoded': parseString,
+  'application/json': JSON.parse
+};
+
+/**
+ * Parse the given header `str` into
+ * an object containing the mapped fields.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api private
+ */
+
+function parseHeader(str) {
+  var lines = str.split(/\r?\n/);
+  var fields = {};
+  var index;
+  var line;
+  var field;
+  var val;
+
+  lines.pop(); // trailing CRLF
+
+  for (var i = 0, len = lines.length; i < len; ++i) {
+    line = lines[i];
+    index = line.indexOf(':');
+    field = line.slice(0, index).toLowerCase();
+    val = trim(line.slice(index + 1));
+    fields[field] = val;
+  }
+
+  return fields;
+}
+
+/**
+ * Return the mime type for the given `str`.
+ *
+ * @param {String} str
+ * @return {String}
+ * @api private
+ */
+
+function type(str){
+  return str.split(/ *; */).shift();
+};
+
+/**
+ * Return header field parameters.
+ *
+ * @param {String} str
+ * @return {Object}
+ * @api private
+ */
+
+function params(str){
+  return reduce(str.split(/ *; */), function(obj, str){
+    var parts = str.split(/ *= */)
+      , key = parts.shift()
+      , val = parts.shift();
+
+    if (key && val) obj[key] = val;
+    return obj;
+  }, {});
+};
+
+/**
+ * Initialize a new `Response` with the given `xhr`.
+ *
+ *  - set flags (.ok, .error, etc)
+ *  - parse header
+ *
+ * Examples:
+ *
+ *  Aliasing `superagent` as `request` is nice:
+ *
+ *      request = superagent;
+ *
+ *  We can use the promise-like API, or pass callbacks:
+ *
+ *      request.get('/').end(function(res){});
+ *      request.get('/', function(res){});
+ *
+ *  Sending data can be chained:
+ *
+ *      request
+ *        .post('/user')
+ *        .send({ name: 'tj' })
+ *        .end(function(res){});
+ *
+ *  Or passed to `.send()`:
+ *
+ *      request
+ *        .post('/user')
+ *        .send({ name: 'tj' }, function(res){});
+ *
+ *  Or passed to `.post()`:
+ *
+ *      request
+ *        .post('/user', { name: 'tj' })
+ *        .end(function(res){});
+ *
+ * Or further reduced to a single call for simple cases:
+ *
+ *      request
+ *        .post('/user', { name: 'tj' }, function(res){});
+ *
+ * @param {XMLHTTPRequest} xhr
+ * @param {Object} options
+ * @api private
+ */
+
+function Response(req, options) {
+  options = options || {};
+  this.req = req;
+  this.xhr = this.req.xhr;
+  this.text = this.xhr.responseText;
+  this.setStatusProperties(this.xhr.status);
+  this.header = this.headers = parseHeader(this.xhr.getAllResponseHeaders());
+  // getAllResponseHeaders sometimes falsely returns "" for CORS requests, but
+  // getResponseHeader still works. so we get content-type even if getting
+  // other headers fails.
+  this.header['content-type'] = this.xhr.getResponseHeader('content-type');
+  this.setHeaderProperties(this.header);
+  this.body = this.req.method != 'HEAD'
+    ? this.parseBody(this.text)
+    : null;
+}
+
+/**
+ * Get case-insensitive `field` value.
+ *
+ * @param {String} field
+ * @return {String}
+ * @api public
+ */
+
+Response.prototype.get = function(field){
+  return this.header[field.toLowerCase()];
+};
+
+/**
+ * Set header related properties:
+ *
+ *   - `.type` the content type without params
+ *
+ * A response of "Content-Type: text/plain; charset=utf-8"
+ * will provide you with a `.type` of "text/plain".
+ *
+ * @param {Object} header
+ * @api private
+ */
+
+Response.prototype.setHeaderProperties = function(header){
+  // content-type
+  var ct = this.header['content-type'] || '';
+  this.type = type(ct);
+
+  // params
+  var obj = params(ct);
+  for (var key in obj) this[key] = obj[key];
+};
+
+/**
+ * Parse the given body `str`.
+ *
+ * Used for auto-parsing of bodies. Parsers
+ * are defined on the `superagent.parse` object.
+ *
+ * @param {String} str
+ * @return {Mixed}
+ * @api private
+ */
+
+Response.prototype.parseBody = function(str){
+  var parse = request.parse[this.type];
+  return parse
+    ? parse(str)
+    : null;
+};
+
+/**
+ * Set flags such as `.ok` based on `status`.
+ *
+ * For example a 2xx response will give you a `.ok` of __true__
+ * whereas 5xx will be __false__ and `.error` will be __true__. The
+ * `.clientError` and `.serverError` are also available to be more
+ * specific, and `.statusType` is the class of error ranging from 1..5
+ * sometimes useful for mapping respond colors etc.
+ *
+ * "sugar" properties are also defined for common cases. Currently providing:
+ *
+ *   - .noContent
+ *   - .badRequest
+ *   - .unauthorized
+ *   - .notAcceptable
+ *   - .notFound
+ *
+ * @param {Number} status
+ * @api private
+ */
+
+Response.prototype.setStatusProperties = function(status){
+  var type = status / 100 | 0;
+
+  // status / class
+  this.status = status;
+  this.statusType = type;
+
+  // basics
+  this.info = 1 == type;
+  this.ok = 2 == type;
+  this.clientError = 4 == type;
+  this.serverError = 5 == type;
+  this.error = (4 == type || 5 == type)
+    ? this.toError()
+    : false;
+
+  // sugar
+  this.accepted = 202 == status;
+  this.noContent = 204 == status || 1223 == status;
+  this.badRequest = 400 == status;
+  this.unauthorized = 401 == status;
+  this.notAcceptable = 406 == status;
+  this.notFound = 404 == status;
+  this.forbidden = 403 == status;
+};
+
+/**
+ * Return an `Error` representative of this response.
+ *
+ * @return {Error}
+ * @api public
+ */
+
+Response.prototype.toError = function(){
+  var req = this.req;
+  var method = req.method;
+  var url = req.url;
+
+  var msg = 'cannot ' + method + ' ' + url + ' (' + this.status + ')';
+  var err = new Error(msg);
+  err.status = this.status;
+  err.method = method;
+  err.url = url;
+
+  return err;
+};
+
+/**
+ * Expose `Response`.
+ */
+
+request.Response = Response;
+
+/**
+ * Initialize a new `Request` with the given `method` and `url`.
+ *
+ * @param {String} method
+ * @param {String} url
+ * @api public
+ */
+
+function Request(method, url) {
+  var self = this;
+  Emitter.call(this);
+  this._query = this._query || [];
+  this.method = method;
+  this.url = url;
+  this.header = {};
+  this._header = {};
+  this.on('end', function(){
+    var res = new Response(self);
+    if ('HEAD' == method) res.text = null;
+    self.callback(null, res);
+  });
+}
+
+/**
+ * Mixin `Emitter`.
+ */
+
+Emitter(Request.prototype);
+
+/**
+ * Allow for extension
+ */
+
+Request.prototype.use = function(fn) {
+  fn(this);
+  return this;
+}
+
+/**
+ * Set timeout to `ms`.
+ *
+ * @param {Number} ms
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.timeout = function(ms){
+  this._timeout = ms;
+  return this;
+};
+
+/**
+ * Clear previous timeout.
+ *
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.clearTimeout = function(){
+  this._timeout = 0;
+  clearTimeout(this._timer);
+  return this;
+};
+
+/**
+ * Abort the request, and clear potential timeout.
+ *
+ * @return {Request}
+ * @api public
+ */
+
+Request.prototype.abort = function(){
+  if (this.aborted) return;
+  this.aborted = true;
+  this.xhr.abort();
+  this.clearTimeout();
+  this.emit('abort');
+  return this;
+};
+
+/**
+ * Set header `field` to `val`, or multiple fields with one object.
+ *
+ * Examples:
+ *
+ *      req.get('/')
+ *        .set('Accept', 'application/json')
+ *        .set('X-API-Key', 'foobar')
+ *        .end(callback);
+ *
+ *      req.get('/')
+ *        .set({ Accept: 'application/json', 'X-API-Key': 'foobar' })
+ *        .end(callback);
+ *
+ * @param {String|Object} field
+ * @param {String} val
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.set = function(field, val){
+  if (isObject(field)) {
+    for (var key in field) {
+      this.set(key, field[key]);
+    }
+    return this;
+  }
+  this._header[field.toLowerCase()] = val;
+  this.header[field] = val;
+  return this;
+};
+
+/**
+ * Get case-insensitive header `field` value.
+ *
+ * @param {String} field
+ * @return {String}
+ * @api private
+ */
+
+Request.prototype.getHeader = function(field){
+  return this._header[field.toLowerCase()];
+};
+
+/**
+ * Set Content-Type to `type`, mapping values from `request.types`.
+ *
+ * Examples:
+ *
+ *      superagent.types.xml = 'application/xml';
+ *
+ *      request.post('/')
+ *        .type('xml')
+ *        .send(xmlstring)
+ *        .end(callback);
+ *
+ *      request.post('/')
+ *        .type('application/xml')
+ *        .send(xmlstring)
+ *        .end(callback);
+ *
+ * @param {String} type
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.type = function(type){
+  this.set('Content-Type', request.types[type] || type);
+  return this;
+};
+
+/**
+ * Set Accept to `type`, mapping values from `request.types`.
+ *
+ * Examples:
+ *
+ *      superagent.types.json = 'application/json';
+ *
+ *      request.get('/agent')
+ *        .accept('json')
+ *        .end(callback);
+ *
+ *      request.get('/agent')
+ *        .accept('application/json')
+ *        .end(callback);
+ *
+ * @param {String} accept
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.accept = function(type){
+  this.set('Accept', request.types[type] || type);
+  return this;
+};
+
+/**
+ * Set Authorization field value with `user` and `pass`.
+ *
+ * @param {String} user
+ * @param {String} pass
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.auth = function(user, pass){
+  var str = btoa(user + ':' + pass);
+  this.set('Authorization', 'Basic ' + str);
+  return this;
+};
+
+/**
+* Add query-string `val`.
+*
+* Examples:
+*
+*   request.get('/shoes')
+*     .query('size=10')
+*     .query({ color: 'blue' })
+*
+* @param {Object|String} val
+* @return {Request} for chaining
+* @api public
+*/
+
+Request.prototype.query = function(val){
+  if ('string' != typeof val) val = serialize(val);
+  if (val) this._query.push(val);
+  return this;
+};
+
+/**
+ * Write the field `name` and `val` for "multipart/form-data"
+ * request bodies.
+ *
+ * ``` js
+ * request.post('/upload')
+ *   .field('foo', 'bar')
+ *   .end(callback);
+ * ```
+ *
+ * @param {String} name
+ * @param {String|Blob|File} val
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.field = function(name, val){
+  if (!this._formData) this._formData = new FormData();
+  this._formData.append(name, val);
+  return this;
+};
+
+/**
+ * Queue the given `file` as an attachment to the specified `field`,
+ * with optional `filename`.
+ *
+ * ``` js
+ * request.post('/upload')
+ *   .attach(new Blob(['<a id="a"><b id="b">hey!</b></a>'], { type: "text/html"}))
+ *   .end(callback);
+ * ```
+ *
+ * @param {String} field
+ * @param {Blob|File} file
+ * @param {String} filename
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.attach = function(field, file, filename){
+  if (!this._formData) this._formData = new FormData();
+  this._formData.append(field, file, filename);
+  return this;
+};
+
+/**
+ * Send `data`, defaulting the `.type()` to "json" when
+ * an object is given.
+ *
+ * Examples:
+ *
+ *       // querystring
+ *       request.get('/search')
+ *         .end(callback)
+ *
+ *       // multiple data "writes"
+ *       request.get('/search')
+ *         .send({ search: 'query' })
+ *         .send({ range: '1..5' })
+ *         .send({ order: 'desc' })
+ *         .end(callback)
+ *
+ *       // manual json
+ *       request.post('/user')
+ *         .type('json')
+ *         .send('{"name":"tj"})
+ *         .end(callback)
+ *
+ *       // auto json
+ *       request.post('/user')
+ *         .send({ name: 'tj' })
+ *         .end(callback)
+ *
+ *       // manual x-www-form-urlencoded
+ *       request.post('/user')
+ *         .type('form')
+ *         .send('name=tj')
+ *         .end(callback)
+ *
+ *       // auto x-www-form-urlencoded
+ *       request.post('/user')
+ *         .type('form')
+ *         .send({ name: 'tj' })
+ *         .end(callback)
+ *
+ *       // defaults to x-www-form-urlencoded
+  *      request.post('/user')
+  *        .send('name=tobi')
+  *        .send('species=ferret')
+  *        .end(callback)
+ *
+ * @param {String|Object} data
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.send = function(data){
+  var obj = isObject(data);
+  var type = this.getHeader('Content-Type');
+
+  // merge
+  if (obj && isObject(this._data)) {
+    for (var key in data) {
+      this._data[key] = data[key];
+    }
+  } else if ('string' == typeof data) {
+    if (!type) this.type('form');
+    type = this.getHeader('Content-Type');
+    if ('application/x-www-form-urlencoded' == type) {
+      this._data = this._data
+        ? this._data + '&' + data
+        : data;
+    } else {
+      this._data = (this._data || '') + data;
+    }
+  } else {
+    this._data = data;
+  }
+
+  if (!obj) return this;
+  if (!type) this.type('json');
+  return this;
+};
+
+/**
+ * Invoke the callback with `err` and `res`
+ * and handle arity check.
+ *
+ * @param {Error} err
+ * @param {Response} res
+ * @api private
+ */
+
+Request.prototype.callback = function(err, res){
+  var fn = this._callback;
+  if (2 == fn.length) return fn(err, res);
+  if (err) return this.emit('error', err);
+  fn(res);
+};
+
+/**
+ * Invoke callback with x-domain error.
+ *
+ * @api private
+ */
+
+Request.prototype.crossDomainError = function(){
+  var err = new Error('Origin is not allowed by Access-Control-Allow-Origin');
+  err.crossDomain = true;
+  this.callback(err);
+};
+
+/**
+ * Invoke callback with timeout error.
+ *
+ * @api private
+ */
+
+Request.prototype.timeoutError = function(){
+  var timeout = this._timeout;
+  var err = new Error('timeout of ' + timeout + 'ms exceeded');
+  err.timeout = timeout;
+  this.callback(err);
+};
+
+/**
+ * Enable transmission of cookies with x-domain requests.
+ *
+ * Note that for this to work the origin must not be
+ * using "Access-Control-Allow-Origin" with a wildcard,
+ * and also must set "Access-Control-Allow-Credentials"
+ * to "true".
+ *
+ * @api public
+ */
+
+Request.prototype.withCredentials = function(){
+  this._withCredentials = true;
+  return this;
+};
+
+/**
+ * Initiate request, invoking callback `fn(res)`
+ * with an instanceof `Response`.
+ *
+ * @param {Function} fn
+ * @return {Request} for chaining
+ * @api public
+ */
+
+Request.prototype.end = function(fn){
+  var self = this;
+  var xhr = this.xhr = getXHR();
+  var query = this._query.join('&');
+  var timeout = this._timeout;
+  var data = this._formData || this._data;
+
+  // store callback
+  this._callback = fn || noop;
+
+  // state change
+  xhr.onreadystatechange = function(){
+    if (4 != xhr.readyState) return;
+    if (0 == xhr.status) {
+      if (self.aborted) return self.timeoutError();
+      return self.crossDomainError();
+    }
+    self.emit('end');
+  };
+
+  // progress
+  if (xhr.upload) {
+    xhr.upload.onprogress = function(e){
+      e.percent = e.loaded / e.total * 100;
+      self.emit('progress', e);
+    };
+  }
+
+  // timeout
+  if (timeout && !this._timer) {
+    this._timer = setTimeout(function(){
+      self.abort();
+    }, timeout);
+  }
+
+  // querystring
+  if (query) {
+    query = request.serializeObject(query);
+    this.url += ~this.url.indexOf('?')
+      ? '&' + query
+      : '?' + query;
+  }
+
+  // initiate request
+  xhr.open(this.method, this.url, true);
+
+  // CORS
+  if (this._withCredentials) xhr.withCredentials = true;
+
+  // body
+  if ('GET' != this.method && 'HEAD' != this.method && 'string' != typeof data && !isHost(data)) {
+    // serialize stuff
+    var serialize = request.serialize[this.getHeader('Content-Type')];
+    if (serialize) data = serialize(data);
+  }
+
+  // set header fields
+  for (var field in this.header) {
+    if (null == this.header[field]) continue;
+    xhr.setRequestHeader(field, this.header[field]);
+  }
+
+  // send stuff
+  this.emit('request', this);
+  xhr.send(data);
+  return this;
+};
+
+/**
+ * Expose `Request`.
+ */
+
+request.Request = Request;
+
+/**
+ * Issue a request:
+ *
+ * Examples:
+ *
+ *    request('GET', '/users').end(callback)
+ *    request('/users').end(callback)
+ *    request('/users', callback)
+ *
+ * @param {String} method
+ * @param {String|Function} url or callback
+ * @return {Request}
+ * @api public
+ */
+
+function request(method, url) {
+  // callback
+  if ('function' == typeof url) {
+    return new Request('GET', method).end(url);
+  }
+
+  // url first
+  if (1 == arguments.length) {
+    return new Request('GET', method);
+  }
+
+  return new Request(method, url);
+}
+
+/**
+ * GET `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.get = function(url, data, fn){
+  var req = request('GET', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.query(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * HEAD `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.head = function(url, data, fn){
+  var req = request('HEAD', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * DELETE `url` with optional callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.del = function(url, fn){
+  var req = request('DELETE', url);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * PATCH `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed} data
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.patch = function(url, data, fn){
+  var req = request('PATCH', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * POST `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed} data
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.post = function(url, data, fn){
+  var req = request('POST', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * PUT `url` with optional `data` and callback `fn(res)`.
+ *
+ * @param {String} url
+ * @param {Mixed|Function} data or fn
+ * @param {Function} fn
+ * @return {Request}
+ * @api public
+ */
+
+request.put = function(url, data, fn){
+  var req = request('PUT', url);
+  if ('function' == typeof data) fn = data, data = null;
+  if (data) req.send(data);
+  if (fn) req.end(fn);
+  return req;
+};
+
+/**
+ * Expose `request`.
+ */
+
+module.exports = request;
+
+},{"emitter":184,"reduce":185}],184:[function(require,module,exports){
+
+/**
+ * Expose `Emitter`.
+ */
+
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks[event] = this._callbacks[event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
+  function on() {
+    self.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks[event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks[event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks[event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks[event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],185:[function(require,module,exports){
+
+/**
+ * Reduce `arr` with `fn`.
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @param {Mixed} initial
+ *
+ * TODO: combatible error handling?
+ */
+
+module.exports = function(arr, fn, initial){  
+  var idx = 0;
+  var len = arr.length;
+  var curr = arguments.length == 3
+    ? initial
+    : arr[idx++];
+
+  while (idx < len) {
+    curr = fn.call(null, curr, arr[idx], ++idx, arr);
+  }
+  
+  return curr;
+};
+},{}],186:[function(require,module,exports){
+(function (process){
+/**
+ * @module vow
+ * @author Filatov Dmitry <dfilatov@yandex-team.ru>
+ * @version 0.4.3
+ * @license
+ * Dual licensed under the MIT and GPL licenses:
+ *   * http://www.opensource.org/licenses/mit-license.php
+ *   * http://www.gnu.org/licenses/gpl.html
+ */
+
+(function(global) {
+
+/**
+ * @class Deferred
+ * @exports vow:Deferred
+ * @description
+ * The `Deferred` class is used to encapsulate newly-created promise object along with functions that resolve, reject or notify it.
+ */
+
+/**
+ * @constructor
+ * @description
+ * You can use `vow.defer()` instead of using this constructor.
+ *
+ * `new vow.Deferred()` gives the same result as `vow.defer()`.
+ */
+var Deferred = function() {
+    this._promise = new Promise();
+};
+
+Deferred.prototype = /** @lends Deferred.prototype */{
+    /**
+     * Returns corresponding promise.
+     *
+     * @returns {vow:Promise}
+     */
+    promise : function() {
+        return this._promise;
+    },
+
+    /**
+     * Resolves corresponding promise with given `value`.
+     *
+     * @param {*} value
+     *
+     * @example
+     * ```js
+     * var defer = vow.defer(),
+     *     promise = defer.promise();
+     *
+     * promise.then(function(value) {
+     *     // value is "'success'" here
+     * });
+     *
+     * defer.resolve('success');
+     * ```
+     */
+    resolve : function(value) {
+        this._promise.isResolved() || this._promise._resolve(value);
+    },
+
+    /**
+     * Rejects corresponding promise with given `reason`.
+     *
+     * @param {*} reason
+     *
+     * @example
+     * ```js
+     * var defer = vow.defer(),
+     *     promise = defer.promise();
+     *
+     * promise.fail(function(reason) {
+     *     // reason is "'something is wrong'" here
+     * });
+     *
+     * defer.reject('something is wrong');
+     * ```
+     */
+    reject : function(reason) {
+        this._promise.isResolved() || this._promise._reject(reason);
+    },
+
+    /**
+     * Notifies corresponding promise with given `value`.
+     *
+     * @param {*} value
+     *
+     * @example
+     * ```js
+     * var defer = vow.defer(),
+     *     promise = defer.promise();
+     *
+     * promise.progress(function(value) {
+     *     // value is "'20%'", "'40%'" here
+     * });
+     *
+     * defer.notify('20%');
+     * defer.notify('40%');
+     * ```
+     */
+    notify : function(value) {
+        this._promise.isResolved() || this._promise._notify(value);
+    }
+};
+
+var PROMISE_STATUS = {
+    PENDING   : 0,
+    FULFILLED : 1,
+    REJECTED  : -1
+};
+
+/**
+ * @class Promise
+ * @exports vow:Promise
+ * @description
+ * The `Promise` class is used when you want to give to the caller something to subscribe to,
+ * but not the ability to resolve or reject the deferred.
+ */
+
+/**
+ * @constructor
+ * @param {Function} resolver See https://github.com/domenic/promises-unwrapping/blob/master/README.md#the-promise-constructor for details.
+ * @description
+ * You should use this constructor directly only if you are going to use `vow` as DOM Promises implementation.
+ * In other case you should use `vow.defer()` and `defer.promise()` methods.
+ * @example
+ * ```js
+ * function fetchJSON(url) {
+ *     return new vow.Promise(function(resolve, reject, notify) {
+ *         var xhr = new XMLHttpRequest();
+ *         xhr.open('GET', url);
+ *         xhr.responseType = 'json';
+ *         xhr.send();
+ *         xhr.onload = function() {
+ *             if(xhr.response) {
+ *                 resolve(xhr.response);
+ *             }
+ *             else {
+ *                 reject(new TypeError());
+ *             }
+ *         };
+ *     });
+ * }
+ * ```
+ */
+var Promise = function(resolver) {
+    this._value = undef;
+    this._status = PROMISE_STATUS.PENDING;
+
+    this._fulfilledCallbacks = [];
+    this._rejectedCallbacks = [];
+    this._progressCallbacks = [];
+
+    if(resolver) { // NOTE: see https://github.com/domenic/promises-unwrapping/blob/master/README.md
+        var _this = this,
+            resolverFnLen = resolver.length;
+
+        resolver(
+            function(val) {
+                _this.isResolved() || _this._resolve(val);
+            },
+            resolverFnLen > 1?
+                function(reason) {
+                    _this.isResolved() || _this._reject(reason);
+                } :
+                undef,
+            resolverFnLen > 2?
+                function(val) {
+                    _this.isResolved() || _this._notify(val);
+                } :
+                undef);
+    }
+};
+
+Promise.prototype = /** @lends Promise.prototype */ {
+    /**
+     * Returns value of fulfilled promise or reason in case of rejection.
+     *
+     * @returns {*}
+     */
+    valueOf : function() {
+        return this._value;
+    },
+
+    /**
+     * Returns `true` if promise is resolved.
+     *
+     * @returns {Boolean}
+     */
+    isResolved : function() {
+        return this._status !== PROMISE_STATUS.PENDING;
+    },
+
+    /**
+     * Returns `true` if promise is fulfilled.
+     *
+     * @returns {Boolean}
+     */
+    isFulfilled : function() {
+        return this._status === PROMISE_STATUS.FULFILLED;
+    },
+
+    /**
+     * Returns `true` if promise is rejected.
+     *
+     * @returns {Boolean}
+     */
+    isRejected : function() {
+        return this._status === PROMISE_STATUS.REJECTED;
+    },
+
+    /**
+     * Adds reactions to promise.
+     *
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Function} [onProgress] Callback that will to be invoked with the value after promise has been notified
+     * @param {Object} [ctx] Context of callbacks execution
+     * @returns {vow:Promise} A new promise, see https://github.com/promises-aplus/promises-spec for details
+     */
+    then : function(onFulfilled, onRejected, onProgress, ctx) {
+        var defer = new Deferred();
+        this._addCallbacks(defer, onFulfilled, onRejected, onProgress, ctx);
+        return defer.promise();
+    },
+
+    /**
+     * Adds rejection reaction only. It is shortcut for `promise.then(undefined, onRejected)`.
+     *
+     * @param {Function} onRejected Callback to be called with the value after promise has been rejected
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    'catch' : function(onRejected, ctx) {
+        return this.then(undef, onRejected, ctx);
+    },
+
+    /**
+     * Adds rejection reaction only. It is shortcut for `promise.then(null, onRejected)`. It's alias for `catch`.
+     *
+     * @param {Function} onRejected Callback to be called with the value after promise has been rejected
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    fail : function(onRejected, ctx) {
+        return this.then(undef, onRejected, ctx);
+    },
+
+    /**
+     * Adds resolving reaction (to fulfillment and rejection both).
+     *
+     * @param {Function} onResolved Callback that to be called with the value after promise has been rejected
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    always : function(onResolved, ctx) {
+        var _this = this,
+            cb = function() {
+                return onResolved.call(this, _this);
+            };
+
+        return this.then(cb, cb, ctx);
+    },
+
+    /**
+     * Adds progress reaction.
+     *
+     * @param {Function} onProgress Callback to be called with the value when promise has been notified
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    progress : function(onProgress, ctx) {
+        return this.then(undef, undef, onProgress, ctx);
+    },
+
+    /**
+     * Like `promise.then`, but "spreads" the array into a variadic value handler.
+     * It is useful with `vow.all` and `vow.allResolved` methods.
+     *
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Object} [ctx] Context of callbacks execution
+     * @returns {vow:Promise}
+     *
+     * @example
+     * ```js
+     * var defer1 = vow.defer(),
+     *     defer2 = vow.defer();
+     *
+     * vow.all([defer1.promise(), defer2.promise()]).spread(function(arg1, arg2) {
+     *     // arg1 is "1", arg2 is "'two'" here
+     * });
+     *
+     * defer1.resolve(1);
+     * defer2.resolve('two');
+     * ```
+     */
+    spread : function(onFulfilled, onRejected, ctx) {
+        return this.then(
+            function(val) {
+                return onFulfilled.apply(this, val);
+            },
+            onRejected,
+            ctx);
+    },
+
+    /**
+     * Like `then`, but terminates a chain of promises.
+     * If the promise has been rejected, throws it as an exception in a future turn of the event loop.
+     *
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Function} [onProgress] Callback that will to be invoked with the value after promise has been notified
+     * @param {Object} [ctx] Context of callbacks execution
+     *
+     * @example
+     * ```js
+     * var defer = vow.defer();
+     * defer.reject(Error('Internal error'));
+     * defer.promise().done(); // exception to be thrown
+     * ```
+     */
+    done : function(onFulfilled, onRejected, onProgress, ctx) {
+        this
+            .then(onFulfilled, onRejected, onProgress, ctx)
+            .fail(throwException);
+    },
+
+    /**
+     * Returns a new promise that will be fulfilled in `delay` milliseconds if the promise is fulfilled,
+     * or immediately rejected if promise is rejected.
+     *
+     * @param {Number} delay
+     * @returns {vow:Promise}
+     */
+    delay : function(delay) {
+        var timer,
+            promise = this.then(function(val) {
+                var defer = new Deferred();
+                timer = setTimeout(
+                    function() {
+                        defer.resolve(val);
+                    },
+                    delay);
+
+                return defer.promise();
+            });
+
+        promise.always(function() {
+            clearTimeout(timer);
+        });
+
+        return promise;
+    },
+
+    /**
+     * Returns a new promise that will be rejected in `timeout` milliseconds
+     * if the promise is not resolved beforehand.
+     *
+     * @param {Number} timeout
+     * @returns {vow:Promise}
+     *
+     * @example
+     * ```js
+     * var defer = vow.defer(),
+     *     promiseWithTimeout1 = defer.promise().timeout(50),
+     *     promiseWithTimeout2 = defer.promise().timeout(200);
+     *
+     * setTimeout(
+     *     function() {
+     *         defer.resolve('ok');
+     *     },
+     *     100);
+     *
+     * promiseWithTimeout1.fail(function(reason) {
+     *     // promiseWithTimeout to be rejected in 50ms
+     * });
+     *
+     * promiseWithTimeout2.then(function(value) {
+     *     // promiseWithTimeout to be fulfilled with "'ok'" value
+     * });
+     * ```
+     */
+    timeout : function(timeout) {
+        var defer = new Deferred(),
+            timer = setTimeout(
+                function() {
+                    defer.reject(Error('timed out'));
+                },
+                timeout);
+
+        this.then(
+            function(val) {
+                defer.resolve(val);
+            },
+            function(reason) {
+                defer.reject(reason);
+            });
+
+        defer.promise().always(function() {
+            clearTimeout(timer);
+        });
+
+        return defer.promise();
+    },
+
+    _vow : true,
+
+    _resolve : function(val) {
+        if(this._status !== PROMISE_STATUS.PENDING) {
+            return;
+        }
+
+        if(val === this) {
+            this._reject(TypeError('Can\'t resolve promise with itself'));
+            return;
+        }
+
+        if(val && !!val._vow) { // shortpath for vow.Promise
+            val.then(
+                this._resolve,
+                this._reject,
+                this._notify,
+                this);
+            return;
+        }
+
+        if(isObject(val) || isFunction(val)) {
+            var then;
+            try {
+                then = val.then;
+            }
+            catch(e) {
+                this._reject(e);
+                return;
+            }
+
+            if(isFunction(then)) {
+                var _this = this,
+                    isResolved = false;
+
+                try {
+                    then.call(
+                        val,
+                        function(val) {
+                            if(isResolved) {
+                                return;
+                            }
+
+                            isResolved = true;
+                            _this._resolve(val);
+                        },
+                        function(err) {
+                            if(isResolved) {
+                                return;
+                            }
+
+                            isResolved = true;
+                            _this._reject(err);
+                        },
+                        function(val) {
+                            _this._notify(val);
+                        });
+                }
+                catch(e) {
+                    isResolved || this._reject(e);
+                }
+
+                return;
+            }
+        }
+
+        this._fulfill(val);
+    },
+
+    _fulfill : function(val) {
+        if(this._status !== PROMISE_STATUS.PENDING) {
+            return;
+        }
+
+        this._status = PROMISE_STATUS.FULFILLED;
+        this._value = val;
+
+        this._callCallbacks(this._fulfilledCallbacks, val);
+        this._fulfilledCallbacks = this._rejectedCallbacks = this._progressCallbacks = undef;
+    },
+
+    _reject : function(reason) {
+        if(this._status !== PROMISE_STATUS.PENDING) {
+            return;
+        }
+
+        this._status = PROMISE_STATUS.REJECTED;
+        this._value = reason;
+
+        this._callCallbacks(this._rejectedCallbacks, reason);
+        this._fulfilledCallbacks = this._rejectedCallbacks = this._progressCallbacks = undef;
+    },
+
+    _notify : function(val) {
+        this._callCallbacks(this._progressCallbacks, val);
+    },
+
+    _addCallbacks : function(defer, onFulfilled, onRejected, onProgress, ctx) {
+        if(onRejected && !isFunction(onRejected)) {
+            ctx = onRejected;
+            onRejected = undef;
+        }
+        else if(onProgress && !isFunction(onProgress)) {
+            ctx = onProgress;
+            onProgress = undef;
+        }
+
+        var cb;
+
+        if(!this.isRejected()) {
+            cb = { defer : defer, fn : isFunction(onFulfilled)? onFulfilled : undef, ctx : ctx };
+            this.isFulfilled()?
+                this._callCallbacks([cb], this._value) :
+                this._fulfilledCallbacks.push(cb);
+        }
+
+        if(!this.isFulfilled()) {
+            cb = { defer : defer, fn : onRejected, ctx : ctx };
+            this.isRejected()?
+                this._callCallbacks([cb], this._value) :
+                this._rejectedCallbacks.push(cb);
+        }
+
+        if(this._status === PROMISE_STATUS.PENDING) {
+            this._progressCallbacks.push({ defer : defer, fn : onProgress, ctx : ctx });
+        }
+    },
+
+    _callCallbacks : function(callbacks, arg) {
+        var len = callbacks.length;
+        if(!len) {
+            return;
+        }
+
+        var isResolved = this.isResolved(),
+            isFulfilled = this.isFulfilled();
+
+        nextTick(function() {
+            var i = 0, cb, defer, fn;
+            while(i < len) {
+                cb = callbacks[i++];
+                defer = cb.defer;
+                fn = cb.fn;
+
+                if(fn) {
+                    var ctx = cb.ctx,
+                        res;
+                    try {
+                        res = ctx? fn.call(ctx, arg) : fn(arg);
+                    }
+                    catch(e) {
+                        defer.reject(e);
+                        continue;
+                    }
+
+                    isResolved?
+                        defer.resolve(res) :
+                        defer.notify(res);
+                }
+                else {
+                    isResolved?
+                        isFulfilled?
+                            defer.resolve(arg) :
+                            defer.reject(arg) :
+                        defer.notify(arg);
+                }
+            }
+        });
+    }
+};
+
+/** @lends Promise */
+var staticMethods = {
+    /**
+     * Coerces given `value` to a promise, or returns the `value` if it's already a promise.
+     *
+     * @param {*} value
+     * @returns {vow:Promise}
+     */
+    cast : function(value) {
+        return vow.cast(value);
+    },
+
+    /**
+     * Returns a promise to be fulfilled only after all the items in `iterable` are fulfilled,
+     * or to be rejected when any of the `iterable` is rejected.
+     *
+     * @param {Array|Object} iterable
+     * @returns {vow:Promise}
+     */
+    all : function(iterable) {
+        return vow.all(iterable);
+    },
+
+    /**
+     * Returns a promise to be fulfilled only when any of the items in `iterable` are fulfilled,
+     * or to be rejected when the first item is rejected.
+     *
+     * @param {Array} iterable
+     * @returns {vow:Promise}
+     */
+    race : function(iterable) {
+        return vow.anyResolved(iterable);
+    },
+
+    /**
+     * Returns a promise that has already been resolved with the given `value`.
+     * If `value` is a promise, returned promise will be adopted with the state of given promise.
+     *
+     * @param {*} value
+     * @returns {vow:Promise}
+     */
+    resolve : function(value) {
+        return vow.resolve(value);
+    },
+
+    /**
+     * Returns a promise that has already been rejected with the given `reason`.
+     *
+     * @param {*} reason
+     * @returns {vow:Promise}
+     */
+    reject : function(reason) {
+        return vow.reject(reason);
+    }
+};
+
+for(var prop in staticMethods) {
+    staticMethods.hasOwnProperty(prop) &&
+        (Promise[prop] = staticMethods[prop]);
+}
+
+var vow = /** @exports vow */ {
+    Deferred : Deferred,
+
+    Promise : Promise,
+
+    /**
+     * Creates a new deferred. This method is a factory method for `vow:Deferred` class.
+     * It's equivalent to `new vow.Deferred()`.
+     *
+     * @returns {vow:Deferred}
+     */
+    defer : function() {
+        return new Deferred();
+    },
+
+    /**
+     * Static equivalent to `promise.then`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Function} [onProgress] Callback that will to be invoked with the value after promise has been notified
+     * @param {Object} [ctx] Context of callbacks execution
+     * @returns {vow:Promise}
+     */
+    when : function(value, onFulfilled, onRejected, onProgress, ctx) {
+        return vow.cast(value).then(onFulfilled, onRejected, onProgress, ctx);
+    },
+
+    /**
+     * Static equivalent to `promise.fail`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} onRejected Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    fail : function(value, onRejected, ctx) {
+        return vow.when(value, undef, onRejected, ctx);
+    },
+
+    /**
+     * Static equivalent to `promise.always`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} onResolved Callback that will to be invoked with the reason after promise has been resolved
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    always : function(value, onResolved, ctx) {
+        return vow.when(value).always(onResolved, ctx);
+    },
+
+    /**
+     * Static equivalent to `promise.progress`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} onProgress Callback that will to be invoked with the reason after promise has been notified
+     * @param {Object} [ctx] Context of callback execution
+     * @returns {vow:Promise}
+     */
+    progress : function(value, onProgress, ctx) {
+        return vow.when(value).progress(onProgress, ctx);
+    },
+
+    /**
+     * Static equivalent to `promise.spread`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Object} [ctx] Context of callbacks execution
+     * @returns {vow:Promise}
+     */
+    spread : function(value, onFulfilled, onRejected, ctx) {
+        return vow.when(value).spread(onFulfilled, onRejected, ctx);
+    },
+
+    /**
+     * Static equivalent to `promise.done`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Function} [onFulfilled] Callback that will to be invoked with the value after promise has been fulfilled
+     * @param {Function} [onRejected] Callback that will to be invoked with the reason after promise has been rejected
+     * @param {Function} [onProgress] Callback that will to be invoked with the value after promise has been notified
+     * @param {Object} [ctx] Context of callbacks execution
+     */
+    done : function(value, onFulfilled, onRejected, onProgress, ctx) {
+        vow.when(value).done(onFulfilled, onRejected, onProgress, ctx);
+    },
+
+    /**
+     * Checks whether the given `value` is a promise-like object
+     *
+     * @param {*} value
+     * @returns {Boolean}
+     *
+     * @example
+     * ```js
+     * vow.isPromise('something'); // returns false
+     * vow.isPromise(vow.defer().promise()); // returns true
+     * vow.isPromise({ then : function() { }); // returns true
+     * ```
+     */
+    isPromise : function(value) {
+        return isObject(value) && isFunction(value.then);
+    },
+
+    /**
+     * Coerces given `value` to a promise, or returns the `value` if it's already a promise.
+     *
+     * @param {*} value
+     * @returns {vow:Promise}
+     */
+    cast : function(value) {
+        return vow.isPromise(value)?
+            value :
+            vow.resolve(value);
+    },
+
+    /**
+     * Static equivalent to `promise.valueOf`.
+     * If given `value` is not an instance of `vow.Promise`, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @returns {*}
+     */
+    valueOf : function(value) {
+        return value && isFunction(value.valueOf)? value.valueOf() : value;
+    },
+
+    /**
+     * Static equivalent to `promise.isFulfilled`.
+     * If given `value` is not an instance of `vow.Promise`, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @returns {Boolean}
+     */
+    isFulfilled : function(value) {
+        return value && isFunction(value.isFulfilled)? value.isFulfilled() : true;
+    },
+
+    /**
+     * Static equivalent to `promise.isRejected`.
+     * If given `value` is not an instance of `vow.Promise`, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @returns {Boolean}
+     */
+    isRejected : function(value) {
+        return value && isFunction(value.isRejected)? value.isRejected() : false;
+    },
+
+    /**
+     * Static equivalent to `promise.isResolved`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @returns {Boolean}
+     */
+    isResolved : function(value) {
+        return value && isFunction(value.isResolved)? value.isResolved() : true;
+    },
+
+    /**
+     * Returns a promise that has already been resolved with the given `value`.
+     * If `value` is a promise, returned promise will be adopted with the state of given promise.
+     *
+     * @param {*} value
+     * @returns {vow:Promise}
+     */
+    resolve : function(value) {
+        var res = vow.defer();
+        res.resolve(value);
+        return res.promise();
+    },
+
+    /**
+     * Returns a promise that has already been fulfilled with the given `value`.
+     * If `value` is a promise, returned promise will be fulfilled with fulfill/rejection value of given promise.
+     *
+     * @param {*} value
+     * @returns {vow:Promise}
+     */
+    fulfill : function(value) {
+        return vow.when(value, null, function(reason) {
+            return reason;
+        });
+    },
+
+    /**
+     * Returns a promise that has already been rejected with the given `reason`.
+     * If `reason` is a promise, returned promise will be rejected with fulfill/rejection value of given promise.
+     *
+     * @param {*} reason
+     * @returns {vow:Promise}
+     */
+    reject : function(reason) {
+        return vow.when(reason, function(val) {
+            throw val;
+        });
+    },
+
+    /**
+     * Invokes a given function `fn` with arguments `args`
+     *
+     * @param {Function} fn
+     * @param {...*} [args]
+     * @returns {vow:Promise}
+     *
+     * @example
+     * ```js
+     * var promise1 = vow.invoke(function(value) {
+     *         return value;
+     *     }, 'ok'),
+     *     promise2 = vow.invoke(function() {
+     *         throw Error();
+     *     });
+     *
+     * promise1.isFulfilled(); // true
+     * promise1.valueOf(); // 'ok'
+     * promise2.isRejected(); // true
+     * promise2.valueOf(); // instance of Error
+     * ```
+     */
+    invoke : function(fn, args) {
+        var len = Math.max(arguments.length - 1, 0),
+            callArgs;
+        if(len) { // optimization for V8
+            callArgs = Array(len);
+            var i = 0;
+            while(i < len) {
+                callArgs[i++] = arguments[i];
+            }
+        }
+
+        try {
+            return vow.resolve(callArgs?
+                fn.apply(global, callArgs) :
+                fn.call(global));
+        }
+        catch(e) {
+            return vow.reject(e);
+        }
+    },
+
+    /**
+     * Returns a promise to be fulfilled only after all the items in `iterable` are fulfilled,
+     * or to be rejected when any of the `iterable` is rejected.
+     *
+     * @param {Array|Object} iterable
+     * @returns {vow:Promise}
+     *
+     * @example
+     * with array:
+     * ```js
+     * var defer1 = vow.defer(),
+     *     defer2 = vow.defer();
+     *
+     * vow.all([defer1.promise(), defer2.promise(), 3])
+     *     .then(function(value) {
+     *          // value is "[1, 2, 3]" here
+     *     });
+     *
+     * defer1.resolve(1);
+     * defer2.resolve(2);
+     * ```
+     *
+     * @example
+     * with object:
+     * ```js
+     * var defer1 = vow.defer(),
+     *     defer2 = vow.defer();
+     *
+     * vow.all({ p1 : defer1.promise(), p2 : defer2.promise(), p3 : 3 })
+     *     .then(function(value) {
+     *          // value is "{ p1 : 1, p2 : 2, p3 : 3 }" here
+     *     });
+     *
+     * defer1.resolve(1);
+     * defer2.resolve(2);
+     * ```
+     */
+    all : function(iterable) {
+        var defer = new Deferred(),
+            isPromisesArray = isArray(iterable),
+            keys = isPromisesArray?
+                getArrayKeys(iterable) :
+                getObjectKeys(iterable),
+            len = keys.length,
+            res = isPromisesArray? [] : {};
+
+        if(!len) {
+            defer.resolve(res);
+            return defer.promise();
+        }
+
+        var i = len;
+        vow._forEach(
+            iterable,
+            function() {
+                if(!--i) {
+                    var j = 0;
+                    while(j < len) {
+                        res[keys[j]] = vow.valueOf(iterable[keys[j++]]);
+                    }
+                    defer.resolve(res);
+                }
+            },
+            defer.reject,
+            defer.notify,
+            defer,
+            keys);
+
+        return defer.promise();
+    },
+
+    /**
+     * Returns a promise to be fulfilled only after all the items in `iterable` are resolved.
+     *
+     * @param {Array|Object} iterable
+     * @returns {vow:Promise}
+     *
+     * @example
+     * ```js
+     * var defer1 = vow.defer(),
+     *     defer2 = vow.defer();
+     *
+     * vow.allResolved([defer1.promise(), defer2.promise()]).spread(function(promise1, promise2) {
+     *     promise1.isRejected(); // returns true
+     *     promise1.valueOf(); // returns "'error'"
+     *     promise2.isFulfilled(); // returns true
+     *     promise2.valueOf(); // returns "'ok'"
+     * });
+     *
+     * defer1.reject('error');
+     * defer2.resolve('ok');
+     * ```
+     */
+    allResolved : function(iterable) {
+        var defer = new Deferred(),
+            isPromisesArray = isArray(iterable),
+            keys = isPromisesArray?
+                getArrayKeys(iterable) :
+                getObjectKeys(iterable),
+            i = keys.length,
+            res = isPromisesArray? [] : {};
+
+        if(!i) {
+            defer.resolve(res);
+            return defer.promise();
+        }
+
+        var onResolved = function() {
+                --i || defer.resolve(iterable);
+            };
+
+        vow._forEach(
+            iterable,
+            onResolved,
+            onResolved,
+            defer.notify,
+            defer,
+            keys);
+
+        return defer.promise();
+    },
+
+    allPatiently : function(iterable) {
+        return vow.allResolved(iterable).then(function() {
+            var isPromisesArray = isArray(iterable),
+                keys = isPromisesArray?
+                    getArrayKeys(iterable) :
+                    getObjectKeys(iterable),
+                rejectedPromises, fulfilledPromises,
+                len = keys.length, i = 0, key, promise;
+
+            if(!len) {
+                return isPromisesArray? [] : {};
+            }
+
+            while(i < len) {
+                key = keys[i++];
+                promise = iterable[key];
+                if(vow.isRejected(promise)) {
+                    rejectedPromises || (rejectedPromises = isPromisesArray? [] : {});
+                    isPromisesArray?
+                        rejectedPromises.push(promise.valueOf()) :
+                        rejectedPromises[key] = promise.valueOf();
+                }
+                else if(!rejectedPromises) {
+                    (fulfilledPromises || (fulfilledPromises = isPromisesArray? [] : {}))[key] = vow.valueOf(promise);
+                }
+            }
+
+            if(rejectedPromises) {
+                throw rejectedPromises;
+            }
+
+            return fulfilledPromises;
+        });
+    },
+
+    /**
+     * Returns a promise to be fulfilled only when any of the items in `iterable` are fulfilled,
+     * or to be rejected when all the items are rejected (with the reason of the first rejected item).
+     *
+     * @param {Array} iterable
+     * @returns {vow:Promise}
+     */
+    any : function(iterable) {
+        var defer = new Deferred(),
+            len = iterable.length;
+
+        if(!len) {
+            defer.reject(Error());
+            return defer.promise();
+        }
+
+        var i = 0, reason;
+        vow._forEach(
+            iterable,
+            defer.resolve,
+            function(e) {
+                i || (reason = e);
+                ++i === len && defer.reject(reason);
+            },
+            defer.notify,
+            defer);
+
+        return defer.promise();
+    },
+
+    /**
+     * Returns a promise to be fulfilled only when any of the items in `iterable` are fulfilled,
+     * or to be rejected when the first item is rejected.
+     *
+     * @param {Array} iterable
+     * @returns {vow:Promise}
+     */
+    anyResolved : function(iterable) {
+        var defer = new Deferred(),
+            len = iterable.length;
+
+        if(!len) {
+            defer.reject(Error());
+            return defer.promise();
+        }
+
+        vow._forEach(
+            iterable,
+            defer.resolve,
+            defer.reject,
+            defer.notify,
+            defer);
+
+        return defer.promise();
+    },
+
+    /**
+     * Static equivalent to `promise.delay`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Number} delay
+     * @returns {vow:Promise}
+     */
+    delay : function(value, delay) {
+        return vow.resolve(value).delay(delay);
+    },
+
+    /**
+     * Static equivalent to `promise.timeout`.
+     * If given `value` is not a promise, then `value` is equivalent to fulfilled promise.
+     *
+     * @param {*} value
+     * @param {Number} timeout
+     * @returns {vow:Promise}
+     */
+    timeout : function(value, timeout) {
+        return vow.resolve(value).timeout(timeout);
+    },
+
+    _forEach : function(promises, onFulfilled, onRejected, onProgress, ctx, keys) {
+        var len = keys? keys.length : promises.length,
+            i = 0;
+        while(i < len) {
+            vow.when(promises[keys? keys[i] : i], onFulfilled, onRejected, onProgress, ctx);
+            ++i;
+        }
+    }
+};
+
+var undef,
+    nextTick = (function() {
+        var fns = [],
+            enqueueFn = function(fn) {
+                return fns.push(fn) === 1;
+            },
+            callFns = function() {
+                var fnsToCall = fns, i = 0, len = fns.length;
+                fns = [];
+                while(i < len) {
+                    fnsToCall[i++]();
+                }
+            };
+
+        if(typeof setImmediate === 'function') { // ie10, nodejs >= 0.10
+            return function(fn) {
+                enqueueFn(fn) && setImmediate(callFns);
+            };
+        }
+
+        if(typeof process === 'object' && process.nextTick) { // nodejs < 0.10
+            return function(fn) {
+                enqueueFn(fn) && process.nextTick(callFns);
+            };
+        }
+
+        if(global.postMessage) { // modern browsers
+            var isPostMessageAsync = true;
+            if(global.attachEvent) {
+                var checkAsync = function() {
+                        isPostMessageAsync = false;
+                    };
+                global.attachEvent('onmessage', checkAsync);
+                global.postMessage('__checkAsync', '*');
+                global.detachEvent('onmessage', checkAsync);
+            }
+
+            if(isPostMessageAsync) {
+                var msg = '__promise' + +new Date,
+                    onMessage = function(e) {
+                        if(e.data === msg) {
+                            e.stopPropagation && e.stopPropagation();
+                            callFns();
+                        }
+                    };
+
+                global.addEventListener?
+                    global.addEventListener('message', onMessage, true) :
+                    global.attachEvent('onmessage', onMessage);
+
+                return function(fn) {
+                    enqueueFn(fn) && global.postMessage(msg, '*');
+                };
+            }
+        }
+
+        var doc = global.document;
+        if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
+            var createScript = function() {
+                    var script = doc.createElement('script');
+                    script.onreadystatechange = function() {
+                        script.parentNode.removeChild(script);
+                        script = script.onreadystatechange = null;
+                        callFns();
+                };
+                (doc.documentElement || doc.body).appendChild(script);
+            };
+
+            return function(fn) {
+                enqueueFn(fn) && createScript();
+            };
+        }
+
+        return function(fn) { // old browsers
+            enqueueFn(fn) && setTimeout(callFns, 0);
+        };
+    })(),
+    throwException = function(e) {
+        nextTick(function() {
+            throw e;
+        });
+    },
+    isFunction = function(obj) {
+        return typeof obj === 'function';
+    },
+    isObject = function(obj) {
+        return obj !== null && typeof obj === 'object';
+    },
+    toStr = Object.prototype.toString,
+    isArray = Array.isArray || function(obj) {
+        return toStr.call(obj) === '[object Array]';
+    },
+    getArrayKeys = function(arr) {
+        var res = [],
+            i = 0, len = arr.length;
+        while(i < len) {
+            res.push(i++);
+        }
+        return res;
+    },
+    getObjectKeys = Object.keys || function(obj) {
+        var res = [];
+        for(var i in obj) {
+            obj.hasOwnProperty(i) && res.push(i);
+        }
+        return res;
+    };
+
+var defineAsGlobal = true;
+if(typeof exports === 'object') {
+    module.exports = vow;
+    defineAsGlobal = false;
+}
+
+if(typeof modules === 'object') {
+    modules.define('vow', function(provide) {
+        provide(vow);
+    });
+    defineAsGlobal = false;
+}
+
+if(typeof define === 'function') {
+    define(function(require, exports, module) {
+        module.exports = vow;
+    });
+    defineAsGlobal = false;
+}
+
+defineAsGlobal && (global.vow = vow);
+
+})(this);
+
+}).call(this,require("/Users/lapple/Code/eb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/lapple/Code/eb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":28}]},{},[1])

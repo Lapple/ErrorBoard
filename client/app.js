@@ -30,4 +30,4 @@ var updateApp = function(ctx) {
 page('/', redirectTo('/dashboard/'));
 page('/:type/:id?', updateApp);
 
-$(page.start);
+document.addEventListener('DOMContentLoaded', page.start);

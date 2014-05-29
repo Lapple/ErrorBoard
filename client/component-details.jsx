@@ -87,7 +87,7 @@ module.exports = React.createClass({
     },
     componentDidMount: function() {
         window.requestAnimationFrame(this.show);
-        $(document).on('keyup', this.onKeyUp);
+        document.addEventListener('keyup', this.onKeyUp);
 
         this.fetchData(this.props);
     },
@@ -95,7 +95,7 @@ module.exports = React.createClass({
         this.fetchData(props);
     },
     componentWillUnmount: function() {
-        $(document).off('keyup', this.onKeyUp);
+        document.removeEventListener('keyup', this.onKeyUp);
     },
     updateData: function() {
         this.setState({

@@ -1,4 +1,6 @@
 var _ = require('lodash');
+var vow = require('vow');
+var request = require('superagent');
 var aggregators = require('../common/aggregators');
 
 var _reports = {};
@@ -22,20 +24,29 @@ var getParams = function(key) {
 module.exports = {
     fetch: function(type, params) {
         var key = getKey(params);
+        var deferred = vow.defer();
 
         if (!_reports[type]) {
             _reports[type] = {};
         }
 
         if (_reports[type][key]) {
-            var deferred = $.Deferred();
-            _.defer(deferred.resolve, _reports[type][key]);
-            return deferred.promise();
+            deferred.resolve(_reports[type][key]);
+        } else {
+            request
+                .get('/reports/' + type)
+                .query(params)
+                .set('Accept', 'application/json')
+                .end(function(res) {
+                    if (res.ok) {
+                        deferred.resolve(_reports[type][key] = res.body);
+                    } else {
+                        deferred.reject(res.text);
+                    }
+                });
         }
 
-        return $.getJSON('/reports/' + type, params).done(function(response) {
-            _reports[type][key] = response;
-        });
+        return deferred.promise();
     },
     get: function(type, params) {
         return (_reports[type] && _reports[type][getKey(params)]) || null;

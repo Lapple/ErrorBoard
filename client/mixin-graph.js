@@ -4,14 +4,14 @@ module.exports = {
     },
     calculateWidth: function() {
         this.setState({
-            width: $(this.getDOMNode()).width()
+            width: this.getDOMNode().offsetWidth
         });
     },
     componentDidMount: function() {
         this.calculateWidth();
-        $(window).on('resize', this.calculateWidth);
+        window.addEventListener('resize', this.calculateWidth);
     },
     componentWillUnmount: function() {
-        $(window).off('resize', this.calculateWidth);
+        window.removeEventListener('resize', this.calculateWidth);
     }
 };
