@@ -218,6 +218,25 @@ html, body, .app, .container, .menu, .content {
     height: 24px;
 }
 
+.counter {
+    position: absolute;
+    top: 22px;
+    right: 35px;
+
+    font-size: 14px;
+    line-height: 24px;
+    color: rgb(153, 167, 177);
+    cursor: pointer;
+}
+
+.counter:hover {
+    color: rgb(0, 109, 170);
+}
+
+.counter_hidden {
+    display: none;
+}
+
 .timespan {
     position: relative;
     height: 24px;

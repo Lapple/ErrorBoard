@@ -4,6 +4,7 @@ var React = require('react');
 var Reports = require('./reports');
 var ReportItem = require('./component-report-item.jsx');
 var Notice = require('./component-notice.jsx');
+var UpdateCounter = require('./component-update-counter.jsx');
 
 var HOUR = 60 * 60 * 1000;
 
@@ -11,6 +12,8 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             index: [],
+            lastRefreshed: Date.now(),
+            updatesCount: 0,
             newCount: 0,
             hasOrderBroken: false
         };
@@ -34,6 +37,7 @@ module.exports = React.createClass({
 
         return <div className="report">
             { this.notice() }
+            <UpdateCounter count={ this.state.updatesCount } since={ this.state.lastRefreshed } onClick={ this.createIndex } />
             <table className="report__table">
                 { this.thead() }
                 <tbody>
@@ -62,7 +66,7 @@ module.exports = React.createClass({
             <tr className='report__row report__row_head'>
                 <th className='report__cell report__cell_head'>{ title }</th>
                 <th className='report__cell report__cell_head report__cell_count'>Count</th>
-                <th className='report__cell report__cell_head report__cell_delta'></th>
+                <th className='report__cell report__cell_head report__cell_delta' />
                 <th className='report__cell report__cell_head report__cell_timespan'>Timespan</th>
             </tr>
         </thead>;
@@ -100,26 +104,24 @@ module.exports = React.createClass({
     },
     createIndex: function() {
         var data = Reports.get(this.props.type);
+        var index = _.map(data, addKey).sort(sortByLatestReport);
 
-        this.setState({
-            index: _.map(data, addKey).sort(sortByLatestReport),
-            hasOrderBroken: false,
-            newCount: 0
-        });
+        this.setState(_.extend(this.getInitialState(), {index: index}));
     },
     updateIndex: function() {
         var data = Reports.get(this.props.type);
 
         var addIndex = _.partial(addCurrentIndex, this.state.index);
         var addDelta = _.partial(countDelta, this.state.index);
-        var indexed = _.map(data, _.compose(addIndex, addKey));
+        var indexed = _.map(data, _.compose(addDelta, addIndex, addKey));
 
         var rows = partition(indexed, isIndexed);
         var index = rows[0].sort(sortByCurrentIndex);
 
         this.setState({
-            index: _.map(index, addDelta),
+            index: index,
             hasOrderBroken: !isSortedByLatest(index),
+            updatesCount: sumDeltas(indexed),
             newCount: rows[1].length
         });
     }
@@ -158,17 +160,24 @@ function addKey(value, key) {
     return _.extend(_.clone(value), {key: key});
 }
 
-function addCurrentIndex(prev, item) {
+function addCurrentIndex(index, item) {
     return _.extend(item, {
-        _index: _.findIndex(prev, {key: item.key})
+        _index: _.findIndex(index, {key: item.key})
     });
 }
 
-function countDelta(prev, item) {
-    var count = prev[item._index].count || 0;
-    var delta = prev[item._index].delta || 0;
+function countDelta(index, item) {
+    var prev = index[item._index] || {};
+    var count = prev.count || 0;
+    var delta = prev.delta || 0;
 
     return _.extend(item, {
         delta: item.count - count + delta
     });
+}
+
+function sumDeltas(index) {
+    return _.reduce(index, function(memo, item) {
+        return memo += item.delta;
+    }, 0);
 }
