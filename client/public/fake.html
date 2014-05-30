@@ -1,0 +1,28 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>ErrorBoard - Error Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <script type="text/javascript">
+            window.onerror = function(message, url, line, column, error) {
+                var e = encodeURIComponent;
+                (new Image()).src = 'http://127.0.0.1:3000/error?message=' + e(message) + '&url=' + e(url) + '&line=' + e(line) + (error && error.stack ? '&stack=' + e(error.stack) : '') + (column ? '&column=' + e(column) : '');
+            };
+        </script>
+        <script type="text/javascript">
+            function logParams() {
+                console.log(params);
+            }
+
+            function callLogParams() {
+                logParams(2);
+            }
+
+            callLogParams(1);
+        </script>
+    </body>
+</html>

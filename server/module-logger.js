@@ -27,7 +27,9 @@ app.use(function(req, res) {
 
         message: query.message,
         url: query.url,
-        line: query.line
+        line: query.line,
+        column: query.column,
+        stack: query.stack
     };
 
     db.insert(doc, function(err) {

@@ -10,6 +10,9 @@ module.exports = React.createClass({
         var data = this.props.data;
         var timespan = this.props.timespan;
 
+        var isBrowserType = this.props.type === 'browsers';
+        var delta = data.delta || 0;
+
         var rowClasses = cx({
             'report__row': true,
             'report__row_clickable': _.isFunction(this.props.onClick),
@@ -17,11 +20,8 @@ module.exports = React.createClass({
 
         var titleClasses = cx({
             'report__cut': true,
-            'report__mono': _.contains(['messages', 'scripts'], this.props.type)
+            'report__mono': !isBrowserType
         });
-
-        var isBrowserType = this.props.type === 'browsers';
-        var delta = data.delta || 0;
 
         return <tr className={ rowClasses } onClick={ this.props.onClick }>
             <td className='report__cell report__cell_cut'>

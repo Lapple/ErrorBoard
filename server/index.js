@@ -16,6 +16,10 @@ app.use(favicon(path.join(publicPath, 'favicon.ico')));
 app.use('/static', express.static(publicPath));
 app.get('/reports/:type', require('./route-reports'));
 app.get('/error', require('./module-logger'));
+
+// TODO: Remove.
+app.get('/fake', serveStaticFile(path.join(publicPath, 'fake.html')));
+
 app.get('/*', serveStaticFile(path.join(publicPath, 'index.html')));
 
 ws.installHandlers(server, {prefix: '/ws'});
