@@ -4,6 +4,14 @@ html, body {
     margin: 0;
 }
 
+._u {
+    border-bottom: 1px solid;
+}
+
+._i {
+    font-style: italic;
+}
+
 html, body, .app, .container, .menu, .content {
     height: 100%;
 }
@@ -166,8 +174,18 @@ html, body, .app, .container, .menu, .content {
 }
 
 .report__cell_count {
-    width: 70px;
+    width: 50px;
+    padding-right: 5px;
+
     text-align: right;
+}
+
+.report__cell_delta {
+    width: 25px;
+    padding-left: 5px;
+
+    text-align: right;
+    color: rgb(153, 167, 177);
 }
 
 .report__cell_timespan {

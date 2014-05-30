@@ -21,6 +21,7 @@ module.exports = React.createClass({
         });
 
         var isBrowserType = this.props.type === 'browsers';
+        var delta = data.delta || 0;
 
         return <tr className={ rowClasses } onClick={ this.props.onClick }>
             <td className='report__cell report__cell_cut'>
@@ -31,7 +32,10 @@ module.exports = React.createClass({
                 </div>
             </td>
             <td className='report__cell report__cell_count'>
-                { data.count }
+                { data.count - delta }
+            </td>
+            <td className='report__cell report__cell_delta'>
+                { delta > 0 ? '+' + delta : null }
             </td>
             {
                 timespan ?
