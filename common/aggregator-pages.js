@@ -4,12 +4,13 @@ var reduceBrowsers = require('./reduce-browsers');
 
 module.exports = function() {
     return aggregate({
-        groupBy: function(item) {
-            return item.referer || 'No referer';
-        },
-        create: {
-            count: 0,
-            browsers: []
+        groupBy: getTitlePage,
+        create: function(item) {
+            return {
+                title: getTitlePage(item),
+                count: 0,
+                browsers: []
+            };
         },
         each: function(obj, next) {
             obj.count += 1;
@@ -18,3 +19,7 @@ module.exports = function() {
         }
     });
 };
+
+function getTitlePage(data) {
+    return data.referer || 'No referer';
+}

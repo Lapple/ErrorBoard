@@ -43,7 +43,7 @@ module.exports = React.createClass({
     },
     _showDetails: function(data) {
         var url = '/' + this.props.ctx.params.type + '/' + slug(data.key) + '/';
-        page.show(url, {details: data.key});
+        page.show(url, {details: data.title});
     },
     _hideDetails: function() {
         page.show('/' + this.props.ctx.params.type + '/');

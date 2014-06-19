@@ -10,8 +10,11 @@ module.exports = function(params) {
         filter: function(item) {
             return slug(getBrowserName(item)) === params.id;
         },
-        create: {
-            count: 0
+        create: function(item) {
+            return {
+                title: item.message,
+                count: 0
+            };
         },
         each: function(obj, next) {
             obj.count += 1;

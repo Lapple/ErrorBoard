@@ -7,10 +7,8 @@ var cx = React.addons.classSet;
 var Reports = require('./reports');
 var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
-var ReporterMixin = require('./mixin-reporter');
 
 module.exports = React.createClass({
-    mixins: [ReporterMixin],
     getInitialState: function() {
         var state = {
             visible: false,
@@ -64,7 +62,7 @@ module.exports = React.createClass({
         }
     },
     table: function() {
-        var items = _.map(this.getReport(this.state.data), function(data) {
+        var items = _.map(toArray(this.state.data).sort(sortByLatestReport), function(data) {
             return ReportItem({
                 key: data.key,
                 type: (this.props.type === 'message') ? 'browsers' : 'messages',
@@ -126,3 +124,13 @@ module.exports = React.createClass({
         return props.type === 'message';
     }
 });
+
+function toArray(object) {
+    return _.map(object, function(value, key) {
+        return _.extend(_.clone(value), {key: key});
+    });
+}
+
+function sortByLatestReport(a, b) {
+    return b.latest - a.latest;
+}

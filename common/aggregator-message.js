@@ -8,10 +8,20 @@ module.exports = function(params) {
     return aggregate({
         groupBy: getBrowserName,
         filter: function(item) {
-            return slug(item.message) === params.id;
+            var message = JSON.stringify({
+                message: item.message,
+                line: item.line,
+                url: item.url
+            });
+
+            return slug(message) === params.id;
         },
-        create: {
-            count: 0
+        create: function(item) {
+            return {
+                title: item.message,
+                count: 0,
+                stack: item.stack
+            };
         },
         each: function(obj, next) {
             obj.count += 1;

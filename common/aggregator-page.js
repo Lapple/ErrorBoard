@@ -13,9 +13,12 @@ module.exports = function(params) {
             return slug(referer) === params.id ||
                 (params.id === 'no-referer' && !referer);
         },
-        create: {
-            count: 0,
-            browsers: []
+        create: function(item) {
+            return {
+                title: item.message,
+                count: 0,
+                browsers: []
+            };
         },
         each: function(obj, next) {
             obj.count += 1;

@@ -9,8 +9,14 @@ module.exports = function(params) {
             return moment(item.timestamp).startOf('hour').valueOf();
         },
         filter: function(item) {
+            var message = slug(JSON.stringify({
+                message: item.message,
+                line: item.line,
+                url: item.url
+            }));
+
             var isMatchingTime = item.timestamp >= params.from && item.timestamp <= params.to;
-            var isMatchingQuery = !params.message || slug(item.message) === params.message;
+            var isMatchingQuery = !params.message || message === params.message;
 
             return isMatchingTime && isMatchingQuery;
         },

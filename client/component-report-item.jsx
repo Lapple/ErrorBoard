@@ -26,9 +26,9 @@ module.exports = React.createClass({
         return <tr className={ rowClasses } onClick={ this.props.onClick }>
             <td className='report__cell report__cell_cut'>
                 { data.browsers ? <Browsers list={ data.browsers } align='right' /> : null }
-                <div className={ titleClasses } title={ data.key }>
-                    { isBrowserType ? <Browsers list={ [data.key.split(' ').slice(0, -1).join(' ')] } /> : null }
-                    { data.key }
+                <div className={ titleClasses } title={ data.title }>
+                    { isBrowserType ? <Browsers list={ [data.title.split(' ').slice(0, -1).join(' ')] } /> : null }
+                    { data.title }
                 </div>
             </td>
             <td className='report__cell report__cell_count'>

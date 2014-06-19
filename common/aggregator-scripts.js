@@ -4,12 +4,13 @@ var reduceBrowsers = require('./reduce-browsers');
 
 module.exports = function() {
     return aggregate({
-        groupBy: function(item) {
-            return item.url + ':' + (item.line || 0);
-        },
-        create: {
-            count: 0,
-            browsers: []
+        groupBy: getTitleScript,
+        create: function(item) {
+            return {
+                title: getTitleScript(item),
+                count: 0,
+                browsers: []
+            };
         },
         each: function(obj, next) {
             obj.count += 1;
@@ -18,3 +19,7 @@ module.exports = function() {
         }
     });
 };
+
+function getTitleScript(data) {
+    return data.url + ':' + (data.line || 0);
+}

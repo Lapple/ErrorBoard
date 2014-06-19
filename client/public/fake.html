@@ -22,7 +22,12 @@
                 logParams(2);
             }
 
-            callLogParams(1);
+            function ref() {
+                var a = this.property();
+            }
+
+            // callLogParams(1);
+            ref();
         </script>
     </body>
 </html>

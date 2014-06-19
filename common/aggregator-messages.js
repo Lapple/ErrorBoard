@@ -4,10 +4,19 @@ var reduceBrowsers = require('./reduce-browsers');
 
 module.exports = function() {
     return aggregate({
-        groupBy: 'message',
-        create: {
-            count: 0,
-            browsers: []
+        groupBy: function(item) {
+            return JSON.stringify({
+                message: item.message,
+                line: item.line,
+                url: item.url
+            });
+        },
+        create: function(item) {
+            return {
+                title: item.message,
+                count: 0,
+                browsers: []
+            };
         },
         each: function(obj, next) {
             obj.count += 1;
