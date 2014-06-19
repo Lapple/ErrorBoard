@@ -441,3 +441,18 @@ html, body, .app, .container, .menu, .content {
 .graph__bar {
     fill: rgb(153, 167, 177);
 }
+
+.stack {
+    font: 13px/24px Consolas, Menlo, monospace;
+    white-space: pre;
+    background: rgba(206, 216, 223, 0.15);
+    box-shadow:
+        inset 0 -1px rgba(0, 0, 0, 0.03),
+        inset 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.stack_filled {
+    margin: 20px -20px;
+    padding: 8px 20px;
+    overflow-x: auto;
+}

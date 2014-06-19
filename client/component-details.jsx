@@ -5,6 +5,7 @@ var moment = require('moment');
 var cx = React.addons.classSet;
 
 var Reports = require('./reports');
+var Stack = require('./component-stack.jsx');
 var Graph = require('./component-graph.jsx');
 var ReportItem = require('./component-report-item.jsx');
 
@@ -35,12 +36,13 @@ module.exports = React.createClass({
                     <path fill='#777' d='M15 1.7l-.7-.7-6.3 6.299-6.3-6.299-.7.7 6.3 6.3-6.3 6.299.7.701 6.3-6.3 6.3 6.3.7-.701-6.3-6.299 6.3-6.3z'/>
                 </svg>
             </div>
-            { this.title() }
-            { this.graph() }
-            { this.table() }
+            { this.renderTitle() }
+            { this.renderStackTrace() }
+            { this.renderGraph() }
+            { this.renderTable() }
         </div>;
     },
-    title: function() {
+    renderTitle: function() {
         if (this.props.title) {
             return <div className='title'>
                 { this.props.title }
@@ -51,7 +53,16 @@ module.exports = React.createClass({
             </div>;
         }
     },
-    graph: function() {
+    renderStackTrace: function() {
+        if (this.props.type === 'message') {
+            var sample = _.first(this.state.data);
+
+            if (sample) {
+                return <Stack data={ sample.stack } />;
+            }
+        }
+    },
+    renderGraph: function() {
         if (this.hasGraph(this.props)) {
             return Graph({
                 data: this.state.graphData,
@@ -61,8 +72,8 @@ module.exports = React.createClass({
             });
         }
     },
-    table: function() {
-        var items = _.map(toArray(this.state.data).sort(sortByLatestReport), function(data) {
+    renderTable: function() {
+        var items = _.map(this.state.data, function(data) {
             return ReportItem({
                 key: data.key,
                 type: (this.props.type === 'message') ? 'browsers' : 'messages',
@@ -96,8 +107,10 @@ module.exports = React.createClass({
         document.removeEventListener('keyup', this.onKeyUp);
     },
     updateData: function() {
+        var report = Reports.get(this.props.type, {id: this.props.id});
+
         this.setState({
-            data: Reports.get(this.props.type, {id: this.props.id}),
+            data: toArray(report).sort(sortByLatestReport)
         });
     },
     updateGraph: function() {
