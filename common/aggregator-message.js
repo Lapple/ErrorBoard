@@ -18,7 +18,7 @@ module.exports = function(params) {
         },
         create: function(item) {
             return {
-                title: item.message,
+                title: getBrowserName(item),
                 count: 0,
                 stack: item.stack
             };

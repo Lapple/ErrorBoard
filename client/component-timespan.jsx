@@ -35,7 +35,7 @@ module.exports = React.createClass({
             <div className='timespan__point timespan__point_end' style={_.pick(position, 'right')}>
                 <div className='timespan__tooltip'>
                     <div className='timespan__caption'>Latest report</div>
-                    { moment(this.props.end).format('MMMM Do YYYY, HH:mm') }
+                    { moment(this.props.finish).format('MMMM Do YYYY, HH:mm') }
                 </div>
             </div>
         </div>

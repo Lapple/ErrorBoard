@@ -742,7 +742,7 @@ module.exports = React.createClass({displayName: 'exports',
             React.DOM.div( {className:"timespan__point timespan__point_end", style:_.pick(position, 'right')}, 
                 React.DOM.div( {className:"timespan__tooltip"}, 
                     React.DOM.div( {className:"timespan__caption"}, "Latest report"),
-                     moment(this.props.end).format('MMMM Do YYYY, HH:mm') 
+                     moment(this.props.finish).format('MMMM Do YYYY, HH:mm') 
                 )
             )
         )
@@ -1003,7 +1003,7 @@ module.exports = function(params) {
         },
         create: function(item) {
             return {
-                title: item.message,
+                title: getBrowserName(item),
                 count: 0,
                 stack: item.stack
             };
