@@ -3,18 +3,13 @@ var slug = require('speakingurl');
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var getBrowserName = require('./browser-name');
+var getMessageSignature = require('./message-signature');
 
 module.exports = function(params) {
     return aggregate({
         groupBy: getBrowserName,
         filter: function(item) {
-            var message = JSON.stringify({
-                message: item.message,
-                line: item.line,
-                url: item.url
-            });
-
-            return slug(message) === params.id;
+            return getMessageSignature(item) === params.id;
         },
         create: function(item) {
             return {

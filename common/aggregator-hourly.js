@@ -1,7 +1,7 @@
 var moment = require('moment');
-var slug = require('speakingurl');
 
 var aggregate = require('./aggregate');
+var getMessageSignature = require('./message-signature');
 
 module.exports = function(params) {
     return aggregate({
@@ -9,14 +9,8 @@ module.exports = function(params) {
             return moment(item.timestamp).startOf('hour').valueOf();
         },
         filter: function(item) {
-            var message = slug(JSON.stringify({
-                message: item.message,
-                line: item.line,
-                url: item.url
-            }));
-
             var isMatchingTime = item.timestamp >= params.from && item.timestamp <= params.to;
-            var isMatchingQuery = !params.message || message === params.message;
+            var isMatchingQuery = !params.message || getMessageSignature(item) === params.message;
 
             return isMatchingTime && isMatchingQuery;
         },

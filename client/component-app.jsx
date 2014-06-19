@@ -1,5 +1,4 @@
 var page = require('page');
-var slug = require('speakingurl');
 var React = require('react');
 
 var Nav = require('./component-nav.jsx');
@@ -42,7 +41,7 @@ module.exports = React.createClass({
         }
     },
     _showDetails: function(data) {
-        var url = '/' + this.props.ctx.params.type + '/' + slug(data.key) + '/';
+        var url = '/' + this.props.ctx.params.type + '/' + encodeURIComponent(data.key) + '/';
         page.show(url, {details: data.title});
     },
     _hideDetails: function() {

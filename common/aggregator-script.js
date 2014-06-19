@@ -1,5 +1,3 @@
-var slug = require('speakingurl');
-
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var reduceBrowsers = require('./reduce-browsers');
@@ -11,7 +9,7 @@ module.exports = function(params) {
             var url = item.url;
             var line = item.line || 0;
 
-            return slug(url + ':' + line) === params.id;
+            return (url + ':' + line) === params.id;
         },
         create: function(item) {
             return {

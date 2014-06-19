@@ -1,16 +1,11 @@
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var reduceBrowsers = require('./reduce-browsers');
+var getMessageSignature = require('./message-signature');
 
 module.exports = function() {
     return aggregate({
-        groupBy: function(item) {
-            return JSON.stringify({
-                message: item.message,
-                line: item.line,
-                url: item.url
-            });
-        },
+        groupBy: getMessageSignature,
         create: function(item) {
             return {
                 title: item.message,
