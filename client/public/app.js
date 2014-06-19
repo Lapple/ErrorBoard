@@ -28,7 +28,7 @@ var updateApp = function(ctx) {
     React.renderComponent(ComponentApp({ctx: _context}), app);
 };
 
-page('/', redirectTo('/dashboard/'));
+page('/', redirectTo('/messages/'));
 page('/:type/:id?', updateApp);
 
 document.addEventListener('DOMContentLoaded', page.start);
