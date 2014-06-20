@@ -17,8 +17,8 @@ Track and fix JavaScript errors fired by your visitor's browsers.
 
 ### Installation
 
-    $ git clone git://github.com/Lapple/eb.git
-    $ cd eb
+    $ git clone git://github.com/Lapple/ErrorBoard.git
+    $ cd ErrorBoard
     $ npm install
 
 ### Configuration

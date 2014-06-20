@@ -1,7 +1,7 @@
 {
-  "name": "eb",
-  "version": "0.0.0",
-  "description": "ErrorBoard 2.0",
+  "name": "ErrorBoard",
+  "version": "2.0.0",
+  "description": "Track and fix JavaScript errors fired by your visitor's browsers",
   "main": "eb.js",
   "config": {
     "dbfile": "db",
