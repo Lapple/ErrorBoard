@@ -38,8 +38,8 @@ module.exports = React.createClass({
             </div>
             { this.renderTitle() }
             { this.renderStackTrace() }
-            { this.renderGraph() }
             { this.renderTable() }
+            { this.renderGraph() }
         </div>;
     },
     renderTitle: function() {
@@ -58,18 +58,26 @@ module.exports = React.createClass({
             var sample = _.first(this.state.data);
 
             if (sample) {
-                return <Stack data={ sample.stack } />;
+                if (sample.stack) {
+                    return <Stack data={ sample.stack } />;
+                } else if (sample.line && sample.url) {
+                    return <Stack data={ sample.url + ':' + sample.line } />;
+                }
             }
         }
     },
     renderGraph: function() {
         if (this.hasGraph(this.props)) {
-            return Graph({
-                data: this.state.graphData,
-                from: this.state.from,
-                to: this.state.to,
-                height: 200
-            });
+            return <div className='curtain__graph'>
+                {
+                    Graph({
+                        data: this.state.graphData,
+                        from: this.state.from,
+                        to: this.state.to,
+                        height: 200
+                    })
+                }
+            </div>
         }
     },
     renderTable: function() {

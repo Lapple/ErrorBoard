@@ -15,7 +15,9 @@ module.exports = function(params) {
             return {
                 title: getBrowserName(item),
                 count: 0,
-                stack: item.stack
+                stack: item.stack,
+                line: item.line,
+                url: item.url
             };
         },
         each: function(obj, next) {

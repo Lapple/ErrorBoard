@@ -189,8 +189,8 @@ module.exports = React.createClass({displayName: 'exports',
             ),
              this.renderTitle(), 
              this.renderStackTrace(), 
-             this.renderGraph(), 
-             this.renderTable() 
+             this.renderTable(), 
+             this.renderGraph() 
         );
     },
     renderTitle: function() {
@@ -209,18 +209,26 @@ module.exports = React.createClass({displayName: 'exports',
             var sample = _.first(this.state.data);
 
             if (sample) {
-                return Stack( {data: sample.stack } );
+                if (sample.stack) {
+                    return Stack( {data: sample.stack } );
+                } else if (sample.line && sample.url) {
+                    return Stack( {data: sample.url + ':' + sample.line } );
+                }
             }
         }
     },
     renderGraph: function() {
         if (this.hasGraph(this.props)) {
-            return Graph({
-                data: this.state.graphData,
-                from: this.state.from,
-                to: this.state.to,
-                height: 200
-            });
+            return React.DOM.div( {className:"curtain__graph"}, 
+                
+                    Graph({
+                        data: this.state.graphData,
+                        from: this.state.from,
+                        to: this.state.to,
+                        height: 200
+                    })
+                
+            )
         }
     },
     renderTable: function() {
@@ -718,16 +726,10 @@ function sumDeltas(index) {
 
 },{"./component-notice.jsx":8,"./component-report-item.jsx":9,"./component-update-counter.jsx":13,"./reports":15,"lodash":32,"react":35}],11:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
-var cx = React.addons.classSet;
 
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
-        var classes = cx({
-            'stack': true,
-            'stack_filled': !!this.props.data
-        });
-
-        return React.DOM.div( {className: classes }, 
+        return React.DOM.div( {className:"stack"}, 
              this.props.data 
         );
     }
@@ -1021,7 +1023,9 @@ module.exports = function(params) {
             return {
                 title: getBrowserName(item),
                 count: 0,
-                stack: item.stack
+                stack: item.stack,
+                line: item.line,
+                url: item.url
             };
         },
         each: function(obj, next) {

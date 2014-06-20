@@ -418,6 +418,13 @@ html, body, .app, .container, .menu, .content {
     cursor: pointer;
 }
 
+.curtain__graph {
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: -5px;
+}
+
 .graph__axis {
     stroke: rgb(217, 229, 236);
 }
@@ -443,16 +450,14 @@ html, body, .app, .container, .menu, .content {
 }
 
 .stack {
-    font: 13px/24px Consolas, Menlo, monospace;
-    white-space: pre;
-    background: rgba(206, 216, 223, 0.15);
-    box-shadow:
-        inset 0 -1px rgba(0, 0, 0, 0.03),
-        inset 0 1px rgba(0, 0, 0, 0.03);
-}
-
-.stack_filled {
     margin: 20px -20px;
     padding: 8px 20px;
     overflow-x: auto;
+
+    font: 13px/24px Consolas, Menlo, monospace;
+    white-space: pre;
+    background: rgba(214, 201, 178, 0.15);
+    box-shadow:
+        inset 0 -1px rgba(0, 0, 0, 0.03),
+        inset 0 1px rgba(0, 0, 0, 0.03);
 }
