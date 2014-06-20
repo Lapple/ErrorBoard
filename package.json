@@ -8,10 +8,10 @@
     "port": 3000
   },
   "scripts": {
-    "start": "node eb.js",
-    "browserify": "node_modules/.bin/browserify client/app.js -o client/public/app.js",
-    "watchify": "node_modules/.bin/watchify client/app.js -o client/public/app.js -v",
-    "nodemon": "node_modules/.bin/nodemon --ignore client/ eb.js"
+    "start": "npm run browserify && node eb.js",
+    "browserify": "browserify client/app.js -o client/public/app.js",
+    "watchify": "watchify client/app.js -o client/public/app.js -v",
+    "nodemon": "nodemon --ignore client/ eb.js"
   },
   "dependencies": {
     "nedb": "^0.10.5",
