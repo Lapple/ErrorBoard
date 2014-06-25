@@ -3,6 +3,7 @@ var path = require('path');
 
 var express = require('express');
 var favicon = require('serve-favicon');
+var compression = require('compression');
 
 var ws = require('./websockets');
 var serveStaticFile = require('./middleware-static-file');
@@ -17,6 +18,7 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname);
 
 app.use(favicon(path.join(publicPath, 'favicon.ico')));
+app.use(compression());
 app.use('/static', express.static(publicPath));
 app.get('/reports/:type', require('./route-reports'));
 app.get('/error', require('./module-logger'));

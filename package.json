@@ -26,7 +26,8 @@
     "superagent": "^0.18.0",
     "vow": "^0.4.3",
     "ejs": "^1.0.0",
-    "react-tools": "0.10.0"
+    "react-tools": "0.10.0",
+    "compression": "^1.0.8"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",

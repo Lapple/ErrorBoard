@@ -155,7 +155,7 @@ module.exports = React.createClass({displayName: 'exports',
     },
 });
 
-},{"./component-graph.jsx":6,"./reports":15,"moment":33,"react":35}],5:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./reports":15,"moment":33,"react":184}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react/addons');
 var moment = require('moment');
@@ -412,7 +412,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./mixin-graph":14,"lodash":32,"moment":33,"react":35}],7:[function(require,module,exports){
+},{"./mixin-graph":14,"lodash":32,"moment":33,"react":184}],7:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var cx = React.addons.classSet;
 
@@ -496,7 +496,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"react":35}],9:[function(require,module,exports){
+},{"react":184}],9:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react/addons');
 
@@ -731,7 +731,7 @@ function sumDeltas(index) {
     }, 0);
 }
 
-},{"./component-notice.jsx":8,"./component-report-item.jsx":9,"./component-update-counter.jsx":13,"./reports":15,"lodash":32,"react":35}],11:[function(require,module,exports){
+},{"./component-notice.jsx":8,"./component-report-item.jsx":9,"./component-update-counter.jsx":13,"./reports":15,"lodash":32,"react":184}],11:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
 module.exports = React.createClass({displayName: 'exports',
@@ -742,7 +742,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"react":35}],12:[function(require,module,exports){
+},{"react":184}],12:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
@@ -787,7 +787,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"lodash":32,"moment":33,"react":35}],13:[function(require,module,exports){
+},{"lodash":32,"moment":33,"react":184}],13:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react/addons');
 var moment = require('moment');
 
