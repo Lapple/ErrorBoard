@@ -13,10 +13,6 @@ ws.onmessage = function(e) {
     updateApp();
 };
 
-var redirectTo = function(url) {
-    return _.defer.bind(_, page, url);
-};
-
 var _context;
 var updateApp = function(ctx) {
     var app = document.getElementById('app');
@@ -34,7 +30,6 @@ var updateApp = function(ctx) {
     React.renderComponent(ComponentApp(props), app);
 };
 
-page('/', redirectTo('/messages/'));
 page('/:type/:id?', updateApp);
 
 document.addEventListener('DOMContentLoaded', page.start);

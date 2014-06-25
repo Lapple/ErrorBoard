@@ -6,6 +6,7 @@ var favicon = require('serve-favicon');
 
 var ws = require('./websockets');
 var serveStaticFile = require('./middleware-static-file');
+var redirectTo = require('./redirect-to');
 
 var app = express();
 var server = http.createServer(app);
@@ -24,6 +25,7 @@ app.get('/error', require('./module-logger'));
 app.get('/fake', serveStaticFile(path.join(publicPath, 'fake.html')));
 
 app.get('/:type/:id?', require('./route-index'));
+app.get('/', redirectTo('/messages/'));
 
 ws.installHandlers(server, {prefix: '/ws'});
 
