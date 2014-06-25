@@ -8,8 +8,9 @@
     "port": 3000
   },
   "scripts": {
-    "start": "npm run browserify && node eb.js",
+    "start": "npm run browserify && npm run uglify && node eb.js",
     "browserify": "browserify client/app.js -o client/public/app.js",
+    "uglify": "uglifyjs client/public/app.js -o client/public/app.js",
     "watchify": "watchify client/app.js -o client/public/app.js -v",
     "nodemon": "nodemon --ignore client/ eb.js"
   },
@@ -27,7 +28,8 @@
     "vow": "^0.4.3",
     "ejs": "^1.0.0",
     "react-tools": "0.10.0",
-    "compression": "^1.0.8"
+    "compression": "^1.0.8",
+    "uglify-js": "^2.4.14"
   },
   "devDependencies": {
     "nodemon": "^1.0.17",
