@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var React = require('react');
+var React = require('react/addons');
 var slug = require('speakingurl');
 
 var cx = React.addons.classSet;

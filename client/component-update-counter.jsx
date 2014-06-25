@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require('react/addons');
 var moment = require('moment');
 
 var cx = React.addons.classSet;

@@ -7,10 +7,16 @@ var Report = require('./component-report.jsx');
 var Details = require('./component-details.jsx');
 
 module.exports = React.createClass({
+    getDefaultProps: function() {
+        return {
+            params: {},
+            state: {}
+        };
+    },
     render: function() {
         return <div className='container'>
             <div className='menu'>
-                <Nav pathname={ this.props.ctx.pathname } />
+                <Nav pathname={ this.props.pathname } />
             </div>
             <div className='content'>
                 { this.renderMain() }
@@ -21,30 +27,30 @@ module.exports = React.createClass({
         </div>;
     },
     renderMain: function() {
-        if (this.props.ctx.params.type === 'dashboard') {
+        if (this.props.params.type === 'dashboard') {
             return <Dashboard />;
         }
 
-        return <Report type={ this.props.ctx.params.type } onClick={ this._showDetails } />;
+        return <Report type={ this.props.params.type } onClick={ this._showDetails } />;
     },
     renderDetails: function() {
-        var ctx = this.props.ctx;
-        var detailsType = ctx.params.type.slice(0, -1);
+        var params = this.props.params;
+        var detailsType = params.type.slice(0, -1);
 
-        if (ctx.params.id) {
+        if (params.id) {
             return Details({
                 type: detailsType,
-                id: ctx.params.id,
-                title: ctx.state.details || null,
+                id: params.id,
+                title: this.props.state.details || null,
                 onClose: this._hideDetails
             });
         }
     },
     _showDetails: function(data) {
-        var url = '/' + this.props.ctx.params.type + '/' + encodeURIComponent(data.key) + '/';
+        var url = '/' + this.props.params.type + '/' + encodeURIComponent(data.key) + '/';
         page.show(url, {details: data.title});
     },
     _hideDetails: function() {
-        page.show('/' + this.props.ctx.params.type + '/');
+        page.show('/' + this.props.params.type + '/');
     }
 });

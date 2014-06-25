@@ -24,7 +24,13 @@ var updateApp = function(ctx) {
         _context = ctx;
     }
 
-    React.renderComponent(ComponentApp({ctx: _context}), app);
+    var props = {
+        state: _context.state,
+        params: _context.params,
+        pathname: _context.pathname
+    };
+
+    React.renderComponent(ComponentApp(props), app);
 };
 
 page('/', redirectTo('/messages/'));

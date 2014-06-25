@@ -1,3 +1,5 @@
+require('./server/require-jsx')();
+
 var config = require('./package.json').config;
 var server = require('./server');
 

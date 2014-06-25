@@ -25,7 +25,13 @@ var updateApp = function(ctx) {
         _context = ctx;
     }
 
-    React.renderComponent(ComponentApp({ctx: _context}), app);
+    var props = {
+        state: _context.state,
+        params: _context.params,
+        pathname: _context.pathname
+    };
+
+    React.renderComponent(ComponentApp(props), app);
 };
 
 page('/', redirectTo('/messages/'));
@@ -33,7 +39,7 @@ page('/:type/:id?', updateApp);
 
 document.addEventListener('DOMContentLoaded', page.start);
 
-},{"./component-app.jsx":2,"./reports":15,"lodash":32,"page":34,"react":35}],2:[function(require,module,exports){
+},{"./component-app.jsx":2,"./reports":15,"lodash":32,"page":34,"react":184}],2:[function(require,module,exports){
 /** @jsx React.DOM */var page = require('page');
 var React = require('react');
 
@@ -43,10 +49,16 @@ var Report = require('./component-report.jsx');
 var Details = require('./component-details.jsx');
 
 module.exports = React.createClass({displayName: 'exports',
+    getDefaultProps: function() {
+        return {
+            params: {},
+            state: {}
+        };
+    },
     render: function() {
         return React.DOM.div( {className:"container"}, 
             React.DOM.div( {className:"menu"}, 
-                Nav( {pathname: this.props.ctx.pathname } )
+                Nav( {pathname: this.props.pathname } )
             ),
             React.DOM.div( {className:"content"}, 
                  this.renderMain(), 
@@ -57,37 +69,37 @@ module.exports = React.createClass({displayName: 'exports',
         );
     },
     renderMain: function() {
-        if (this.props.ctx.params.type === 'dashboard') {
+        if (this.props.params.type === 'dashboard') {
             return Dashboard(null );
         }
 
-        return Report( {type: this.props.ctx.params.type,  onClick: this._showDetails } );
+        return Report( {type: this.props.params.type,  onClick: this._showDetails } );
     },
     renderDetails: function() {
-        var ctx = this.props.ctx;
-        var detailsType = ctx.params.type.slice(0, -1);
+        var params = this.props.params;
+        var detailsType = params.type.slice(0, -1);
 
-        if (ctx.params.id) {
+        if (params.id) {
             return Details({
                 type: detailsType,
-                id: ctx.params.id,
-                title: ctx.state.details || null,
+                id: params.id,
+                title: this.props.state.details || null,
                 onClose: this._hideDetails
             });
         }
     },
     _showDetails: function(data) {
-        var url = '/' + this.props.ctx.params.type + '/' + encodeURIComponent(data.key) + '/';
+        var url = '/' + this.props.params.type + '/' + encodeURIComponent(data.key) + '/';
         page.show(url, {details: data.title});
     },
     _hideDetails: function() {
-        page.show('/' + this.props.ctx.params.type + '/');
+        page.show('/' + this.props.params.type + '/');
     }
 });
 
-},{"./component-dashboard.jsx":4,"./component-details.jsx":5,"./component-nav.jsx":7,"./component-report.jsx":10,"page":34,"react":35}],3:[function(require,module,exports){
+},{"./component-dashboard.jsx":4,"./component-details.jsx":5,"./component-nav.jsx":7,"./component-report.jsx":10,"page":34,"react":184}],3:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
-var React = require('react');
+var React = require('react/addons');
 var slug = require('speakingurl');
 
 var cx = React.addons.classSet;
@@ -109,7 +121,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"lodash":32,"react":35,"speakingurl":184}],4:[function(require,module,exports){
+},{"lodash":32,"react/addons":35,"speakingurl":185}],4:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 var moment = require('moment');
 
@@ -150,7 +162,7 @@ module.exports = React.createClass({displayName: 'exports',
 
 },{"./component-graph.jsx":6,"./reports":15,"moment":33,"react":35}],5:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
-var React = require('react');
+var React = require('react/addons');
 var moment = require('moment');
 
 var cx = React.addons.classSet;
@@ -307,7 +319,7 @@ function sortByLatestReport(a, b) {
     return b.latest - a.latest;
 }
 
-},{"./component-graph.jsx":6,"./component-report-item.jsx":9,"./component-stack.jsx":11,"./reports":15,"lodash":32,"moment":33,"react":35}],6:[function(require,module,exports){
+},{"./component-graph.jsx":6,"./component-report-item.jsx":9,"./component-stack.jsx":11,"./reports":15,"lodash":32,"moment":33,"react/addons":35}],6:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 var moment = require('moment');
@@ -406,19 +418,19 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"./mixin-graph":14,"lodash":32,"moment":33,"react":35}],7:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+/** @jsx React.DOM */var React = require('react/addons');
 var cx = React.addons.classSet;
-
-var icons = {
-    dashboard: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 5c-.771 0-1.468.301-2 .779v-1.779c0-1.654-1.346-3-3-3s-3 1.346-3 3v4.779c-.532-.478-1.229-.779-2-.779-1.654 0-3 1.346-3 3v6h16v-9c0-1.654-1.346-3-3-3zm-5-2c.551 0 1 .448 1 1v11h-2v-11c0-.552.449-1 1-1zm-4 12h-2v-4c0-.552.449-1 1-1s1 .448 1 1v4zm10 0h-2v-7c0-.552.449-1 1-1s1 .448 1 1v7zM19 21h-14c-.552 0-1-.447-1-1s.448-1 1-1h14c.552 0 1 .447 1 1s-.448 1-1 1z"})),
-    messages: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M18.383 4.318c-.374-.155-.804-.069-1.09.217-1.264 1.263-3.321 1.264-4.586 0-2.045-2.043-5.37-2.043-7.414 0-.188.187-.293.442-.293.707v13c0 .552.448 1 1 1s1-.448 1-1v-4.553c1.271-.997 3.121-.911 4.293.26 2.045 2.043 5.371 2.043 7.414 0 .188-.188.293-.442.293-.707v-8c0-.405-.244-.769-.617-.924zm-7.09 1.631c1.54 1.539 3.808 1.918 5.707 1.138v2.311c-1.446.916-3.387.749-4.646-.51-1.448-1.447-3.598-1.743-5.354-.927v-2.272c1.271-.997 3.121-.912 4.293.26zm1.414 6.585c-1.022-1.021-2.365-1.532-3.707-1.532-.681 0-1.361.131-2 .394v-2.311c1.446-.916 3.387-.749 4.646.51.925.924 2.139 1.386 3.354 1.386.687 0 1.366-.164 2-.459v2.272c-1.272.997-3.122.911-4.293-.26z"})),
-    browsers: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M21 4h-18c-1.104 0-2 .896-2 2v12c0 1.104.896 2 2 2h18c1.104 0 2-.896 2-2v-12c0-1.104-.896-2-2-2zm-18 2h8v12h-8v-12zm18 12h-9v-12h9.003l-.003 12zM20 13.5c0-.275-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h1c.275 0 .5-.225.5-.5v-3zM17 7.5c0-.275-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5v5c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-5zM18.5 10h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM18.5 12h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM13.5 15h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5s.225.5.5.5zM16.5 16h-3c-.275 0-.5.225-.5.5s.225.5.5.5h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5zM18.5 8h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM10 7.5c0-.275-.225-.5-.5-.5h-5c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h5c.275 0 .5-.225.5-.5v-3zM9.501 14h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 12h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 16h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5z"})),
-    scripts: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 16c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-3.025c.838.634 1.87 1.025 3 1.025h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-.184c1.163-.413 2-1.512 2-2.816 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 1.304.837 2.403 2 2.816v7.184c0 2.757 2.243 5 5 5h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3zm0-5c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm-10-7c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm10 16c-.552 0-1-.449-1-1s.448-1 1-1 1 .449 1 1-.448 1-1 1z"})),
-    pages: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 21h-10c-1.654 0-3-1.346-3-3v-12c0-1.654 1.346-3 3-3h10c1.654 0 3 1.346 3 3v12c0 1.654-1.346 3-3 3zm-10-16c-.551 0-1 .449-1 1v12c0 .551.449 1 1 1h10c.551 0 1-.449 1-1v-12c0-.551-.449-1-1-1h-10zM16 11h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 8h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 14h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 17h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5z"}))
-};
 
 module.exports = React.createClass({displayName: 'exports',
     render: function() {
+        var icons = {
+            dashboard: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 5c-.771 0-1.468.301-2 .779v-1.779c0-1.654-1.346-3-3-3s-3 1.346-3 3v4.779c-.532-.478-1.229-.779-2-.779-1.654 0-3 1.346-3 3v6h16v-9c0-1.654-1.346-3-3-3zm-5-2c.551 0 1 .448 1 1v11h-2v-11c0-.552.449-1 1-1zm-4 12h-2v-4c0-.552.449-1 1-1s1 .448 1 1v4zm10 0h-2v-7c0-.552.449-1 1-1s1 .448 1 1v7zM19 21h-14c-.552 0-1-.447-1-1s.448-1 1-1h14c.552 0 1 .447 1 1s-.448 1-1 1z"})),
+            messages: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M18.383 4.318c-.374-.155-.804-.069-1.09.217-1.264 1.263-3.321 1.264-4.586 0-2.045-2.043-5.37-2.043-7.414 0-.188.187-.293.442-.293.707v13c0 .552.448 1 1 1s1-.448 1-1v-4.553c1.271-.997 3.121-.911 4.293.26 2.045 2.043 5.371 2.043 7.414 0 .188-.188.293-.442.293-.707v-8c0-.405-.244-.769-.617-.924zm-7.09 1.631c1.54 1.539 3.808 1.918 5.707 1.138v2.311c-1.446.916-3.387.749-4.646-.51-1.448-1.447-3.598-1.743-5.354-.927v-2.272c1.271-.997 3.121-.912 4.293.26zm1.414 6.585c-1.022-1.021-2.365-1.532-3.707-1.532-.681 0-1.361.131-2 .394v-2.311c1.446-.916 3.387-.749 4.646.51.925.924 2.139 1.386 3.354 1.386.687 0 1.366-.164 2-.459v2.272c-1.272.997-3.122.911-4.293-.26z"})),
+            browsers: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M21 4h-18c-1.104 0-2 .896-2 2v12c0 1.104.896 2 2 2h18c1.104 0 2-.896 2-2v-12c0-1.104-.896-2-2-2zm-18 2h8v12h-8v-12zm18 12h-9v-12h9.003l-.003 12zM20 13.5c0-.275-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h1c.275 0 .5-.225.5-.5v-3zM17 7.5c0-.275-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5v5c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-5zM18.5 10h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM18.5 12h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM13.5 15h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-3c-.275 0-.5.225-.5.5s.225.5.5.5zM16.5 16h-3c-.275 0-.5.225-.5.5s.225.5.5.5h3c.275 0 .5-.225.5-.5s-.225-.5-.5-.5zM18.5 8h1c.275 0 .5-.225.5-.5s-.225-.5-.5-.5h-1c-.275 0-.5.225-.5.5s.225.5.5.5zM10 7.5c0-.275-.225-.5-.5-.5h-5c-.275 0-.5.225-.5.5v3c0 .275.225.5.5.5h5c.275 0 .5-.225.5-.5v-3zM9.501 14h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 12h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5zM9.501 16h-5c-.274 0-.5.225-.5.5s.226.5.5.5h5c.274 0 .499-.225.499-.5s-.225-.5-.499-.5z"})),
+            scripts: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 16c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-3.025c.838.634 1.87 1.025 3 1.025h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3c-1.305 0-2.403.837-2.816 2h-3.184c-1.654 0-3-1.346-3-3v-.184c1.163-.413 2-1.512 2-2.816 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 1.304.837 2.403 2 2.816v7.184c0 2.757 2.243 5 5 5h3.184c.413 1.163 1.512 2 2.816 2 1.657 0 3-1.343 3-3s-1.343-3-3-3zm0-5c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm-10-7c.552 0 1 .449 1 1s-.448 1-1 1-1-.449-1-1 .448-1 1-1zm10 16c-.552 0-1-.449-1-1s.448-1 1-1 1 .449 1 1-.448 1-1 1z"})),
+            pages: React.DOM.svg( {version:"1.2", xmlns:"http://www.w3.org/2000/svg", viewBox:"0 0 24 24", fill:"currentColor"}, React.DOM.path( {d:"M17 21h-10c-1.654 0-3-1.346-3-3v-12c0-1.654 1.346-3 3-3h10c1.654 0 3 1.346 3 3v12c0 1.654-1.346 3-3 3zm-10-16c-.551 0-1 .449-1 1v12c0 .551.449 1 1 1h10c.551 0 1-.449 1-1v-12c0-.551-.449-1-1-1h-10zM16 11h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 8h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 14h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5zM16 17h-8c-.276 0-.5-.224-.5-.5s.224-.5.5-.5h8c.276 0 .5.224.5.5s-.224.5-.5.5z"}))
+        };
+
         return React.DOM.div( {className:"nav"}, 
              this.logo(), 
              this.link('/dashboard/', 'Dashboard', icons.dashboard), 
@@ -454,7 +466,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"react":35}],8:[function(require,module,exports){
+},{"react/addons":35}],8:[function(require,module,exports){
 /** @jsx React.DOM */var React = require('react');
 
 module.exports = React.createClass({displayName: 'exports',
@@ -491,7 +503,7 @@ module.exports = React.createClass({displayName: 'exports',
 
 },{"react":35}],9:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
-var React = require('react');
+var React = require('react/addons');
 
 var cx = React.addons.classSet;
 var Timespan = require('./component-timespan.jsx');
@@ -539,7 +551,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"./component-browsers.jsx":3,"./component-timespan.jsx":12,"lodash":32,"react":35}],10:[function(require,module,exports){
+},{"./component-browsers.jsx":3,"./component-timespan.jsx":12,"lodash":32,"react/addons":35}],10:[function(require,module,exports){
 /** @jsx React.DOM */var _ = require('lodash');
 var React = require('react');
 
@@ -781,7 +793,7 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"lodash":32,"moment":33,"react":35}],13:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+/** @jsx React.DOM */var React = require('react/addons');
 var moment = require('moment');
 
 var cx = React.addons.classSet;
@@ -802,7 +814,7 @@ module.exports = React.createClass({displayName: 'exports',
     }
 });
 
-},{"moment":33,"react":35}],14:[function(require,module,exports){
+},{"moment":33,"react/addons":35}],14:[function(require,module,exports){
 module.exports = {
     getInitialState: function() {
         return {width: 0};
@@ -888,7 +900,7 @@ module.exports = {
     }
 };
 
-},{"../common/aggregators":26,"lodash":32,"superagent":186,"vow":189}],16:[function(require,module,exports){
+},{"../common/aggregators":26,"lodash":32,"superagent":187,"vow":190}],16:[function(require,module,exports){
 var _ = require('lodash');
 
 var prop = function(name) {
@@ -1035,7 +1047,7 @@ module.exports = function(params) {
     });
 };
 
-},{"./aggregate":16,"./browser-name":27,"./message-signature":28,"./reduce-timestamps":30,"speakingurl":184}],21:[function(require,module,exports){
+},{"./aggregate":16,"./browser-name":27,"./message-signature":28,"./reduce-timestamps":30,"speakingurl":185}],21:[function(require,module,exports){
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var reduceBrowsers = require('./reduce-browsers');
@@ -30019,9 +30031,12 @@ module.exports = warning;
 
 }).call(this,require("/Users/lapple/Code/eb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
 },{"./emptyFunction":144,"/Users/lapple/Code/eb/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":31}],184:[function(require,module,exports){
+module.exports = require('./lib/React');
+
+},{"./lib/React":61}],185:[function(require,module,exports){
 module.exports = require('./lib/');
 
-},{"./lib/":185}],185:[function(require,module,exports){
+},{"./lib/":186}],186:[function(require,module,exports){
 (function() {
     'use strict';
 
@@ -30731,7 +30746,7 @@ module.exports = require('./lib/');
     }
 })();
 
-},{}],186:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -31782,7 +31797,7 @@ request.put = function(url, data, fn){
 
 module.exports = request;
 
-},{"emitter":187,"reduce":188}],187:[function(require,module,exports){
+},{"emitter":188,"reduce":189}],188:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -31948,7 +31963,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],188:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 
 /**
  * Reduce `arr` with `fn`.
@@ -31973,7 +31988,7 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
-},{}],189:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 (function (process){
 /**
  * @module vow
