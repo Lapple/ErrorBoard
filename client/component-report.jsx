@@ -11,7 +11,7 @@ var HOUR = 60 * 60 * 1000;
 module.exports = React.createClass({
     getInitialState: function() {
         return {
-            index: [],
+            index: null,
             lastRefreshed: Date.now(),
             updatesCount: 0,
             newCount: 0,
@@ -41,14 +41,18 @@ module.exports = React.createClass({
             <table className="report__table">
                 { this.thead() }
                 <tbody>
-                    { _.isEmpty(items) ? this.empty() : items }
+                    { items.length ? items: this.empty() }
                 </tbody>
             </table>
         </div>;
     },
     empty: function() {
+        var label = _.isNull(this.state.index) ? 'Loading…' : 'Nothing to display';
+
         return <tr>
-            <td colSpan='3'>Empty</td>
+            <td colSpan='4' className='report__cell report__cell_single'>
+                { label }
+            </td>
         </tr>;
     },
     thead: function() {

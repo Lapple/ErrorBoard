@@ -162,6 +162,14 @@ html, body, .app, .container, .menu, .content {
     color: rgb(153, 167, 177);
 }
 
+.report__cell_single {
+    padding-top: 40px;
+    padding-bottom: 40px;
+
+    text-align: center;
+    color: rgb(153, 167, 177);
+}
+
 .report__cut {
     overflow: hidden;
 
