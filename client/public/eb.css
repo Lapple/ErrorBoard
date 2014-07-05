@@ -433,6 +433,12 @@ html, body, .app, .container, .menu, .content {
     bottom: -5px;
 }
 
+.graph__main {
+    fill: none;
+    stroke: #999;
+    stroke-linejoin: round;
+}
+
 .graph__axis {
     stroke: rgb(217, 229, 236);
 }
@@ -441,20 +447,6 @@ html, body, .app, .container, .menu, .content {
     font-size: 13px;
     fill: rgb(153, 167, 177);
     -webkit-font-smoothing: antialiased;
-}
-
-.graph__label {
-    display: none;
-    text-anchor: middle;
-    -webkit-font-smoothing: antialiased;
-}
-
-.graph__bar-group:hover .graph__label {
-    display: block;
-}
-
-.graph__bar {
-    fill: rgb(153, 167, 177);
 }
 
 .stack {

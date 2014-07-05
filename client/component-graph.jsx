@@ -17,30 +17,27 @@ module.exports = React.createClass({
 
         var width = this.state.width;
         var height = this.props.height;
-        var viewBox = '-0.5 0 ' + width + ' ' + height;
-        var xStep = width / (plot.points.length - 1);
+        var viewBox = '-0.5 0 ' + (width + 0.5) + ' ' + height;
 
         var points = _.map(plot.points, function(item, index, array) {
             var y = (item.count / plot.max) || 0;
 
             return {
-                x: index * xStep,
+                x: index * (width / (array.length - 1)),
                 y: height - (y * height * Y_CAP),
                 value: item.count,
                 time: item.timestamp
             };
         });
 
-        var bars = _.map(points, function(point, index) {
-            var labelDistance = 8;
+        var path = _.reduce(points, function(d, point, index) {
+            var tool = index === 0 ? 'M' : 'L';
+            return d + tool + point.x + ' ' + point.y;
+        }, '');
 
-            if (point.value != 0) {
-                return <g className='graph__bar-group' key={ point.time }>
-                    <rect x={ point.x - xStep } y={ point.y } width={ xStep } height={ height - point.y } className='graph__bar' />
-                    <text x={ point.x - xStep / 2 } y={ point.y - labelDistance } className='graph__label'>
-                        { point.value }
-                    </text>
-                </g>;
+        var circles = _.map(points, function(point, index) {
+            if (point.value > 0) {
+                return <circle key={ point.time } cx={ point.x } cy={ point.y } r='1' />;
             }
         });
 
@@ -65,7 +62,8 @@ module.exports = React.createClass({
             <svg xmlns='http://www.w3.org/2000/svg' width={ width } height={ height } viewBox={ viewBox }>
                 <line x1='0' y1={ height } x2={ width } y2={ height } className='graph__axis' />
                 { days }
-                { bars }
+                <path d={ path } className='graph__main' />
+                { circles }
             </svg>
         </div>;
     },
