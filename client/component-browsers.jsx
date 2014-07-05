@@ -1,8 +1,10 @@
 var _ = require('lodash');
 var React = require('react/addons');
-var slug = require('speakingurl');
-
 var cx = React.addons.classSet;
+
+var slug = function(title) {
+    return title && title.toLowerCase().replace(/\s+/g, '-');
+};
 
 module.exports = React.createClass({
     render: function() {

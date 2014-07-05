@@ -1,5 +1,3 @@
-var slug = require('speakingurl');
-
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var getBrowserName = require('./browser-name');
