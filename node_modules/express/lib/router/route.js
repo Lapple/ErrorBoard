@@ -3,6 +3,7 @@
  */
 
 var debug = require('debug')('express:router:route');
+var Layer = require('./layer');
 var methods = require('methods');
 var utils = require('../utils');
 
@@ -22,21 +23,49 @@ module.exports = Route;
 function Route(path) {
   debug('new %s', path);
   this.path = path;
-  this.stack = undefined;
+  this.stack = [];
 
   // route handlers for various http methods
   this.methods = {};
 }
 
 /**
+ * @api private
+ */
+
+Route.prototype._handles_method = function _handles_method(method) {
+  if (this.methods._all) {
+    return true;
+  }
+
+  method = method.toLowerCase();
+
+  if (method === 'head' && !this.methods['head']) {
+    method = 'get';
+  }
+
+  return Boolean(this.methods[method]);
+};
+
+/**
  * @return {Array} supported HTTP methods
  * @api private
  */
 
-Route.prototype._options = function(){
-  return Object.keys(this.methods).map(function(method) {
-    return method.toUpperCase();
-  });
+Route.prototype._options = function _options() {
+  var methods = Object.keys(this.methods);
+
+  // append automatic head
+  if (this.methods.get && !this.methods.head) {
+    methods.push('head');
+  }
+
+  for (var i = 0; i < methods.length; i++) {
+    // make upper case
+    methods[i] = methods[i].toUpperCase();
+  }
+
+  return methods;
 };
 
 /**
@@ -46,28 +75,22 @@ Route.prototype._options = function(){
  */
 
 Route.prototype.dispatch = function(req, res, done){
-  var self = this;
-  var method = req.method.toLowerCase();
+  var idx = 0;
+  var stack = this.stack;
+  if (stack.length === 0) {
+    return done();
+  }
 
+  var method = req.method.toLowerCase();
   if (method === 'head' && !this.methods['head']) {
     method = 'get';
   }
 
-  req.route = self;
+  req.route = this;
 
-  // single middleware route case
-  if (typeof this.stack === 'function') {
-    this.stack(req, res, done);
-    return;
-  }
+  next();
 
-  var stack = self.stack;
-  if (!stack) {
-    return done();
-  }
-
-  var idx = 0;
-  (function next_layer(err) {
+  function next(err) {
     if (err && err === 'route') {
       return done();
     }
@@ -78,33 +101,15 @@ Route.prototype.dispatch = function(req, res, done){
     }
 
     if (layer.method && layer.method !== method) {
-      return next_layer(err);
+      return next(err);
     }
 
-    var arity = layer.handle.length;
     if (err) {
-      if (arity < 4) {
-        return next_layer(err);
-      }
-
-      try {
-        layer.handle(err, req, res, next_layer);
-      } catch (err) {
-        next_layer(err);
-      }
-      return;
+      layer.handle_error(err, req, res, next);
+    } else {
+      layer.handle_request(req, res, next);
     }
-
-    if (arity > 3) {
-      return next_layer();
-    }
-
-    try {
-      layer.handle(req, res, next_layer);
-    } catch (err) {
-      next_layer(err);
-    }
-  })();
+  }
 };
 
 /**
@@ -136,7 +141,6 @@ Route.prototype.dispatch = function(req, res, done){
  */
 
 Route.prototype.all = function(){
-  var self = this;
   var callbacks = utils.flatten([].slice.call(arguments));
   callbacks.forEach(function(fn) {
     if (typeof fn !== 'function') {
@@ -145,23 +149,18 @@ Route.prototype.all = function(){
       throw new Error(msg);
     }
 
-    if (!self.stack) {
-      self.stack = fn;
-    }
-    else if (typeof self.stack === 'function') {
-      self.stack = [{ handle: self.stack }, { handle: fn }];
-    }
-    else {
-      self.stack.push({ handle: fn });
-    }
-  });
+    var layer = Layer('/', {}, fn);
+    layer.method = undefined;
 
-  return self;
+    this.methods._all = true;
+    this.stack.push(layer);
+  }, this);
+
+  return this;
 };
 
 methods.forEach(function(method){
   Route.prototype[method] = function(){
-    var self = this;
     var callbacks = utils.flatten([].slice.call(arguments));
 
     callbacks.forEach(function(fn) {
@@ -171,21 +170,14 @@ methods.forEach(function(method){
         throw new Error(msg);
       }
 
-      debug('%s %s', method, self.path);
+      debug('%s %s', method, this.path);
 
-      if (!self.methods[method]) {
-        self.methods[method] = true;
-      }
+      var layer = Layer('/', {}, fn);
+      layer.method = method;
 
-      if (!self.stack) {
-        self.stack = [];
-      }
-      else if (typeof self.stack === 'function') {
-        self.stack = [{ handle: self.stack }];
-      }
-
-      self.stack.push({ method: method, handle: fn });
-    });
-    return self;
+      this.methods[method] = true;
+      this.stack.push(layer);
+    }, this);
+    return this;
   };
 });

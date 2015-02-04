@@ -2,21 +2,21 @@ var test = require('tap').test;
 var parents = require('../');
 
 test('win32', function (t) {
-    var dir = 'C:\\Program Files\\Maxis\\Sim City 2000\\cities';
+    var dir = 'c:\\Program Files\\Maxis\\Sim City 2000\\cities';
     var dirs = parents(dir, { platform : 'win32' });
     t.same(dirs, [
-        'C:\\Program Files\\Maxis\\Sim City 2000\\cities',
-        'C:\\Program Files\\Maxis\\Sim City 2000',
-        'C:\\Program Files\\Maxis',
-        'C:\\Program Files',
-        'C:',
+        'c:\\Program Files\\Maxis\\Sim City 2000\\cities',
+        'c:\\Program Files\\Maxis\\Sim City 2000',
+        'c:\\Program Files\\Maxis',
+        'c:\\Program Files',
+        'c:',
     ]);
     t.end();
 });
 
 test('win32 c:', function (t) {
-    var dirs = parents('C:\\', { platform : 'win32' });
-    t.same(dirs, [ 'C:' ]);
+    var dirs = parents('c:\\', { platform : 'win32' });
+    t.same(dirs, [ 'c:' ]);
     t.end();
 });
 

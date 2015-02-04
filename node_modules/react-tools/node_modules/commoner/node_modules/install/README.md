@@ -24,37 +24,38 @@ Usage
 When evaluated, the contents of install.js create a global function called `install`. This function is the only external interface to the module loader, and it can be called in two ways.
 
 The first way is to pass a module identifier string followed by a module factory function:
+```js
+install("some/module/id", function(require, exports, module) {
+    // CommonJS module code goes here.
 
-    install("some/module/id", function(require, exports, module) {
-        // CommonJS module code goes here.
-
-        // For example:
-        exports.setImmediate = function(callback) {
-            return setTimeout(callback, 0);
-        };
-    });
-
+    // For example:
+    exports.setImmediate = function(callback) {
+        return setTimeout(callback, 0);
+    };
+});
+```
 This makes the module available for requirement, but does not evaluate the contents of the module until the first time another module calls `require("some/module/id")`.
 
 The second way to invoke `install` is to omit the module identifier and pass an anonymous module factory function:
+```js
+install(function(require) {
+    // Code that uses require goes here.
 
-    install(function(require) {
-        // Code that uses require goes here.
-
-        // For example:
-        require("some/module/id").setImmediate(function() {
-            console.log("setImmediate fired");
-        });
+    // For example:
+    require("some/module/id").setImmediate(function() {
+        console.log("setImmediate fired");
     });
-
+});
+```
 Anonymous modules are executed in order of installation, as soon as their requirements have been installed. Note that such modules do not have exports objects, because anonymous modules cannot be required.
 
 Sugar
 ---
 If a named module has no requirements and does not need its own scope, the following shorthand can be used to install the module:
-
-    install("simple/module", { exports: {
-        one: 1,
-        two: 2,
-        buckle: "my shoe"
-    }});
+```js
+install("simple/module", { exports: {
+    one: 1,
+    two: 2,
+    buckle: "my shoe"
+}});
+```

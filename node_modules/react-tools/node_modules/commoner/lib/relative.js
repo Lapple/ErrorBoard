@@ -31,10 +31,37 @@ Rp.processSourceP = function(id, input) {
     } : input;
 
     return Q(output[".js"]).then(function(source) {
-        var visitor = new RequireVisitor(relativizer, id);
-        var ast = visitor.visit(recast.parse(source));
+        var promises = [];
+        var ast = recast.parse(source);
 
-        return Q.all(visitor.promises).then(function() {
+        function fixRequireP(literal) {
+            promises.push(relativizer.relativizeP(
+                id, literal.value
+            ).then(function(newValue) {
+                return literal.value = newValue;
+            }));
+        }
+
+        recast.visit(ast, {
+            visitCallExpression: function(path) {
+                var args = path.value.arguments;
+                var callee = path.value.callee;
+
+                if (n.Identifier.check(callee) &&
+                    callee.name === "require" &&
+                    args.length === 1) {
+                    var arg = args[0];
+                    if (n.Literal.check(arg) &&
+                        typeof arg.value === "string") {
+                        fixRequireP(arg);
+                    }
+                }
+
+                this.traverse(path);
+            }
+        });
+
+        return Q.all(promises).then(function() {
             output[".js"] = recast.print(ast).code;
             return output;
         });
@@ -58,41 +85,3 @@ Rp.relativizeP = function(moduleId, requiredId) {
         return util.relativize(moduleId, absoluteId);
     });
 };
-
-var RequireVisitor = recast.Visitor.extend({
-    init: function(relativizer, moduleId) {
-        assert.ok(relativizer instanceof Relativizer);
-        this.relativizer = relativizer;
-        this.moduleId = moduleId;
-        this.promises = [];
-    },
-
-    fixRequireP: function(literal) {
-        var promise = this.relativizer.relativizeP(
-            this.moduleId,
-            literal.value
-        ).then(function(newValue) {
-            return literal.value = newValue;
-        });
-
-        this.promises.push(promise);
-    },
-
-    visitCallExpression: function(exp) {
-        var callee = exp.callee;
-        if (n.Identifier.check(callee) &&
-            callee.name === "require" &&
-            exp.arguments.length === 1)
-        {
-            var arg = exp.arguments[0];
-            if (n.Literal.check(arg) &&
-                typeof arg.value === "string")
-            {
-                this.fixRequireP(arg);
-                return;
-            }
-        }
-
-        this.genericVisit(exp);
-    }
-});

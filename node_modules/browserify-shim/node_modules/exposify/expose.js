@@ -14,7 +14,7 @@ function getReplacements(id, globalVar, requires) {
       var node;
       if (s === id) { 
         node = requires.nodes[index]
-        acc.push({ from: node.range[0], to: node.range[1], id: id, code: '(window.' + globalVar  + ')' });
+        acc.push({ from: node.range[0], to: node.range[1], id: id, code: '(typeof window !== "undefined" ? window.' + globalVar  + ' : typeof global !== "undefined" ? global.' + globalVar  + ' : null)' });
       }
       return acc;
     }, [])

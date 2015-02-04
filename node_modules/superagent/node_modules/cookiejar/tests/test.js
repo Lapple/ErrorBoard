@@ -1,7 +1,8 @@
-var Cookie=require("../cookiejar")
-, CookieAccessInfo = Cookie.CookieAccessInfo
-, CookieJar = Cookie.CookieJar
-, Cookie = Cookie.Cookie
+#!/usr/bin/env node
+var Cookie=require("../cookiejar"),
+    CookieAccessInfo = Cookie.CookieAccessInfo,
+    CookieJar = Cookie.CookieJar,
+    Cookie = Cookie.Cookie;
 
 var assert = require('assert');
 
@@ -17,6 +18,9 @@ assert.equal(cookie.expiration_date, Infinity);
 assert.deepEqual(cookie, new Cookie("a=1;domain=.test.com;path=/"));
 assert.ok(cookie.collidesWith(new Cookie("a=1;domain=.test.com;path=/")));
 
+var cookie = new Cookie("a=1;path=/", ".test.com");
+assert.equal(cookie.domain, ".test.com");
+
 
 // Test CookieJar
 var test_jar = CookieJar();
@@ -29,7 +33,7 @@ assert.equal(cookies.length, 2, "Expires on setCookies fail\n" + cookies.toStrin
 assert.equal(cookies.toValueString(), 'a=1;b=2', "Cannot get value string of multiple cookies");
 
 cookies=test_jar.getCookies(CookieAccessInfo("www.test.com","/"))
-assert.equal(cookies.length, 1, "Wildcard domain fail\n" + cookies.toString());
+assert.equal(cookies.length, 2, "Wildcard domain fail\n" + cookies.toString());
 
 test_jar.setCookies("b=2;domain=test.com;path=/;expires=January 1, 1970");
 cookies=test_jar.getCookies(CookieAccessInfo("test.com","/"))
@@ -56,3 +60,23 @@ assert.equal(cookie.value, "1");
 assert.equal(cookie.domain, ".test.com");
 assert.equal(cookie.path, "/");
 assert.deepEqual(cookie, new Cookie("a=1;domain=.test.com;path=/"));
+
+// Test request_path and request_domain
+test_jar.setCookie(new Cookie("sub=4;path=/", "test.com"));
+var cookie = test_jar.getCookie("sub", CookieAccessInfo("sub.test.com", "/"));
+assert.equal(cookie, undefined);
+
+var cookie = test_jar.getCookie("sub", CookieAccessInfo("test.com", "/"));
+assert.equal(cookie.name, "sub");
+assert.equal(cookie.domain, "test.com");
+
+test_jar.setCookie(new Cookie("sub=4;", "test.com", "/accounts"));
+var cookie = test_jar.getCookie("sub", CookieAccessInfo("test.com", "/"));
+assert.equal(cookie, undefined);
+
+var cookie = test_jar.getCookie("sub", CookieAccessInfo("test.com", "/accounts"));
+assert.equal(cookie.path, "/accounts");
+
+test_jar.setCookie(new Cookie("sub=5;path=/", "test.com", "/accounts"));
+var cookies = test_jar.getCookies(CookieAccessInfo("test.com"));
+assert.equal(cookies.length, 3);

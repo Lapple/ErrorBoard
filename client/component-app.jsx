@@ -38,12 +38,11 @@ module.exports = React.createClass({
         var detailsType = params.type.slice(0, -1);
 
         if (params.id) {
-            return Details({
-                type: detailsType,
-                id: params.id,
-                title: this.props.state.details || null,
-                onClose: this._hideDetails
-            });
+            return <Details
+                type={ detailsType }
+                id={ params.id }
+                title={ this.props.state.details || null }
+                onClose={ this._hideDetails } />;
         }
     },
     _showDetails: function(data) {

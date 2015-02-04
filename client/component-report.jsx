@@ -23,16 +23,15 @@ module.exports = React.createClass({
         var earliest = _.reduce(this.state.index, getEarliest, now);
 
         var items = _.map(this.state.index, function(data) {
-            return ReportItem({
-                key: data.key,
-                type: this.props.type,
-                data: data,
-                timespan: {
+            return <ReportItem
+                key={ data.key }
+                type={ this.props.type }
+                data={ data }
+                timespan={ {
                     earliest: earliest,
                     latest: now
-                },
-                onClick: _.partial(this.props.onClick, data)
-            });
+                } }
+                onClick={ _.partial(this.props.onClick, data) } />;
         }, this);
 
         return <div className="report">

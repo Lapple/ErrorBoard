@@ -18,7 +18,7 @@ module.exports = React.createClass({
 
         if (this.hasGraph(this.props)) {
             state.graphData = {};
-            state.from = moment().startOf('hour').subtract('days', 4).valueOf();
+            state.from = moment().startOf('hour').subtract(4, 'days').valueOf();
             state.to = Date.now();
         }
 
@@ -69,25 +69,21 @@ module.exports = React.createClass({
     renderGraph: function() {
         if (this.hasGraph(this.props)) {
             return <div className='curtain__graph'>
-                {
-                    Graph({
-                        data: this.state.graphData,
-                        from: this.state.from,
-                        to: this.state.to,
-                        height: 200
-                    })
-                }
+                <Graph
+                    data={ this.state.graphData }
+                    from={ this.state.from }
+                    to={ this.state.to }
+                    height={ 200 } />
             </div>
         }
     },
     renderTable: function() {
         var items = _.map(this.state.data, function(data) {
-            return ReportItem({
-                key: data.key,
-                type: (this.props.type === 'message') ? 'browsers' : 'messages',
-                data: data,
-                timespan: false
-            });
+            return <ReportItem
+                key={ data.key }
+                type={ (this.props.type === 'message') ? 'browsers' : 'messages' }
+                data={ data }
+                timespan={ false } />;
         }, this);
 
         return <table className="report__table report__table_details">

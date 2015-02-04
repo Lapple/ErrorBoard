@@ -100,6 +100,15 @@ BCp.setRelativize = function(value) {
 // This default can be overridden by individual BuildContext instances.
 BCp.setRelativize(false);
 
+BCp.setUseProvidesModule = function(value) {
+    Object.defineProperty(this, "useProvidesModule", {
+        value: !!value
+    });
+};
+
+// This default can be overridden by individual BuildContext instances.
+BCp.setUseProvidesModule(false);
+
 BCp.setCacheDirectory = function(dir) {
     if (!dir) {
         // Disable the cache directory.

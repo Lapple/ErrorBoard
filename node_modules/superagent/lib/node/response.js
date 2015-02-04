@@ -19,8 +19,7 @@ module.exports = Response;
  *  - set flags (.ok, .error, etc)
  *  - parse header
  *
- * @param {ClientRequest} req
- * @param {IncomingMessage} res
+ * @param {Request} req
  * @param {Object} options
  * @constructor
  * @extends {Stream}
@@ -28,11 +27,12 @@ module.exports = Response;
  * @api private
  */
 
-function Response(req, res, options) {
+function Response(req, options) {
   Stream.call(this);
   options = options || {};
-  this.req = req;
-  this.res = res;
+  var res = this.res = req.res;
+  this.request = req;
+  this.req = req.req;
   this.links = {};
   this.text = res.text;
   this.body = res.body || {};
@@ -105,6 +105,7 @@ Response.prototype.toError = function(){
   var msg = 'cannot ' + method + ' ' + path + ' (' + this.status + ')';
   var err = new Error(msg);
   err.status = this.status;
+  err.text = this.text;
   err.method = method;
   err.path = path;
 
@@ -200,4 +201,20 @@ Response.prototype.setStatusProperties = function(status){
   this.notAcceptable = 406 == status;
   this.forbidden = 403 == status;
   this.notFound = 404 == status;
+};
+
+/**
+ * To json.
+ *
+ * @return {Object}
+ * @api public
+ */
+
+Response.prototype.toJSON = function(){
+  return {
+    req: this.request.toJSON(),
+    header: this.header,
+    status: this.status,
+    text: this.text
+  };
 };

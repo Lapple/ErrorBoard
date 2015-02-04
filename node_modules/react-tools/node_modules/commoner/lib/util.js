@@ -319,7 +319,7 @@ exports.inherits = function(ctor, base) {
 function absolutize(moduleId, requiredId) {
     if (requiredId.charAt(0) === ".")
         requiredId = path.join(moduleId, "..", requiredId);
-    return path.normalize(requiredId);
+    return path.normalize(requiredId).replace(/\\/g, '/');
 }
 exports.absolutize = absolutize;
 
@@ -339,7 +339,7 @@ function relativize(moduleId, requiredId) {
     if (requiredId.charAt(0) !== ".")
         requiredId = "./" + requiredId;
 
-    return requiredId;
+    return requiredId.replace(/\\/g, '/');
 }
 exports.relativize = relativize;
 

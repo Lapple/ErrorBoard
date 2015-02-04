@@ -452,7 +452,7 @@ BinarySearchTree.prototype.delete = function (key, value) {
   if (!this.compareKeys(key, this.key) === 0) { return; }
 
   // Delete only a value
-  if (this.data.length > 1 && value) {
+  if (this.data.length > 1 && value !== undefined) {
     this.data.forEach(function (d) {
       if (!self.checkValueEquality(d, value)) { newData.push(d); }
     });

@@ -2,7 +2,6 @@ var express = require('express');
 var useragent = require('useragent');
 var moment = require('moment');
 
-var config = require('../package.json').config;
 var db = require('./database');
 var ws = require('./websockets');
 var app = express();

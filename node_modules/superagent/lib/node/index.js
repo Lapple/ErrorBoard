@@ -238,8 +238,9 @@ Request.prototype.part = util.deprecate(function(){
  */
 
 Request.prototype.agent = function(agent){
-  if (agent) this._agent = agent;
-  return this._agent;
+  if (!arguments.length) return this._agent;
+  this._agent = agent;
+  return this;
 };
 
 /**
@@ -558,6 +559,7 @@ Request.prototype.abort = function(){
   this._aborted = true;
   this.clearTimeout();
   this.req.abort();
+  this.emit('abort');
 };
 
 /**
@@ -621,6 +623,12 @@ Request.prototype.redirect = function(res){
 /**
  * Set Authorization field value with `user` and `pass`.
  *
+ * Examples:
+ *
+ *   .auth('tobi', 'learnboost')
+ *   .auth('tobi:learnboost')
+ *   .auth('tobi')
+ *
  * @param {String} user
  * @param {String} pass
  * @return {Request} for chaining
@@ -628,8 +636,9 @@ Request.prototype.redirect = function(res){
  */
 
 Request.prototype.auth = function(user, pass){
-  if (pass) pass = ':' + pass;
-  var str = new Buffer(user + (pass || '')).toString('base64');
+  if (1 === arguments.length) pass = '';
+  if (!~user.indexOf(':')) user = user + ':';
+  var str = new Buffer(user + pass).toString('base64');
   return this.set('Authorization', 'Basic ' + str);
 };
 
@@ -643,6 +652,15 @@ Request.prototype.auth = function(user, pass){
 
 Request.prototype.ca = function(cert){
   this._ca = cert;
+  return this;
+};
+
+/**
+ * Allow for extension
+ */
+
+Request.prototype.use = function(fn) {
+  fn(this);
   return this;
 };
 
@@ -703,7 +721,7 @@ Request.prototype.request = function(){
   this.query(url.query);
 
   // add cookies
-  req.setHeader('Cookie', this.cookies);
+  if (this.cookies) req.setHeader('Cookie', this.cookies);
 
   // set default UA
   req.setHeader('User-Agent', 'node-superagent/' + pkg.version);
@@ -800,6 +818,18 @@ Request.prototype.end = function(fn){
     var type = type[0];
     var multipart = 'multipart' == type;
     var redirect = isRedirect(res.statusCode);
+    var parser = self._parser;
+
+    self.res = res;
+
+    if ('HEAD' == self.method) {
+      var response = new Response(self);
+      self.response = response;
+      response.redirects = self._redirectList;
+      self.emit('response', response);
+      self.emit('end');
+      return;
+    }
 
     if (self.piped) {
       res.on('end', function(){
@@ -822,14 +852,29 @@ Request.prototype.end = function(fn){
     if (multipart) buffer = false;
 
     // TODO: make all parsers take callbacks
-    if (multipart) {
+    if (!parser && multipart) {
       var form = new formidable.IncomingForm;
 
       form.parse(res, function(err, fields, files){
         if (err) return self.callback(err);
-        var response = new Response(req, res);
+        var response = new Response(self);
+        self.response = response;
         response.body = fields;
         response.files = files;
+        response.redirects = self._redirectList;
+        self.emit('end');
+        self.callback(null, response);
+      });
+      return;
+    }
+
+    // check for images, one more special treatment
+    if (!parser && isImage(mime)) {
+      exports.parse.image(res, function(err, obj){
+        if (err) return self.callback(err);
+        var response = new Response(self);
+        self.response = response;
+        response.body = obj;
         response.redirects = self._redirectList;
         self.emit('end');
         self.callback(null, response);
@@ -851,21 +896,27 @@ Request.prototype.end = function(fn){
     if (buffer) parse = parse || exports.parse.text;
 
     // explicit parser
-    if (self._parser) parse = self._parser;
+    if (parser) parse = parser;
 
     // parse
     if (parse) {
-      parse(res, function(err, obj){
-        // TODO: handle error
-        res.body = obj;
-      });
+      try {
+        parse(res, function(err, obj){
+          if (err) self.callback(err);
+          res.body = obj;
+        });
+      } catch(err) {
+        self.callback(err);
+        return;
+      }
     }
 
     // unbuffered
     if (!buffer) {
       debug('unbuffered %s %s', self.method, self.url);
       self.res = res;
-      var response = new Response(self.req, self.res);
+      var response = new Response(self);
+      self.response = response;
       response.redirects = self._redirectList;
       self.emit('response', response);
       if (multipart) return // allow multipart to handle end event
@@ -881,7 +932,8 @@ Request.prototype.end = function(fn){
     res.on('end', function(){
       debug('end %s %s', self.method, self.url);
       // TODO: unless buffering emit earlier to stream
-      var response = new Response(self.req, self.res);
+      var response = new Response(self);
+      self.response = response;
       response.redirects = self._redirectList;
       self.emit('response', response);
       self.emit('end');
@@ -917,6 +969,21 @@ Request.prototype.end = function(fn){
   }
 
   return this;
+};
+
+/**
+ * To json.
+ *
+ * @return {Object}
+ * @api public
+ */
+
+Request.prototype.toJSON = function(){
+  return {
+    method: this.method,
+    url: this.url,
+    data: this._data
+  };
 };
 
 /**
@@ -982,6 +1049,22 @@ function isText(mime) {
   return 'text' == type
     || 'json' == subtype
     || 'x-www-form-urlencoded' == subtype;
+}
+
+/**
+ * Check if `mime` is image
+ *
+ * @param {String} mime
+ * @return {Boolean}
+ * @api public
+ */
+
+function isImage(mime) {
+  var parts = mime.split('/');
+  var type = parts[0];
+  var subtype = parts[1];
+
+  return 'image' == type;
 }
 
 /**

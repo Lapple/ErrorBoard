@@ -1,5 +1,6 @@
 var React = require('react');
-var ComponentApp = require('../client/component-app.jsx');
+var App = require('../client/component-app.jsx');
+var app = React.createFactory(App);
 
 module.exports = function(req, res) {
     var props = {
@@ -8,6 +9,6 @@ module.exports = function(req, res) {
     };
 
     res.render('template-index', {
-        app: React.renderComponentToString(ComponentApp(props))
+        app: React.renderToString(app(props))
     });
 };

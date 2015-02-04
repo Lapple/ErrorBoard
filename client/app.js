@@ -1,13 +1,13 @@
-var _ = require('lodash');
 var page = require('page');
 var React = require('react');
 
 var Reports = require('./reports');
-var ComponentApp = require('./component-app.jsx');
+var App = require('./component-app.jsx');
+var app = React.createFactory(App);
 
 var _context;
 var updateApp = function(ctx) {
-    var app = document.getElementById('app');
+    var rootNode = document.getElementById('app');
 
     if (ctx) {
         _context = ctx;
@@ -19,7 +19,7 @@ var updateApp = function(ctx) {
         pathname: _context.pathname
     };
 
-    React.renderComponent(ComponentApp(props), app);
+    React.renderComponent(app(props), rootNode);
 };
 
 page('/:type/:id?', updateApp);

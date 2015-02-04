@@ -1,7 +1,7 @@
 /**
  * @module vow
  * @author Filatov Dmitry <dfilatov@yandex-team.ru>
- * @version 0.4.3
+ * @version 0.4.8
  * @license
  * Dual licensed under the MIT and GPL licenses:
  *   * http://www.opensource.org/licenses/mit-license.php
@@ -9,6 +9,129 @@
  */
 
 (function(global) {
+
+var undef,
+    nextTick = (function() {
+        var fns = [],
+            enqueueFn = function(fn) {
+                return fns.push(fn) === 1;
+            },
+            callFns = function() {
+                var fnsToCall = fns, i = 0, len = fns.length;
+                fns = [];
+                while(i < len) {
+                    fnsToCall[i++]();
+                }
+            };
+
+        if(typeof setImmediate === 'function') { // ie10, nodejs >= 0.10
+            return function(fn) {
+                enqueueFn(fn) && setImmediate(callFns);
+            };
+        }
+
+        if(typeof process === 'object' && process.nextTick) { // nodejs < 0.10
+            return function(fn) {
+                enqueueFn(fn) && process.nextTick(callFns);
+            };
+        }
+
+        if(global.postMessage) { // modern browsers
+            var isPostMessageAsync = true;
+            if(global.attachEvent) {
+                var checkAsync = function() {
+                        isPostMessageAsync = false;
+                    };
+                global.attachEvent('onmessage', checkAsync);
+                global.postMessage('__checkAsync', '*');
+                global.detachEvent('onmessage', checkAsync);
+            }
+
+            if(isPostMessageAsync) {
+                var msg = '__promise' + +new Date,
+                    onMessage = function(e) {
+                        if(e.data === msg) {
+                            e.stopPropagation && e.stopPropagation();
+                            callFns();
+                        }
+                    };
+
+                global.addEventListener?
+                    global.addEventListener('message', onMessage, true) :
+                    global.attachEvent('onmessage', onMessage);
+
+                return function(fn) {
+                    enqueueFn(fn) && global.postMessage(msg, '*');
+                };
+            }
+        }
+
+        var doc = global.document;
+        if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
+            var createScript = function() {
+                    var script = doc.createElement('script');
+                    script.onreadystatechange = function() {
+                        script.parentNode.removeChild(script);
+                        script = script.onreadystatechange = null;
+                        callFns();
+                };
+                (doc.documentElement || doc.body).appendChild(script);
+            };
+
+            return function(fn) {
+                enqueueFn(fn) && createScript();
+            };
+        }
+
+        return function(fn) { // old browsers
+            enqueueFn(fn) && setTimeout(callFns, 0);
+        };
+    })(),
+    throwException = function(e) {
+        nextTick(function() {
+            throw e;
+        });
+    },
+    isFunction = function(obj) {
+        return typeof obj === 'function';
+    },
+    isObject = function(obj) {
+        return obj !== null && typeof obj === 'object';
+    },
+    toStr = Object.prototype.toString,
+    isArray = Array.isArray || function(obj) {
+        return toStr.call(obj) === '[object Array]';
+    },
+    getArrayKeys = function(arr) {
+        var res = [],
+            i = 0, len = arr.length;
+        while(i < len) {
+            res.push(i++);
+        }
+        return res;
+    },
+    getObjectKeys = Object.keys || function(obj) {
+        var res = [];
+        for(var i in obj) {
+            obj.hasOwnProperty(i) && res.push(i);
+        }
+        return res;
+    },
+    defineCustomErrorType = function(name) {
+        var res = function(message) {
+            this.name = name;
+            this.message = message;
+        };
+
+        res.prototype = new Error();
+
+        return res;
+    },
+    wrapOnFulfilled = function(onFulfilled, idx) {
+        return function(val) {
+            onFulfilled.call(this, val, idx);
+        };
+    };
 
 /**
  * @class Deferred
@@ -77,7 +200,21 @@ Deferred.prototype = /** @lends Deferred.prototype */{
      * ```
      */
     reject : function(reason) {
-        this._promise.isResolved() || this._promise._reject(reason);
+        if(this._promise.isResolved()) {
+            return;
+        }
+
+        if(vow.isPromise(reason)) {
+            reason = reason.then(function(val) {
+                var defer = vow.defer();
+                defer.reject(val);
+                return defer.promise();
+            });
+            this._promise._resolve(reason);
+        }
+        else {
+            this._promise._reject(reason);
+        }
     },
 
     /**
@@ -105,8 +242,9 @@ Deferred.prototype = /** @lends Deferred.prototype */{
 
 var PROMISE_STATUS = {
     PENDING   : 0,
-    FULFILLED : 1,
-    REJECTED  : -1
+    RESOLVED  : 1,
+    FULFILLED : 2,
+    REJECTED  : 3
 };
 
 /**
@@ -385,7 +523,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
         var defer = new Deferred(),
             timer = setTimeout(
                 function() {
-                    defer.reject(Error('timed out'));
+                    defer.reject(new vow.TimedOutError('timed out'));
                 },
                 timeout);
 
@@ -407,7 +545,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
     _vow : true,
 
     _resolve : function(val) {
-        if(this._status !== PROMISE_STATUS.PENDING) {
+        if(this._status > PROMISE_STATUS.RESOLVED) {
             return;
         }
 
@@ -416,12 +554,18 @@ Promise.prototype = /** @lends Promise.prototype */ {
             return;
         }
 
+        this._status = PROMISE_STATUS.RESOLVED;
+
         if(val && !!val._vow) { // shortpath for vow.Promise
-            val.then(
-                this._resolve,
-                this._reject,
-                this._notify,
-                this);
+            val.isFulfilled()?
+                this._fulfill(val.valueOf()) :
+                val.isRejected()?
+                    this._reject(val.valueOf()) :
+                    val.then(
+                        this._fulfill,
+                        this._reject,
+                        this._notify,
+                        this);
             return;
         }
 
@@ -474,7 +618,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
     },
 
     _fulfill : function(val) {
-        if(this._status !== PROMISE_STATUS.PENDING) {
+        if(this._status > PROMISE_STATUS.RESOLVED) {
             return;
         }
 
@@ -486,7 +630,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
     },
 
     _reject : function(reason) {
-        if(this._status !== PROMISE_STATUS.PENDING) {
+        if(this._status > PROMISE_STATUS.RESOLVED) {
             return;
         }
 
@@ -527,7 +671,7 @@ Promise.prototype = /** @lends Promise.prototype */ {
                 this._rejectedCallbacks.push(cb);
         }
 
-        if(this._status === PROMISE_STATUS.PENDING) {
+        if(this._status <= PROMISE_STATUS.RESOLVED) {
             this._progressCallbacks.push({ defer : defer, fn : onProgress, ctx : ctx });
         }
     },
@@ -827,9 +971,16 @@ var vow = /** @exports vow */ {
      * @returns {vow:Promise}
      */
     fulfill : function(value) {
-        return vow.when(value, null, function(reason) {
-            return reason;
-        });
+        var defer = vow.defer(),
+            promise = defer.promise();
+
+        defer.resolve(value);
+
+        return promise.isFulfilled()?
+            promise :
+            promise.then(null, function(reason) {
+                return reason;
+            });
     },
 
     /**
@@ -840,9 +991,9 @@ var vow = /** @exports vow */ {
      * @returns {vow:Promise}
      */
     reject : function(reason) {
-        return vow.when(reason, function(val) {
-            throw val;
-        });
+        var defer = vow.defer();
+        defer.reject(reason);
+        return defer.promise();
     },
 
     /**
@@ -942,12 +1093,9 @@ var vow = /** @exports vow */ {
         var i = len;
         vow._forEach(
             iterable,
-            function() {
+            function(value, idx) {
+                res[keys[idx]] = value;
                 if(!--i) {
-                    var j = 0;
-                    while(j < len) {
-                        res[keys[j]] = vow.valueOf(iterable[keys[j++]]);
-                    }
                     defer.resolve(res);
                 }
             },
@@ -1046,7 +1194,7 @@ var vow = /** @exports vow */ {
     },
 
     /**
-     * Returns a promise to be fulfilled only when any of the items in `iterable` are fulfilled,
+     * Returns a promise to be fulfilled only when any of the items in `iterable` is fulfilled,
      * or to be rejected when all the items are rejected (with the reason of the first rejected item).
      *
      * @param {Array} iterable
@@ -1076,7 +1224,7 @@ var vow = /** @exports vow */ {
     },
 
     /**
-     * Returns a promise to be fulfilled only when any of the items in `iterable` are fulfilled,
+     * Returns a promise to be fulfilled only when any of the items in `iterable` is fulfilled,
      * or to be rejected when the first item is rejected.
      *
      * @param {Array} iterable
@@ -1128,128 +1276,28 @@ var vow = /** @exports vow */ {
     _forEach : function(promises, onFulfilled, onRejected, onProgress, ctx, keys) {
         var len = keys? keys.length : promises.length,
             i = 0;
+
         while(i < len) {
-            vow.when(promises[keys? keys[i] : i], onFulfilled, onRejected, onProgress, ctx);
+            vow.when(
+                promises[keys? keys[i] : i],
+                wrapOnFulfilled(onFulfilled, i),
+                onRejected,
+                onProgress,
+                ctx);
             ++i;
         }
-    }
+    },
+
+    TimedOutError : defineCustomErrorType('TimedOut')
 };
 
-var undef,
-    nextTick = (function() {
-        var fns = [],
-            enqueueFn = function(fn) {
-                return fns.push(fn) === 1;
-            },
-            callFns = function() {
-                var fnsToCall = fns, i = 0, len = fns.length;
-                fns = [];
-                while(i < len) {
-                    fnsToCall[i++]();
-                }
-            };
-
-        if(typeof setImmediate === 'function') { // ie10, nodejs >= 0.10
-            return function(fn) {
-                enqueueFn(fn) && setImmediate(callFns);
-            };
-        }
-
-        if(typeof process === 'object' && process.nextTick) { // nodejs < 0.10
-            return function(fn) {
-                enqueueFn(fn) && process.nextTick(callFns);
-            };
-        }
-
-        if(global.postMessage) { // modern browsers
-            var isPostMessageAsync = true;
-            if(global.attachEvent) {
-                var checkAsync = function() {
-                        isPostMessageAsync = false;
-                    };
-                global.attachEvent('onmessage', checkAsync);
-                global.postMessage('__checkAsync', '*');
-                global.detachEvent('onmessage', checkAsync);
-            }
-
-            if(isPostMessageAsync) {
-                var msg = '__promise' + +new Date,
-                    onMessage = function(e) {
-                        if(e.data === msg) {
-                            e.stopPropagation && e.stopPropagation();
-                            callFns();
-                        }
-                    };
-
-                global.addEventListener?
-                    global.addEventListener('message', onMessage, true) :
-                    global.attachEvent('onmessage', onMessage);
-
-                return function(fn) {
-                    enqueueFn(fn) && global.postMessage(msg, '*');
-                };
-            }
-        }
-
-        var doc = global.document;
-        if('onreadystatechange' in doc.createElement('script')) { // ie6-ie8
-            var createScript = function() {
-                    var script = doc.createElement('script');
-                    script.onreadystatechange = function() {
-                        script.parentNode.removeChild(script);
-                        script = script.onreadystatechange = null;
-                        callFns();
-                };
-                (doc.documentElement || doc.body).appendChild(script);
-            };
-
-            return function(fn) {
-                enqueueFn(fn) && createScript();
-            };
-        }
-
-        return function(fn) { // old browsers
-            enqueueFn(fn) && setTimeout(callFns, 0);
-        };
-    })(),
-    throwException = function(e) {
-        nextTick(function() {
-            throw e;
-        });
-    },
-    isFunction = function(obj) {
-        return typeof obj === 'function';
-    },
-    isObject = function(obj) {
-        return obj !== null && typeof obj === 'object';
-    },
-    toStr = Object.prototype.toString,
-    isArray = Array.isArray || function(obj) {
-        return toStr.call(obj) === '[object Array]';
-    },
-    getArrayKeys = function(arr) {
-        var res = [],
-            i = 0, len = arr.length;
-        while(i < len) {
-            res.push(i++);
-        }
-        return res;
-    },
-    getObjectKeys = Object.keys || function(obj) {
-        var res = [];
-        for(var i in obj) {
-            obj.hasOwnProperty(i) && res.push(i);
-        }
-        return res;
-    };
-
 var defineAsGlobal = true;
-if(typeof exports === 'object') {
+if(typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = vow;
     defineAsGlobal = false;
 }
 
-if(typeof modules === 'object') {
+if(typeof modules === 'object' && isFunction(modules.define)) {
     modules.define('vow', function(provide) {
         provide(vow);
     });

@@ -60,8 +60,8 @@ Accepts.prototype.types = function (types) {
   var n = this.negotiator;
   if (!types.length) return n.mediaTypes();
   if (!this.headers.accept) return types[0];
-  var mimes = types.map(extToMime).filter(validMime);
-  var accepts = n.mediaTypes(mimes);
+  var mimes = types.map(extToMime);
+  var accepts = n.mediaTypes(mimes.filter(validMime));
   var first = accepts[0];
   if (!first) return false;
   return types[mimes.indexOf(first)];

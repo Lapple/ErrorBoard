@@ -7,7 +7,7 @@ var Graph = require('./component-graph.jsx');
 module.exports = React.createClass({
     getInitialState: function() {
         return {
-            from: moment().startOf('hour').subtract('days', 4).valueOf(),
+            from: moment().startOf('hour').subtract(4, 'days').valueOf(),
             to: Date.now(),
             hourly: {}
         };
