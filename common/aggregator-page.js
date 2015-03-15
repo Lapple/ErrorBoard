@@ -9,7 +9,7 @@ module.exports = function(params) {
             var referer = item.referer;
 
             return referer === params.id ||
-                (params.id === 'no-referer' && !referer);
+                (params.id === 'No referer' && !referer);
         },
         create: function(item) {
             return {
