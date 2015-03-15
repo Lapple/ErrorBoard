@@ -433,6 +433,11 @@ html, body, .app, .container, .menu, .content {
     bottom: -5px;
 }
 
+.curtain__table {
+    overflow-y: scroll;
+    height: calc(100% - 60px);
+}
+
 .graph__main {
     fill: none;
     stroke: #999;
