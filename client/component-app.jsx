@@ -38,10 +38,15 @@ module.exports = React.createClass({
         var detailsType = params.type.slice(0, -1);
 
         if (params.id) {
+            var title = this.props.state.details;
+            if (!title) {
+                title = params.type === "messages" ?
+                    JSON.parse(params.id)["message"] : params.id;
+            }
             return <Details
                 type={ detailsType }
                 id={ params.id }
-                title={ this.props.state.details || null }
+                title={ title }
                 onClose={ this._hideDetails } />;
         }
     },
