@@ -13,14 +13,15 @@ module.exports = React.createClass({
         return {
             index: null,
             lastRefreshed: Date.now(),
+            timespanLatest: Date.now(),
             updatesCount: 0,
             newCount: 0,
             hasOrderBroken: false
         };
     },
     render: function() {
-        var now = Date.now();
-        var earliest = _.reduce(this.state.index, getEarliest, now);
+        var latest = this.state.timespanLatest;
+        var earliest = _.reduce(this.state.index, getEarliest, latest);
 
         var items = _.map(this.state.index, function(data) {
             return <ReportItem
@@ -29,7 +30,7 @@ module.exports = React.createClass({
                 data={ data }
                 timespan={ {
                     earliest: earliest,
-                    latest: now
+                    latest: latest
                 } }
                 onClick={ _.partial(this.props.onClick, data) } />;
         }, this);
@@ -82,7 +83,7 @@ module.exports = React.createClass({
         }
     },
     componentDidMount: function() {
-        this._interval = setInterval(this.forceUpdate.bind(this), HOUR);
+        this._interval = setInterval(this.updateTimespan, HOUR);
         this.fetchData(this.props);
     },
     componentWillReceiveProps: function(props) {
@@ -125,7 +126,13 @@ module.exports = React.createClass({
             index: index,
             hasOrderBroken: !isSortedByLatest(index),
             updatesCount: sumDeltas(indexed),
-            newCount: rows[1].length
+            newCount: rows[1].length,
+            timespanLatest: Date.now()
+        });
+    },
+    updateTimespan: function() {
+        this.setState({
+            timespanLatest: Date.now()
         });
     }
 });
