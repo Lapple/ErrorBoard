@@ -100,7 +100,7 @@ module.exports = React.createClass({
         Reports.fetch(props.type).done(this.updateData);
     },
     updateData: function() {
-        if (_.isEmpty(this.state.index)) {
+        if (this.state.index === null) {
             this.createIndex();
         } else {
             this.updateIndex();
