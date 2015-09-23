@@ -7,8 +7,16 @@ var _reports = {};
 
 var getKey = function(params) {
     return _.reduce(params, function(result, value, key) {
+        if (value === null) {
+            return result;
+        }
+
+        if (value === false) {
+            value = '';
+        }
+
         return result + '&' + key + '=' + encodeURIComponent(value);
-    }, '?');
+    }, '');
 };
 
 var getParams = function(key) {
@@ -35,7 +43,7 @@ module.exports = {
         } else {
             request
                 .get('/reports/' + type)
-                .query(params)
+                .query(key)
                 .set('Accept', 'application/json')
                 .end(function(res) {
                     if (res.ok) {

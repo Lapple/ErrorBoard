@@ -13,9 +13,7 @@ module.exports = React.createClass({
     getInitialState: function() {
         var state = {
             visible: false,
-            // FIXME: This should be a proper boolean instead of maybe. It's
-            // maybe for now because of URL parametrization.
-            showingMeta: null,
+            showingMeta: false,
             data: {}
         };
 
@@ -71,7 +69,7 @@ module.exports = React.createClass({
                         'tabs__item_active': !this.state.showingMeta
                     })
                 }
-                onClick={ this.toggleMeta.bind(this, null) }>
+                onClick={ this.toggleMeta.bind(this, false) }>
                 { this.props.type === 'message' ? 'Browsers' : 'Messages' }
             </button>
             <button
@@ -153,7 +151,7 @@ module.exports = React.createClass({
     },
     componentWillReceiveProps: function(props) {
         if (props.type === 'metagroup') {
-            this.toggleMeta(null);
+            this.toggleMeta(false);
         }
     },
     componentWillUpdate: function(props, state) {
