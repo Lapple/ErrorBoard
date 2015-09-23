@@ -60,6 +60,10 @@ window.onerror = function( message, url, line, column, error ) {
 
 Replace `127.0.0.1:3000` with the address and the port number your ErrorBoard is running.
 
+### Metadata
+
+The error reporting snippet might optionally pass a `meta=` parameter that can either be a plain or JSON string. Use this parameter if you need to pass other contextual information about the page or user, for example, locale, environment or build number.
+
 ### License
 
 (The MIT License)

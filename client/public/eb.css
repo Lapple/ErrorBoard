@@ -64,9 +64,9 @@ html, body, .app, .container, .menu, .content {
 
 .nav__icon {
     display: inline-block;
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    margin: 0.2em 10px 0 0;
 
     vertical-align: top;
 }

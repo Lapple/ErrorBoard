@@ -1,4 +1,5 @@
 module.exports = {
+    metagroup: require('./aggregator-metagroup'),
     messages: require('./aggregator-messages'),
     message: require('./aggregator-message'),
     browsers: require('./aggregator-browsers'),
@@ -7,5 +8,6 @@ module.exports = {
     script: require('./aggregator-script'),
     hourly: require('./aggregator-hourly'),
     pages: require('./aggregator-pages'),
-    page: require('./aggregator-page')
+    page: require('./aggregator-page'),
+    meta: require('./aggregator-meta')
 };

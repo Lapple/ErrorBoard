@@ -57,13 +57,16 @@ module.exports = React.createClass({
     },
     thead: function() {
         var title = 'Message';
+        var type = this.props.type;
 
-        if (this.props.type === 'browsers') {
+        if (type === 'browsers') {
             title = 'Browser';
-        } else if (this.props.type === 'scripts') {
+        } else if (type === 'scripts') {
             title = 'Script';
-        } else if (this.props.type === 'pages') {
+        } else if (type === 'pages') {
             title = 'Page URL';
+        } else if (type === 'meta') {
+            title = 'Metadata';
         }
 
         return <thead>

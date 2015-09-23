@@ -6,6 +6,14 @@ var Dashboard = require('./component-dashboard.jsx');
 var Report = require('./component-report.jsx');
 var Details = require('./component-details.jsx');
 
+var DETAIL_TYPES = {
+    messages: 'message',
+    browsers: 'browser',
+    scripts: 'script',
+    pages: 'page',
+    meta: 'metagroup'
+};
+
 module.exports = React.createClass({
     getDefaultProps: function() {
         return {
@@ -35,7 +43,7 @@ module.exports = React.createClass({
     },
     renderDetails: function() {
         var params = this.props.params;
-        var detailsType = params.type.slice(0, -1);
+        var detailsType = DETAIL_TYPES[params.type];
 
         if (params.id) {
             return <Details

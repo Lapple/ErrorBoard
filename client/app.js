@@ -19,7 +19,7 @@ var updateApp = function(ctx) {
         pathname: _context.pathname
     };
 
-    React.renderComponent(app(props), rootNode);
+    React.render(app(props), rootNode);
 };
 
 page('/:type/:id?', updateApp);

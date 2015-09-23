@@ -18,6 +18,14 @@ app.use(function(req, res) {
     var timestamp = Date.now();
     var date = moment(timestamp).format('DD-MM-YYYY');
 
+    var meta = query.meta;
+
+    try {
+        meta = JSON.parse(meta);
+    } catch(e) {
+        // Unable to parse JSON metadata, treating it as a string.
+    }
+
     var doc = {
         ua: ua,
         referer: referer,
@@ -28,7 +36,9 @@ app.use(function(req, res) {
         url: query.url,
         line: query.line,
         column: query.column,
-        stack: query.stack
+        stack: query.stack,
+
+        meta: meta
     };
 
     db.insert(doc, function(err) {
