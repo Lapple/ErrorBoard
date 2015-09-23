@@ -13,6 +13,9 @@ module.exports = React.createClass({
     getInitialState: function() {
         var state = {
             visible: false,
+            // FIXME: This should be a proper boolean instead of maybe. It's
+            // maybe for now because of URL parametrization.
+            showingMeta: null,
             data: {}
         };
 
@@ -37,6 +40,7 @@ module.exports = React.createClass({
                 </svg>
             </div>
             { this.renderTitle() }
+            { this.renderTabs() }
             { this.renderStackTrace() }
             { this.renderTable() }
             { this.renderGraph() }
@@ -52,6 +56,36 @@ module.exports = React.createClass({
                 No title
             </div>;
         }
+    },
+    renderTabs: function() {
+        if (this.props.type === 'metagroup') {
+            return null;
+        }
+
+        return <div className='tabs'>
+            <button
+                type='button'
+                className={
+                    cx({
+                        'tabs__item': true,
+                        'tabs__item_active': !this.state.showingMeta
+                    })
+                }
+                onClick={ this.toggleMeta.bind(this, null) }>
+                { this.props.type === 'message' ? 'Browsers' : 'Messages' }
+            </button>
+            <button
+                type='button'
+                className={
+                    cx({
+                        'tabs__item': true,
+                        'tabs__item_active': this.state.showingMeta
+                    })
+                }
+                onClick={ this.toggleMeta.bind(this, true) }>
+                Metadata
+            </button>
+        </div>;
     },
     renderStackTrace: function() {
         if (this.props.type === 'message') {
@@ -78,13 +112,26 @@ module.exports = React.createClass({
         }
     },
     renderTable: function() {
+        var isShowingBrowsersBreakdown = (
+            this.props.type === 'message' &&
+            !this.state.showingMeta
+        );
+
         var items = _.map(this.state.data, function(data) {
             return <ReportItem
                 key={ data.key }
-                type={ (this.props.type === 'message') ? 'browsers' : 'messages' }
+                type={ isShowingBrowsersBreakdown ? 'browsers' : 'messages' }
                 data={ data }
                 timespan={ false } />;
         }, this);
+
+        if (items.length === 0) {
+            items = <tr>
+                <td colSpan='4' className='report__cell report__cell_single'>
+                    Nothing to display
+                </td>
+            </tr>;
+        }
 
         return <table className="report__table report__table_details">
             <tbody>{ items }</tbody>
@@ -102,16 +149,31 @@ module.exports = React.createClass({
         window.requestAnimationFrame(this.show);
         document.addEventListener('keyup', this.onKeyUp);
 
-        this.fetchData(this.props);
+        this.fetchData(this.props, this.state.showingMeta);
     },
     componentWillReceiveProps: function(props) {
-        this.fetchData(props);
+        if (props.type === 'metagroup') {
+            this.toggleMeta(null);
+        }
+    },
+    componentWillUpdate: function(props, state) {
+        var shouldFetchData = (
+            props !== this.props ||
+            state.showingMeta !== this.state.showingMeta
+        );
+
+        if (shouldFetchData) {
+            this.fetchData(props, state.showingMeta);
+        }
     },
     componentWillUnmount: function() {
         document.removeEventListener('keyup', this.onKeyUp);
     },
     updateData: function() {
-        var report = Reports.get(this.props.type, {id: this.props.id});
+        var report = Reports.get(this.props.type, {
+            id: this.props.id,
+            meta: this.state.showingMeta
+        });
 
         this.setState({
             data: toArray(report).sort(sortByLatestReport)
@@ -126,8 +188,11 @@ module.exports = React.createClass({
             })
         });
     },
-    fetchData: function(props) {
-        Reports.fetch(props.type, {id: props.id}).done(this.updateData);
+    fetchData: function(props, isShowingMeta) {
+        Reports.fetch(props.type, {
+            id: props.id,
+            meta: isShowingMeta
+        }).done(this.updateData);
 
         if (this.hasGraph(props)) {
             Reports.fetch('hourly', {
@@ -139,6 +204,9 @@ module.exports = React.createClass({
     },
     hasGraph: function(props) {
         return props.type === 'message';
+    },
+    toggleMeta: function(isShowingMeta) {
+        this.setState({showingMeta: isShowingMeta});
     }
 });
 

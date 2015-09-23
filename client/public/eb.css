@@ -16,7 +16,8 @@ html, body, .app, .container, .menu, .content {
     height: 100%;
 }
 
-.container {
+.container,
+.tabs__item {
     font: 16px/1.5 "Source Sans Pro", sans-serif;
     color: rgb(66, 74, 78);
 }
@@ -163,8 +164,8 @@ html, body, .app, .container, .menu, .content {
 }
 
 .report__cell_single {
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 25px;
+    padding-bottom: 25px;
 
     text-align: center;
     color: rgb(153, 167, 177);
@@ -460,4 +461,33 @@ html, body, .app, .container, .menu, .content {
     box-shadow:
         inset 0 -1px rgba(0, 0, 0, 0.03),
         inset 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.tabs {
+    margin-bottom: 10px;
+}
+
+.tabs__item {
+    font-size: 14px;
+
+    display: inline-block;
+
+    margin-right: 6px;
+    padding: 3px 6px;
+
+    cursor: pointer;
+
+    border: 0;
+    background: none;
+}
+
+.tabs__item:not(.tabs__item_active):hover {
+    color: rgb(0, 109, 170);
+}
+
+.tabs__item_active {
+    text-decoration: none;
+
+    border-radius: 3px;
+    background: rgba(0, 0, 0, .05);
 }

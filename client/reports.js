@@ -7,7 +7,7 @@ var _reports = {};
 
 var getKey = function(params) {
     return _.reduce(params, function(result, value, key) {
-        return result + '&' + key + '=' + value;
+        return result + '&' + key + '=' + encodeURIComponent(value);
     }, '?');
 };
 
@@ -15,7 +15,7 @@ var getParams = function(key) {
     return _.reduce(key.substr(1).split('&'), function(params, pair) {
         var p = pair.split('=');
 
-        params[p[0]] = p[1];
+        params[p[0]] = decodeURIComponent(p[1]);
 
         return params;
     }, {});

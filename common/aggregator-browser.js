@@ -1,16 +1,23 @@
 var aggregate = require('./aggregate');
 var reduceTimestamps = require('./reduce-timestamps');
 var getBrowserName = require('./browser-name');
+var getMetaKey = require('./meta-key');
 
 module.exports = function(params) {
+    var groupFunction = params.meta ? getMetaKey : getMessage;
+
     return aggregate({
-        groupBy: 'message',
+        groupBy: groupFunction,
         filter: function(item) {
+            if (params.meta && !item.meta) {
+                return false;
+            }
+
             return getBrowserName(item) === params.id;
         },
         create: function(item) {
             return {
-                title: item.message,
+                title: groupFunction(item),
                 count: 0
             };
         },
@@ -20,3 +27,7 @@ module.exports = function(params) {
         }
     });
 };
+
+function getMessage(item) {
+    return item.message;
+}
