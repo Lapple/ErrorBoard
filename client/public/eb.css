@@ -17,7 +17,8 @@ html, body, .app, .container, .menu, .content {
 }
 
 .container,
-.tabs__item {
+.tabs__item,
+.report__field {
     font: 16px/1.5 "Source Sans Pro", sans-serif;
     color: rgb(66, 74, 78);
 }
@@ -109,9 +110,56 @@ html, body, .app, .container, .menu, .content {
     margin: 28px 35px;
 }
 
-.report {
-    /* Padding for notices. */
-    padding-top: 35px;
+.report__head {
+    font-size: 14px;
+    line-height: 24px;
+
+    overflow: hidden;
+
+    height: 24px;
+    margin-bottom: 11px;
+}
+
+.report__filter {
+    overflow: hidden;
+}
+
+.report__field {
+    font-size: 13px;
+
+    width: 100%;
+    width: calc(100% - 37px);
+    max-width: 300px;
+    height: 17px;
+    padding: 2px 5px;
+
+    vertical-align: top;
+
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-right: 0;
+    border-radius: 2px 0 0 2px;
+    outline: none;
+}
+
+.report__field:focus {
+    border-color: rgba(0, 0, 0, .3);
+}
+
+.report__submit {
+    line-height: 1;
+
+    width: 22px;
+    height: 23px;
+    padding: 0;
+
+    cursor: pointer;
+
+    color: #999;
+    border: 0;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-left: 0;
+    border-radius: 0 2px 2px 0;
+    background: #fff;
 }
 
 .report__table {
@@ -202,16 +250,17 @@ html, body, .app, .container, .menu, .content {
 }
 
 .notice {
-    position: absolute;
-    top: 22px;
-    left: 35px;
-    right: 35px;
-    padding-left: 35px;
+    /* To position the icon. */
+    position: relative;
+
+    float: right;
+
+    margin-left: 30px;
+    padding-left: 30px;
+
+    cursor: pointer;
 
     color: rgb(226, 140, 107);
-    font-size: 14px;
-    line-height: 24px;
-    cursor: pointer;
 }
 
 .notice:hover {
@@ -220,22 +269,21 @@ html, body, .app, .container, .menu, .content {
 
 .notice__icon {
     position: absolute;
-    top: 0;
+    top: 2px;
     left: 0;
 
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .counter {
-    position: absolute;
-    top: 22px;
-    right: 35px;
+    float: right;
 
-    font-size: 14px;
-    line-height: 24px;
-    color: rgb(153, 167, 177);
+    margin-left: 30px;
+
     cursor: pointer;
+
+    color: rgb(153, 167, 177);
 }
 
 .counter:hover {

@@ -16,7 +16,8 @@ module.exports = React.createClass({
             timespanLatest: Date.now(),
             updatesCount: 0,
             newCount: 0,
-            hasOrderBroken: false
+            hasOrderBroken: false,
+            filterValue: ''
         };
     },
     render: function() {
@@ -35,10 +36,16 @@ module.exports = React.createClass({
                 onClick={ _.partial(this.props.onClick, data) } />;
         }, this);
 
-        return <div className="report">
-            { this.notice() }
-            <UpdateCounter count={ this.state.updatesCount } since={ this.state.lastRefreshed } onClick={ this.createIndex } />
-            <table className="report__table">
+        return <div className='report'>
+            <div className='report__head'>
+                <UpdateCounter
+                    count={ this.state.updatesCount }
+                    since={ this.state.lastRefreshed }
+                    onClick={ this.createIndex } />
+                { this.notice() }
+                { this.filterForm() }
+            </div>
+            <table className='report__table'>
                 { this.thead() }
                 <tbody>
                     { items.length ? items: this.empty() }
@@ -85,22 +92,46 @@ module.exports = React.createClass({
             return <Notice onClick={ this.createIndex } />;
         }
     },
+    filterForm: function() {
+        if (this.props.type !== 'messages') {
+            return null;
+        }
+
+        return <form className='report__filter' onSubmit={ this.onFilterSubmit }>
+            <input
+                type='text'
+                className='report__field'
+                // For now indeed only metadata filtering is supported.
+                placeholder='Filter by metadata…'
+                value={ this.state.filterValue }
+                onChange={ this.onFilterChange } />
+            <button className='report__submit' type='submit'>
+                <svg version='1.2' xmlns='http://www.w3.org/2000/svg' width='9' viewBox='0 0 512 1024' fill='currentColor'>
+                    <path d='M480 512L160 832l-96-96 240-224L64 288l96-96 320 320z' />
+                </svg>
+            </button>
+        </form>;
+    },
     componentDidMount: function() {
         this._interval = setInterval(this.updateTimespan, HOUR);
-        this.fetchData(this.props);
+        this.fetchData(this.props)
+            .done(this.updateData);
     },
     componentWillReceiveProps: function(props) {
         if (this.props.type !== props.type) {
             this.setState(this.getInitialState());
         }
 
-        this.fetchData(props);
+        this.fetchData(props)
+            .done(this.updateData);
     },
     componentWillUnmount: function() {
         clearInterval(this._interval);
     },
     fetchData: function(props) {
-        Reports.fetch(props.type).done(this.updateData);
+        return Reports.fetch(props.type, {
+            filterMetaBy: this.state.filterValue
+        });
     },
     updateData: function() {
         if (this.state.index === null) {
@@ -110,13 +141,20 @@ module.exports = React.createClass({
         }
     },
     createIndex: function() {
-        var data = Reports.get(this.props.type);
+        var data = this.getReport();
         var index = _.map(data, addKey).sort(sortByLatestReport);
 
-        this.setState(_.extend(this.getInitialState(), {index: index}));
+        this.setState({
+            index: index,
+            lastRefreshed: Date.now(),
+            timespanLatest: Date.now(),
+            updatesCount: 0,
+            newCount: 0,
+            hasOrderBroken: false
+        });
     },
     updateIndex: function() {
-        var data = Reports.get(this.props.type);
+        var data = this.getReport();
 
         var addIndex = _.partial(addCurrentIndex, this.state.index);
         var addDelta = _.partial(countDelta, this.state.index);
@@ -133,10 +171,26 @@ module.exports = React.createClass({
             timespanLatest: Date.now()
         });
     },
+    getReport: function() {
+        return Reports.get(this.props.type, {
+            filterMetaBy: this.state.filterValue
+        });
+    },
     updateTimespan: function() {
         this.setState({
             timespanLatest: Date.now()
         });
+    },
+    onFilterChange: function(e) {
+        this.setState({
+            filterValue: e.target.value
+        });
+    },
+    onFilterSubmit: function(e) {
+        this.fetchData(this.props)
+            .done(this.createIndex);
+
+        e.preventDefault();
     }
 });
 
