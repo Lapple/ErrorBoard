@@ -114,24 +114,23 @@ module.exports = React.createClass({
     },
     componentDidMount: function() {
         this._interval = setInterval(this.updateTimespan, HOUR);
-        this.fetchData(this.props)
+
+        fetchReport(this.props.type, this.state.filterValue)
             .done(this.updateData);
     },
     componentWillReceiveProps: function(props) {
+        var state = this.state;
+
         if (this.props.type !== props.type) {
-            this.setState(this.getInitialState());
+            state = this.getInitialState();
+            this.setState(state);
         }
 
-        this.fetchData(props)
+        fetchReport(props.type, state.filterValue)
             .done(this.updateData);
     },
     componentWillUnmount: function() {
         clearInterval(this._interval);
-    },
-    fetchData: function(props) {
-        return Reports.fetch(props.type, {
-            filterMetaBy: this.state.filterValue
-        });
     },
     updateData: function() {
         if (this.state.index === null) {
@@ -187,12 +186,18 @@ module.exports = React.createClass({
         });
     },
     onFilterSubmit: function(e) {
-        this.fetchData(this.props)
+        fetchReport(this.props.type, this.state.filterValue)
             .done(this.createIndex);
 
         e.preventDefault();
     }
 });
+
+function fetchReport(type, filterValue) {
+    return Reports.fetch(type, {
+        filterMetaBy: filterValue
+    });
+}
 
 function getEarliest(memo, item) {
     return _.min([memo, item.earliest]);
